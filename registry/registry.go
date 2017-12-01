@@ -19,7 +19,7 @@ type Service struct {
 	check   *consul.AgentServiceCheck
 }
 
-func newRegistry() *Registry {
+func NewRegistry() *Registry {
 	config := consul.DefaultConfig()
 
 	// create the client
