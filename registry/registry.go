@@ -1,6 +1,8 @@
 package registry
 
 import (
+	"errors"
+
 	consul "github.com/hashicorp/consul/api"
 )
 
@@ -10,6 +12,7 @@ type Registry struct {
 	Config *consul.Config
 }
 
+// Service struct
 type Service struct {
 	ID      string
 	Name    string
@@ -19,6 +22,7 @@ type Service struct {
 	check   *consul.AgentServiceCheck
 }
 
+// NewRegistry function
 func NewRegistry() *Registry {
 	config := consul.DefaultConfig()
 
@@ -34,19 +38,13 @@ func NewRegistry() *Registry {
 }
 
 // Deregister a service
-// func (c *Registry) Deregister(s *Service) error {
-// 	if len(s.Nodes) == 0 {
-// 		return errors.New("Require at least one node")
-// 	}
-//
-// 	// delete our hash of the service
-// 	c.Lock()
-// 	delete(c.register, s.Name)
-// 	c.Unlock()
-//
-// 	node := s.Nodes[0]
-// 	return c.Client.Agent().ServiceDeregister(node.Id)
-// }
+func (r *Registry) Deregister(s *Service) error {
+	if len(s.ID) == 0 {
+		return errors.New("Service ID is required")
+	}
+
+	return r.Client.Agent().ServiceDeregister(s.ID)
+}
 
 // Register a service
 func (r *Registry) Register(s *Service) error {
