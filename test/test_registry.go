@@ -5,17 +5,27 @@ package main
 import (
 	"fmt"
 
-	"micro/registry"
+	consul "github.com/hashicorp/consul/api"
+	"github.com/nzgogo/micro/registry"
 )
 
 func main() {
 	reg := registry.NewRegistry()
 
-	var srv registry.Service
-	srv.ID = "01"
-	srv.Name = "Nats"
-	srv.Address = "127.0.0.1"
-	srv.Port = 4222
+	srv := registry.Service{
+		ID:      "01",
+		Name:    "Nats",
+		Address: "127.0.0.1",
+		Port:    4222,
+	}
+
+	healthCheck := consul.AgentServiceCheck{
+		Args:     {"/usr/local/bin/check", "-s", srv.Name + "." + srv.ID},
+		Interval: "30s",
+		Timeout:  "3s",
+	}
+
+	srv.Check = healthCheck
 
 	err := reg.Register(&srv)
 
