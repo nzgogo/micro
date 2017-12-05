@@ -49,14 +49,15 @@ func (r *Registry) Deregister(s *Service) error {
 // Register a service
 func (r *Registry) Register(s *Service) error {
 	// register the service
-	if err := r.Client.Agent().ServiceRegister(&consul.AgentServiceRegistration{
+	err := r.Client.Agent().ServiceRegister(&consul.AgentServiceRegistration{
 		ID:      s.ID,
 		Name:    s.Name,
 		Tags:    s.Tags,
 		Port:    s.Port,
 		Address: s.Address,
 		Check:   s.check,
-	}); err != nil {
+	})
+	if err != nil {
 		return err
 	}
 
