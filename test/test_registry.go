@@ -5,10 +5,7 @@ package main
 import (
 	"fmt"
 
-<<<<<<< HEAD
 	consul "github.com/hashicorp/consul/api"
-=======
->>>>>>> 1673804260b8c695810c667cf3bb39574bb4f0dc
 	"github.com/nzgogo/micro/registry"
 )
 
@@ -23,12 +20,12 @@ func main() {
 	}
 
 	healthCheck := consul.AgentServiceCheck{
-		Args:     {"/usr/local/bin/check", "-s", srv.Name + "." + srv.ID},
+		Args:     []string{"/usr/local/bin/check", "-s", srv.Name + "." + srv.ID},
 		Interval: "30s",
 		Timeout:  "3s",
 	}
 
-	srv.Check = healthCheck
+	srv.Check = &healthCheck
 
 	err := reg.Register(&srv)
 
