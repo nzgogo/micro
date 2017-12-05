@@ -2,7 +2,8 @@ package main
 
 import (
 	"fmt"
-	"micro/registry"
+
+	"github.com/nzgogo/micro/registry"
 )
 
 func main() {
