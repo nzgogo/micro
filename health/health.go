@@ -6,19 +6,20 @@ import (
 
 var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
-type HealthResponse struct {
+// ResponseMsg struct
+type ResponseMsg struct {
 	ServiceName string
 	ServiceID   string
 	ServiceLoad int
 }
 
-func encode(hr *HealthResponse) ([]byte, error) {
+func encode(hr *ResponseMsg) ([]byte, error) {
 	return json.Marshal(hr)
 }
 
-func decode(res []byte) HealthResponse {
-	var resStruct HealthResponse
+func decode(res []byte) *ResponseMsg {
+	var resStruct ResponseMsg
 	json.Unmarshal(res, resStruct)
 
-	return resStruct
+	return &resStruct
 }
