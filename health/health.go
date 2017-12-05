@@ -13,11 +13,13 @@ type ResponseMsg struct {
 	ServiceLoad int
 }
 
-func encode(hr *ResponseMsg) ([]byte, error) {
+// Encode function
+func Encode(hr *ResponseMsg) ([]byte, error) {
 	return json.Marshal(hr)
 }
 
-func decode(res []byte) *ResponseMsg {
+// Decode function
+func Decode(res []byte) *ResponseMsg {
 	var resStruct ResponseMsg
 	json.Unmarshal(res, resStruct)
 
