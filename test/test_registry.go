@@ -5,7 +5,10 @@ package main
 import (
 	"fmt"
 
+<<<<<<< HEAD
 	consul "github.com/hashicorp/consul/api"
+=======
+>>>>>>> 1673804260b8c695810c667cf3bb39574bb4f0dc
 	"github.com/nzgogo/micro/registry"
 )
 
