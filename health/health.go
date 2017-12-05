@@ -8,11 +8,11 @@ var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 type HealthResponse struct {
 	ServiceName string
-	ServiceId   string
+	ServiceID   string
 	ServiceLoad int
 }
 
-func encode(hr *HealthResponse) []byte {
+func encode(hr *HealthResponse) ([]byte, error) {
 	return json.Marshal(hr)
 }
 
