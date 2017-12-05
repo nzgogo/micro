@@ -19,7 +19,7 @@ type Service struct {
 	Tags    []string
 	Port    int
 	Address string
-	check   *consul.AgentServiceCheck
+	Check   *consul.AgentServiceCheck
 }
 
 // NewRegistry function
@@ -55,7 +55,7 @@ func (r *Registry) Register(s *Service) error {
 		Tags:    s.Tags,
 		Port:    s.Port,
 		Address: s.Address,
-		Check:   s.check,
+		Check:   s.Check,
 	}); err != nil {
 		return err
 	}
