@@ -76,13 +76,13 @@ func (r *Discovery)GetLoads(service_name string){
 
 func (r *Discovery)DiscoverServices(healthyOnly bool, service_name string) {
 
-	services, _, err := r.Client.Catalog().Services(&consul.QueryOptions{})
-	CheckErr(err)
+	//services, _, err := r.Client.Catalog().Services(&consul.QueryOptions{})
+	//CheckErr(err)
 
 	fmt.Println("--do discover ---:", r.Config.Address)
 
-	for name := range services {
-		servicesData, _, err := r.Client.Health().Service(name, "", healthyOnly,
+//	for name := range services {
+		servicesData, _, err := r.Client.Health().Service(service_name, "", healthyOnly,
 			&consul.QueryOptions{})
 		CheckErr(err)
 		for _, entry := range servicesData {
@@ -103,7 +103,7 @@ func (r *Discovery)DiscoverServices(healthyOnly bool, service_name string) {
 				r.ServList = append(r.ServList, node)
 			}
 		}
-	}
+//	}
 	return
 }
 
