@@ -1,7 +1,11 @@
+// Transport is an interface which is used for communication between
+// services. It uses NATS implementations
+
 package transport
 
 import (
 	"strings"
+	"fmt"
 	"time"
 	"errors"
 	"github.com/nats-io/go-nats"
@@ -13,18 +17,7 @@ type Message struct {
 	Body   []byte
 }
 
-type Client interface {
-	Recv(*Message) error
-	Send(*Message) error
-	Close() error
-}
-
-type ntport struct {
-	addrs []string
-	opts  Options
-}
-
-type ntportClient struct {
+type Client struct {
 	conn *nats.Conn
 	addr string
 	id   string
@@ -32,26 +25,44 @@ type ntportClient struct {
 	opts Options
 }
 
-
 type Option func(*Options)
-
-type DialOption func(*DialOptions)
-
-var (
-	DefaultDialTimeout = time.Second * 5
-)
-
-// Transport is an interface which is used for communication between
-// services. It uses NATS implementations
-type Transport interface {
-	Dial(addr string, opts ...DialOption) (Client, error)
-}
 
 var (
 	DefaultTimeout = time.Minute
+	DefaultDialTimeout = time.Second * 5
 )
 
-func (n *ntportClient) AsynSend(m *Message) error {
+
+func (n *Client)TestConnection() error {
+	if n.conn == nil {
+		return fmt.Errorf("natsproxy: Connection cannot be nil")
+	}
+	if n.conn.Status() != nats.CONNECTED {
+		return fmt.Errorf("Client not connected")
+	}
+	return nil
+}
+
+func (n *Client) Request(req *Message, resp *Message) error{
+	var Codec codec.Codec
+	b, err := Codec.Marshal(req)
+	if err != nil {
+		return err
+	}
+
+	rsp, respErr := n.conn.Request(n.addr, b, n.opts.Timeout)
+	if respErr != nil {
+		return respErr
+	}
+
+	if err := Codec.Unmarshal(rsp.Data, resp); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (n *Client) Publish(m *Message) error {
 	var Codec codec.Codec
 	b, err := Codec.Marshal(m)
 	if err != nil {
@@ -78,7 +89,7 @@ func (n *ntportClient) AsynSend(m *Message) error {
 	}
 }
 
-func (n *ntportClient) Send(m *Message) error {
+func (n *Client) Send(m *Message) error {
 	var Codec codec.Codec
 	b, err := Codec.Marshal(m)
 	if err != nil {
@@ -105,7 +116,7 @@ func (n *ntportClient) Send(m *Message) error {
 	}
 }
 
-func (n *ntportClient) Recv(m *Message) error {
+func (n *Client) Recv(m *Message) error {
 	timeout := time.Second * 10
 	if n.opts.Timeout > time.Duration(0) {
 		timeout = n.opts.Timeout
@@ -126,53 +137,13 @@ func (n *ntportClient) Recv(m *Message) error {
 	return nil
 }
 
-func (n *ntportClient) Close() error {
+func (n *Client) Close() error {
 	n.sub.Unsubscribe()
 	n.conn.Close()
 	return nil
 }
 
-func (n *ntport) Dial(addr string, dialOpts ...DialOption) (Client, error) {
-	dopts := DialOptions{
-		Timeout: DefaultDialTimeout,
-	}
-
-	for _, o := range dialOpts {
-		o(&dopts)
-	}
-
-	opts := nats.GetDefaultOptions()
-	opts.Servers = n.addrs
-	opts.Secure = n.opts.Secure
-	opts.TLSConfig = n.opts.TLSConfig
-	opts.Timeout = dopts.Timeout
-
-	// secure might not be set
-	if n.opts.TLSConfig != nil {
-		opts.Secure = true
-	}
-
-	c, err := opts.Connect()
-	if err != nil {
-		return nil, err
-	}
-
-	id := nats.NewInbox()
-	sub, err := c.SubscribeSync(id)
-	if err != nil {
-		return nil, err
-	}
-
-	return &ntportClient{
-		conn: c,
-		addr: addr,
-		id:   id,
-		sub:  sub,
-		opts: n.opts,
-	}, nil
-}
-
-func NewTransport(opts ...Option) Transport {
+func NewTransport(opts ...Option) (*Client, error) {
 	options := Options{
 		Timeout: DefaultTimeout,
 	}
@@ -197,8 +168,35 @@ func NewTransport(opts ...Option) Transport {
 		cAddrs = []string{nats.DefaultURL}
 	}
 
-	return &ntport{
-		addrs: cAddrs,
-		opts:  options,
+	client_opts := nats.GetDefaultOptions()
+	client_opts.Servers = cAddrs
+	client_opts.Secure = options.Secure
+	client_opts.TLSConfig = options.TLSConfig
+	client_opts.Timeout = options.Timeout
+
+	// secure might not be set
+	if client_opts.TLSConfig != nil {
+		client_opts.Secure = true
 	}
+
+	c, err := client_opts.Connect()
+	if err != nil {
+		return nil, err
+	}
+
+	id := nats.NewInbox()
+	sub, err := c.SubscribeSync(id)
+	if err != nil {
+		return nil, err
+	}
+
+	options.Timeout = DefaultDialTimeout
+
+	return &Client{
+		conn: c,
+		addr: options.Dial_Addrs,
+		id:   id,
+		sub:  sub,
+		opts: options,
+	}, nil
 }

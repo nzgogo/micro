@@ -6,14 +6,11 @@ import (
 )
 
 type Options struct {
-	Addrs     []string
+	Dial_Addrs	string	//  Message destination address
+	Addrs     []string	// A configured set of nats servers which this client will use when attempting to connect.
 	Secure    bool
 	TLSConfig *tls.Config
 	// Timeout sets the timeout for Send/Recv
-	Timeout time.Duration
-}
-
-type DialOptions struct {
 	Timeout time.Duration
 }
 
@@ -43,12 +40,5 @@ func Secure(b bool) Option {
 func TLSConfig(t *tls.Config) Option {
 	return func(o *Options) {
 		o.TLSConfig = t
-	}
-}
-
-// Timeout used when dialling the remote side
-func WithTimeout(d time.Duration) DialOption {
-	return func(o *DialOptions) {
-		o.Timeout = d
 	}
 }
