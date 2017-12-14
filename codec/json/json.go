@@ -2,7 +2,8 @@ package json
 
 import (
 	"github.com/json-iterator/go"
-	"github.com/nzgogo/micro/codec"
+	bCodec "github.com/micro/go-micro/broker/codec"
+	tCodec "github.com/micro/go-micro/transport/codec"
 )
 
 var json = jsoniter.ConfigCompatibleWithStandardLibrary
@@ -21,6 +22,12 @@ func (j jsonCodec) String() string {
 	return "json"
 }
 
-func NewCodec() codec.Codec {
+// NewBrokerCodec returns a go-micro broker Codec interface compatible new json codec
+func NewBrokerCodec() bCodec.Codec {
+	return jsonCodec{}
+}
+
+// NewTransportCodec returns a go-micro transport Codec interface compatible new json codec
+func NewTransportCodec() tCodec.Codec {
 	return jsonCodec{}
 }
