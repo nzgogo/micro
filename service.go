@@ -11,14 +11,20 @@ import (
 	"github.com/nzgogo/micro/codec/json"
 )
 
+var natsAddr = "nats://dev.gogox.co.nz:4222"
+
 // NewService returns a go-micro compatible service using nats as broker and transport
 func NewService(opts ...micro.Option) micro.Service {
 	bOptions := []broker.Option{
-		broker.Codec(json.NewBrokerCodec),
+		broker.Addrs(natsAddr),
+		broker.Codec(json.NewBrokerCodec()),
 	}
 	b := natsBroker.NewBroker(bOptions...)
 
-	tOptions := []transport.Option{}
+	tOptions := []transport.Option{
+		transport.Addrs(natsAddr),
+		transport.Codec(json.NewTransportCodec()),
+	}
 	t := natsTransport.NewTransport(tOptions...)
 
 	srvOptions := []micro.Option{
