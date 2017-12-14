@@ -7,11 +7,15 @@ import (
 
 	natsBroker "github.com/micro/go-plugins/broker/nats"
 	natsTransport "github.com/micro/go-plugins/transport/nats"
+
+	"github.com/nzgogo/micro/codec/json"
 )
 
 // NewService returns a go-micro compatible service using nats as broker and transport
 func NewService(opts ...micro.Option) micro.Service {
-	bOptions := []broker.Option{}
+	bOptions := []broker.Option{
+		broker.Codec(json.NewBrokerCodec),
+	}
 	b := natsBroker.NewBroker(bOptions...)
 
 	tOptions := []transport.Option{}
