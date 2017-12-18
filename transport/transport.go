@@ -12,15 +12,10 @@ import (
 	"github.com/nzgogo/micro/codec"
 )
 
-type Message struct {
-	Header map[string]string
-	Body   []byte
-}
-
 type Client struct {
 	conn *nats.Conn
-	addr string
-	id   string
+	addr string		//nats subject
+	rplAddr string	//refers to nats.Msg.reply, for a subscriber use only
 	sub  *nats.Subscription
 	opts Options
 }
@@ -43,7 +38,7 @@ func (n *Client)TestConnection() error {
 	return nil
 }
 
-func (n *Client) Request(req *Message, resp *Message) error{
+func (n *Client) Request(req *codec.Request, resp *codec.Response) error{
 	var Codec codec.Codec
 	b, err := Codec.Marshal(req)
 	if err != nil {
@@ -62,7 +57,7 @@ func (n *Client) Request(req *Message, resp *Message) error{
 	return nil
 }
 
-func (n *Client) Publish(m *Message) error {
+func (n *Client) Publish(m *codec.Request) error {
 	var Codec codec.Codec
 	b, err := Codec.Marshal(m)
 	if err != nil {
@@ -89,34 +84,13 @@ func (n *Client) Publish(m *Message) error {
 	}
 }
 
-func (n *Client) Send(m *Message) error {
-	var Codec codec.Codec
-	b, err := Codec.Marshal(m)
+func (n *Client) Subscribe(resp *codec.Request) error {
+	sub, err := n.conn.SubscribeSync(n.addr)
+	n.sub = sub
 	if err != nil {
 		return err
 	}
 
-	// no deadline
-	if n.opts.Timeout == time.Duration(0) {
-		return n.conn.PublishRequest(n.addr, n.id, b)
-	}
-
-	// use the deadline
-	ch := make(chan error, 1)
-
-	go func() {
-		ch <- n.conn.PublishRequest(n.addr, n.id, b)
-	}()
-
-	select {
-	case err := <-ch:
-		return err
-	case <-time.After(n.opts.Timeout):
-		return errors.New("deadline exceeded")
-	}
-}
-
-func (n *Client) Recv(m *Message) error {
 	timeout := time.Second * 10
 	if n.opts.Timeout > time.Duration(0) {
 		timeout = n.opts.Timeout
@@ -127,13 +101,13 @@ func (n *Client) Recv(m *Message) error {
 		return err
 	}
 
-	var mr Message
+	var mr *codec.Request
 	var Codec codec.Codec
 	if err := Codec.Unmarshal(rsp.Data, &mr); err != nil {
 		return err
 	}
-
-	*m = mr
+	n.rplAddr = rsp.Reply
+	resp = mr
 	return nil
 }
 
@@ -184,19 +158,12 @@ func NewTransport(opts ...Option) (*Client, error) {
 		return nil, err
 	}
 
-	id := nats.NewInbox()
-	sub, err := c.SubscribeSync(id)
-	if err != nil {
-		return nil, err
-	}
 
 	options.Timeout = DefaultDialTimeout
 
 	return &Client{
 		conn: c,
 		addr: options.Dial_Addrs,
-		id:   id,
-		sub:  sub,
 		opts: options,
 	}, nil
 }

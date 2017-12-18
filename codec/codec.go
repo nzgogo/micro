@@ -18,7 +18,7 @@ type Request struct {
 	Path      string           `json:"path"`
 	Authority string           `json:"authority"`
 	Scheme    string           `json:"scheme"`
-	Header    map[string]*Pair `json:"header"`
+	Header    map[string][]string `json:"header"`
 	Get       map[string]*Pair `json:"get"`
 	Post      map[string]*Pair `json:"post"`
 	Body      string           `json:"body"`
