@@ -6,12 +6,19 @@ import (
 )
 
 type Options struct {
-	Dial_Addrs	string	//  Message destination address
+	Subject	string	//  Message destination address
 	Addrs     []string	// A configured set of nats servers which this client will use when attempting to connect.
 	Secure    bool
 	TLSConfig *tls.Config
 	// Timeout sets the timeout for Send/Recv
 	Timeout time.Duration
+}
+
+// subject to use for transport
+func Subject(sub string) Option {
+	return func(o *Options) {
+		o.Subject = sub
+	}
 }
 
 // Addrs to use for transport
