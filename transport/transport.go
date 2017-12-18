@@ -9,7 +9,8 @@ import (
 	"time"
 	"errors"
 	"github.com/nats-io/go-nats"
-	"github.com/nzgogo/micro/codec"
+	//"github.com/nzgogo/micro/codec"
+	"micro/codec"
 )
 
 type Client struct {
@@ -163,7 +164,7 @@ func NewTransport(opts ...Option) (*Client, error) {
 
 	return &Client{
 		conn: c,
-		addr: options.Dial_Addrs,
+		addr: options.Subject,
 		opts: options,
 	}, nil
 }
