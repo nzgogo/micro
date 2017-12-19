@@ -14,7 +14,10 @@ type Options struct {
 type Option func(*Options)
 
 func newOptions(opts ...Option) Options {
-	var opt Options
+	opt := Options{
+		Codec:     codec.NewCodec(),
+		Transport: transport.NewTransport(),
+	}
 
 	for _, o := range opts {
 		o(&opt)
