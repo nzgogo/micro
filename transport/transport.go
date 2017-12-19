@@ -10,16 +10,13 @@ import (
 	"time"
 
 	"github.com/nats-io/go-nats"
-	//"github.com/nzgogo/micro/codec"
-	"micro/codec"
 )
 
 type Transport interface {
 	Options() Options
 	Init(...Option) error
-	Request([]byte, interface{}) error
+	Request([]byte, ResponseHandler) error
 	Publish([]byte) error
-	Subscribe() error
 	Close() error
 }
 
@@ -31,6 +28,8 @@ type transport struct {
 	opts    Options
 }
 
+type ResponseHandler func([]byte) error
+
 var (
 	DefaultTimeout     = time.Second * 15
 	DefaultDialTimeout = time.Second * 5
@@ -38,7 +37,7 @@ var (
 
 func (n *transport) TestConnection() error {
 	if n.conn == nil {
-		return fmt.Errorf("natsproxy: Connection cannot be nil")
+		return fmt.Errorf("Connection cannot be nil")
 	}
 	if n.conn.Status() != nats.CONNECTED {
 		return fmt.Errorf("Client not connected")
@@ -46,31 +45,21 @@ func (n *transport) TestConnection() error {
 	return nil
 }
 
-func (n *transport) Request(req *codec.Request, resp *codec.Response) error {
-	var Codec codec.Codec
-	b, err := Codec.Marshal(req)
-	if err != nil {
-		return err
-	}
+func (n *transport) Options() Options {
+	return n.opts
+}
 
-	rsp, respErr := n.conn.Request(n.addr, b, n.opts.Timeout)
+func (n *transport) Request(req []byte, handler ResponseHandler) error {
+
+	rsp, respErr := n.conn.Request(n.addr, req, n.opts.Timeout)
 	if respErr != nil {
 		return respErr
 	}
 
-	if err := Codec.Unmarshal(rsp.Data, resp); err != nil {
-		return err
-	}
-
-	return nil
+	return handler(rsp.Data)
 }
 
-func (n *transport) Publish(m *codec.Request) error {
-	var Codec codec.Codec
-	b, err := Codec.Marshal(m)
-	if err != nil {
-		return err
-	}
+func (n *transport) Publish(b []byte) error {
 
 	// no deadline
 	if n.opts.Timeout == time.Duration(0) {
@@ -90,33 +79,6 @@ func (n *transport) Publish(m *codec.Request) error {
 	case <-time.After(n.opts.Timeout):
 		return errors.New("deadline exceeded")
 	}
-}
-
-func (n *transport) Subscribe(resp *codec.Request) error {
-	sub, err := n.conn.SubscribeSync(n.addr)
-	n.sub = sub
-	if err != nil {
-		return err
-	}
-
-	timeout := time.Second * 10
-	if n.opts.Timeout > time.Duration(0) {
-		timeout = n.opts.Timeout
-	}
-
-	rsp, err := n.sub.NextMsg(timeout)
-	if err != nil {
-		return err
-	}
-
-	var mr *codec.Request
-	var Codec codec.Codec
-	if err := Codec.Unmarshal(rsp.Data, &mr); err != nil {
-		return err
-	}
-	n.rplAddr = rsp.Reply
-	resp = mr
-	return nil
 }
 
 func (n *transport) Close() error {
@@ -166,9 +128,15 @@ func (n *transport) Init(opts ...Option) error {
 
 	options.Timeout = DefaultDialTimeout
 
+	sub, err := n.conn.SubscribeSync(n.addr)
+	if err != nil {
+		return err
+	}
+
 	n.conn = c
 	n.addr = options.Subject
 	n.opts = options
+	n.sub = sub
 
 	return nil
 }
