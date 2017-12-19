@@ -1,11 +1,13 @@
 package gogo
 
 import (
+	"micro/codec"
 	"micro/transport"
 )
 
 // Options of a service
 type Options struct {
+	Codec     codec.Codec
 	Transport transport.Transport
 }
 
@@ -19,6 +21,12 @@ func newOptions(opts ...Option) Options {
 	}
 
 	return opt
+}
+
+func Codec(c codec.Codec) Option {
+	return func(o *Options) {
+		o.Codec = c
+	}
 }
 
 func Transport(t transport.Transport) Option {
