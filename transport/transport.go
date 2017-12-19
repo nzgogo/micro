@@ -21,11 +21,9 @@ type Transport interface {
 }
 
 type transport struct {
-	conn    *nats.Conn
-	addr    string //nats subject
-	rplAddr string //refers to nats.Msg.reply, for a subscriber use only
-	sub     *nats.Subscription
-	opts    Options
+	conn *nats.Conn
+	sub  *nats.Subscription
+	opts Options
 }
 
 type ResponseHandler func([]byte) error
@@ -49,9 +47,9 @@ func (n *transport) Options() Options {
 	return n.opts
 }
 
-func (n *transport) Request(req []byte, handler ResponseHandler) error {
+func (n *transport) Request(sub string, req []byte, handler ResponseHandler) error {
 
-	rsp, respErr := n.conn.Request(n.addr, req, n.opts.Timeout)
+	rsp, respErr := n.conn.Request(sub, req, n.opts.Timeout)
 	if respErr != nil {
 		return respErr
 	}
@@ -59,18 +57,18 @@ func (n *transport) Request(req []byte, handler ResponseHandler) error {
 	return handler(rsp.Data)
 }
 
-func (n *transport) Publish(b []byte) error {
+func (n *transport) Publish(sub string, b []byte) error {
 
 	// no deadline
 	if n.opts.Timeout == time.Duration(0) {
-		return n.conn.Publish(n.addr, b)
+		return n.conn.Publish(sub, b)
 	}
 
 	// use the deadline
 	ch := make(chan error, 1)
 
 	go func() {
-		ch <- n.conn.Publish(n.addr, b)
+		ch <- n.conn.Publish(sub, b)
 	}()
 
 	select {
@@ -128,13 +126,12 @@ func (n *transport) Init(opts ...Option) error {
 
 	options.Timeout = DefaultDialTimeout
 
-	sub, err := n.conn.SubscribeSync(n.addr)
+	sub, err := n.conn.SubscribeSync(options.Subject)
 	if err != nil {
 		return err
 	}
 
 	n.conn = c
-	n.addr = options.Subject
 	n.opts = options
 	n.sub = sub
 
