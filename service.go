@@ -9,9 +9,9 @@ type Service interface {
 
 type service struct {
 	opts    Options
-	Name    string
-	Version string
-	ID      string
+	name    string
+	version string
+	id      string
 }
 
 func (s *service) Options() Options {
@@ -29,6 +29,11 @@ func (s *service) Run() error {
 func (s *service) Close() {
 }
 
-func NewService() *service {
-	return &service{}
+func NewService(n string, v string, i string, opts ...Option) *service {
+	return &service{
+		opts:    newOptions(opts...),
+		name:    n,
+		version: v,
+		id:      i,
+	}
 }
