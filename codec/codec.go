@@ -27,7 +27,7 @@ type Request struct {
 // Response struct represents a response message
 type Response struct {
 	StatusCode int              `json:"statusCode"`
-	Header     map[string]*Pair `json:"header"`
+	Header     map[string][]string `json:"header"`
 	Body       string           `json:"body"`
 }
 
