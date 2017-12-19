@@ -14,7 +14,7 @@ import (
 
 type Transport interface {
 	Options() Options
-	Init(...Option) error
+	Init() error
 	Request([]byte, ResponseHandler) error
 	Publish([]byte) error
 	Close() error
@@ -85,14 +85,8 @@ func (n *transport) Close() error {
 	return nil
 }
 
-func (n *transport) Init(opts ...Option) error {
-	options := Options{
-		Timeout: DefaultTimeout,
-	}
-
-	for _, o := range opts {
-		o(&options)
-	}
+func (n *transport) Init() error {
+	options := n.opts
 
 	var cAddrs []string
 
@@ -139,7 +133,9 @@ func (n *transport) Init(opts ...Option) error {
 }
 
 func NewTransport(opts ...Option) *transport {
-	var options Options
+	options := Options{
+		Timeout: DefaultTimeout,
+	}
 
 	for _, o := range opts {
 		o(&options)
