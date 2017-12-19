@@ -4,6 +4,14 @@ import (
 	"github.com/json-iterator/go"
 )
 
+// Codec is a interface
+type Codec interface {
+	Marshal(interface{}) ([]byte, error)
+	Unmarshal([]byte, interface{}) error
+}
+
+type codec struct{}
+
 var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 // Pair struct represents a key-value pair
@@ -30,14 +38,6 @@ type Response struct {
 	Header     map[string]*Pair `json:"header"`
 	Body       string           `json:"body"`
 }
-
-// Codec is a interface
-type Codec interface {
-	Marshal(interface{}) ([]byte, error)
-	Unmarshal([]byte, interface{}) error
-}
-
-type codec struct{}
 
 func (j codec) Marshal(v interface{}) ([]byte, error) {
 	return json.Marshal(v)
