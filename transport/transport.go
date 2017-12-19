@@ -15,8 +15,8 @@ import (
 type Transport interface {
 	Options() Options
 	Init() error
-	Request([]byte, ResponseHandler) error
-	Publish([]byte) error
+	Request(string, []byte, ResponseHandler) error
+	Publish(string, []byte) error
 	Close() error
 }
 
@@ -140,6 +140,10 @@ func NewTransport(opts ...Option) *transport {
 	for _, o := range opts {
 		o(&options)
 	}
+
+	fmt.Printf("[Transport][Address] %s\n", options.Addrs)
+	fmt.Printf("[Transport][Subject] %s\n", options.Subject)
+	fmt.Printf("[Transport][Timeout] %s\n", options.Timeout)
 
 	return &transport{
 		opts: options,
