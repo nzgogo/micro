@@ -23,7 +23,7 @@ type Transport interface {
 	Close() error
 }
 
-type Nats struct {
+type transport struct {
 	conn    *nats.Conn
 	addr    string //nats subject
 	rplAddr string //refers to nats.Msg.reply, for a subscriber use only
@@ -36,7 +36,7 @@ var (
 	DefaultDialTimeout = time.Second * 5
 )
 
-func (n *Nats) TestConnection() error {
+func (n *transport) TestConnection() error {
 	if n.conn == nil {
 		return fmt.Errorf("natsproxy: Connection cannot be nil")
 	}
@@ -46,7 +46,7 @@ func (n *Nats) TestConnection() error {
 	return nil
 }
 
-func (n *Nats) Request(req *codec.Request, resp *codec.Response) error {
+func (n *transport) Request(req *codec.Request, resp *codec.Response) error {
 	var Codec codec.Codec
 	b, err := Codec.Marshal(req)
 	if err != nil {
@@ -65,7 +65,7 @@ func (n *Nats) Request(req *codec.Request, resp *codec.Response) error {
 	return nil
 }
 
-func (n *Nats) Publish(m *codec.Request) error {
+func (n *transport) Publish(m *codec.Request) error {
 	var Codec codec.Codec
 	b, err := Codec.Marshal(m)
 	if err != nil {
@@ -92,7 +92,7 @@ func (n *Nats) Publish(m *codec.Request) error {
 	}
 }
 
-func (n *Nats) Subscribe(resp *codec.Request) error {
+func (n *transport) Subscribe(resp *codec.Request) error {
 	sub, err := n.conn.SubscribeSync(n.addr)
 	n.sub = sub
 	if err != nil {
@@ -119,13 +119,13 @@ func (n *Nats) Subscribe(resp *codec.Request) error {
 	return nil
 }
 
-func (n *Nats) Close() error {
+func (n *transport) Close() error {
 	n.sub.Unsubscribe()
 	n.conn.Close()
 	return nil
 }
 
-func (n *Nats) Init(opts ...Option) error {
+func (n *transport) Init(opts ...Option) error {
 	options := Options{
 		Timeout: DefaultTimeout,
 	}
@@ -173,6 +173,6 @@ func (n *Nats) Init(opts ...Option) error {
 	return nil
 }
 
-func NewTransport() *Nats {
-	return &Nats{}
+func NewTransport() *transport {
+	return &transport{}
 }
