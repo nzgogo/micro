@@ -1,5 +1,13 @@
 package gogo
 
+import (
+	"fmt"
+	"micro/transport"
+	"strings"
+
+	"github.com/satori/go.uuid"
+)
+
 type Service interface {
 	Options() Options
 	Init(...Options) error
@@ -29,11 +37,28 @@ func (s *service) Run() error {
 func (s *service) Close() {
 }
 
-func NewService(n string, v string, i string, opts ...Option) *service {
-	return &service{
-		opts:    newOptions(opts...),
+func NewService(n string, v string) *service {
+	id := strings.Replace(uuid.NewV4().String(), "-", "", -1)
+
+	s := &service{
 		name:    n,
 		version: v,
-		id:      i,
+		id:      id,
 	}
+
+	fmt.Printf("[Service][Name] %s\n", s.name)
+	fmt.Printf("[Service][Version] %s\n", s.version)
+	fmt.Printf("[Service][ID] %s\n", s.id)
+
+	parseFlags()
+
+	t := transport.NewTransport(
+		transport.Subject(s.name+"."+s.version+"."+s.id),
+		transport.Addrs(*transportFlags["nats_addr"]),
+	)
+
+	s.opts = newOptions(
+		Transport(t),
+	)
+	return s
 }

@@ -14,9 +14,9 @@ type Options struct {
 type Option func(*Options)
 
 func newOptions(opts ...Option) Options {
+
 	opt := Options{
-		Codec:     codec.NewCodec(),
-		Transport: transport.NewTransport(),
+		Codec: codec.NewCodec(),
 	}
 
 	for _, o := range opts {
@@ -35,6 +35,5 @@ func Codec(c codec.Codec) Option {
 func Transport(t transport.Transport) Option {
 	return func(o *Options) {
 		o.Transport = t
-		o.Transport.Init()
 	}
 }
