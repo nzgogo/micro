@@ -138,6 +138,14 @@ func (n *transport) Init(opts ...Option) error {
 	return nil
 }
 
-func NewTransport() *transport {
-	return &transport{}
+func NewTransport(opts ...Option) *transport {
+	var options Options
+
+	for _, o := range opts {
+		o(&options)
+	}
+
+	return &transport{
+		opts: options,
+	}
 }
