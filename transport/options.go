@@ -13,7 +13,7 @@ type Options struct {
 	// Timeout sets the timeout for Send/Recv
 	Timeout time.Duration
 }
-
+type Option func (*Options)
 // subject to use for transport
 func Subject(sub string) Option {
 	return func(o *Options) {
