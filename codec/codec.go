@@ -22,21 +22,21 @@ type Pair struct {
 
 // Request struct represents a request message
 type Request struct {
-	Method    string           `json:"method"`
-	Path      string           `json:"path"`
-	Authority string           `json:"authority"`
-	Scheme    string           `json:"scheme"`
-	Header    map[string]*Pair `json:"header"`
-	Get       map[string]*Pair `json:"get"`
-	Post      map[string]*Pair `json:"post"`
-	Body      string           `json:"body"`
+	Method string              `json:"method"`
+	Path   string              `json:"path"`
+	Host   string              `json:"host"`
+	Scheme string              `json:"scheme"`
+	Header map[string][]string `json:"header"`
+	Get    map[string]*Pair    `json:"get"`
+	Post   map[string]*Pair    `json:"post"`
+	Body   string              `json:"body"`
 }
 
 // Response struct represents a response message
 type Response struct {
-	StatusCode int              `json:"statusCode"`
-	Header     map[string]*Pair `json:"header"`
-	Body       string           `json:"body"`
+	StatusCode int                 `json:"statusCode"`
+	Header     map[string][]string `json:"header"`
+	Body       string              `json:"body"`
 }
 
 func (j codec) Marshal(v interface{}) ([]byte, error) {

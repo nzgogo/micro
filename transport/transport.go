@@ -33,16 +33,6 @@ var (
 	DefaultDialTimeout = time.Second * 5
 )
 
-func (n *transport) TestConnection() error {
-	if n.conn == nil {
-		return fmt.Errorf("Connection cannot be nil")
-	}
-	if n.conn.Status() != nats.CONNECTED {
-		return fmt.Errorf("Client not connected")
-	}
-	return nil
-}
-
 func (n *transport) Options() Options {
 	return n.opts
 }
