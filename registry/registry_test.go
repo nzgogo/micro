@@ -1,4 +1,7 @@
 package registry
+//This is a test file that includes all function tests covered in registry.go.
+//To get this Test working, you need to run a consul agent in dev mode first
+//Just run command line "consul agent -dev" before you go test
 
 import (
 	"bytes"
@@ -7,10 +10,7 @@ import (
 	"net"
 	"net/http"
 	"testing"
-	//"os/exec"
 	consul "github.com/hashicorp/consul/api"
-	//"strings"
-	//"log"
 )
 
 func newHealthCheck(node, name, status string) *consul.HealthCheck {
@@ -63,6 +63,161 @@ func newMockServer(rg *mockRegistry, l net.Listener) error {
 	return http.Serve(l, mux)
 }
 
+func newNode(id string) *Node {
+	return &Node{id}
+}
+
+//This test covers Init, Register, Deregister, GetService, ListServices. This test needs a running consul agent to work
+func TestRegistry(t *testing.T) {
+	{
+		//go runConsulAgent()
+		l1, err := net.Listen("tcp", "localhost:50000")
+		if err != nil {
+			// blurgh?!!
+			panic(err.Error())
+		}
+
+		l2, err := net.Listen("tcp", "localhost:50001")
+		if err != nil {
+			// blurgh?!!
+			panic(err.Error())
+		}
+
+		l3, err := net.Listen("tcp", "localhost:50002")
+		if err != nil {
+			// blurgh?!!
+			panic(err.Error())
+		}
+
+		r := &mockRegistry{
+			status: 200,
+			body: []byte("Fuck off. I am retired, don't ask me to do a damn thing!"),
+			url: "/v1/health/service/service-name",
+		}
+
+		//run three servers
+		go newMockServer(r, l1)
+		go newMockServer(r, l2)
+		go newMockServer(r, l3)
+	}
+
+
+	client := NewRegistry()
+
+	//register three servers
+	{
+		err := client.Init()
+		if err != nil {
+			t.Fatalf("NewRegistry faild. error: %v", err)
+		}
+
+		err = client.Register(&Service{
+			Name: "order",
+			Version : "v-0.1",
+			Nodes: []*Node{
+				newNode("123"),
+			},
+		})
+		if err != nil {
+			t.Fatalf("Register order-123 faild. error: %v", err)
+		}
+
+		err = client.Register(&Service{
+			Name: "order",
+			Version : "v-0.1",
+			Nodes: []*Node{
+				newNode("456"),
+			},
+		})
+		if err != nil {
+			t.Fatalf("Register order-456 faild. error: %v", err)
+		}
+
+		err = client.Register(&Service{
+			Name: "porn",
+			Version : "v-0.1",
+			Nodes: []*Node{
+				newNode("789"),
+			},
+		})
+		if err != nil {
+			t.Fatalf("Register porn-789 faild. error: %v", err)
+		}
+	}
+
+	//list all registered services
+	{
+		services, err := client.ListServices()
+		if err != nil {
+			t.Fatalf("ListServices faild. error: %v", err)
+		}
+
+		pcnt := false
+		ocnt := false
+		for _,service := range services {
+			if service.Name == "porn"{
+				pcnt = true
+			}
+			if service.Name == "order"{
+				ocnt = true
+			}
+
+		}
+		if !pcnt {
+			t.Fatalf("could not find porn service")
+		}
+		if !ocnt {
+			t.Fatalf("could not find order service")
+		}
+	}
+
+	//deregister service porn test
+	{
+		err := client.Deregister(&Service{
+			Nodes: []*Node{
+				newNode("789"),
+			},
+		})
+		if err != nil {
+			t.Fatalf("Deregister porn-789 faild. error: %v", err)
+		}
+
+		services, err := client.ListServices()
+		if err != nil {
+			t.Fatalf("ListServices in Deregister faild. error: %v", err)
+		}
+
+		pcnt := false
+		for _,service := range services {
+			if service.Name == "porn"{
+				pcnt = true
+			}
+		}
+		if pcnt {
+			t.Fatalf("Expected service porn-789 deregistered")
+		}
+	}
+
+	//get service test
+	{
+		services, err := client.GetService("order")
+		if err != nil {
+			t.Fatalf("GetService faild. error: %v", err)
+		}
+		cnt := 0
+		for _,service := range services {
+			if service.Name == "order"{
+				cnt = len(service.Nodes)
+			}
+		}
+		if cnt != 2{
+			t.Fatalf("GetService faild. Cound not find order service")
+		}
+
+	}
+}
+
+//These test functions below are unit test that do not dependant on a running consul agent
 func newConsulTestRegistry(r *mockRegistry) (*registry, func()) {
 	l, err := net.Listen("tcp", "localhost:0")
 	if err != nil {
@@ -100,7 +255,6 @@ func TestConsul_GetService_WithError(t *testing.T) {
 	} else {
 		t.Log("%v",err)
 	}
-
 }
 
 func TestConsul_GetService_WithHealthyServiceNodes(t *testing.T) {
@@ -222,106 +376,3 @@ func TestConsul_GetService_WithUnhealthyServiceNodes(t *testing.T) {
 		t.Fatalf("Expected len of nodes to be `%d`, got `%d`.", exp, act)
 	}
 }
-
-//func runConsulAgent(){
-//	cmd := exec.Command("./run_consul.sh")
-//	cmd.Stdin = strings.NewReader("some input")
-//	var out bytes.Buffer
-//	cmd.Stdout = &out
-//	err := cmd.Run()
-//	if err != nil {
-//		log.Fatal(err)
-//	}
-//}
-
-func newNode(id, addr string, port int) *Node {
-	return &Node{id,addr,port}
-}
-
-func TestRegister(t *testing.T) {
-	//go runConsulAgent()
-	l1, err := net.Listen("tcp", "localhost:50000")
-	if err != nil {
-		// blurgh?!!
-		panic(err.Error())
-	}
-
-	l2, err := net.Listen("tcp", "localhost:50001")
-	if err != nil {
-		// blurgh?!!
-		panic(err.Error())
-	}
-
-	l3, err := net.Listen("tcp", "localhost:50002")
-	if err != nil {
-		// blurgh?!!
-		panic(err.Error())
-	}
-
-	r := &mockRegistry{
-		status: 200,
-		body: []byte("Fuck off. I am retired, don't ask me to do a damn thing!"),
-		url: "/v1/health/service/service-name",
-	}
-
-	go newMockServer(r, l1)
-	go newMockServer(r, l2)
-	go newMockServer(r, l3)
-
-
-	client := NewRegistry()
-	err = client.Init()
-	if err != nil {
-		t.Fatalf("NewRegistry faild. error: %v", err)
-	}
-
-	err = client.Register(&Service{
-		Name: "order",
-		Version : "v-0.1",
-		Nodes: []*Node{
-			newNode("123","localhost", 50000),
-		},
-	})
-	if err != nil {
-		t.Fatalf("Register faild. error: %v", err)
-	}
-
-	err = client.Register(&Service{
-		Name: "order",
-		Version : "v-0.1",
-		Nodes: []*Node{
-			newNode("456","localhost", 50001),
-		},
-	})
-	if err != nil {
-		t.Fatalf("Register faild. error: %v", err)
-	}
-
-	err = client.Register(&Service{
-		Name: "porn",
-		Version : "v-0.1",
-		Nodes: []*Node{
-			newNode("789","localhost", 50002),
-		},
-	})
-	if err != nil {
-		t.Fatalf("Register faild. error: %v", err)
-	}
-
-
-
-}
-
-//func TestGetService(t *testing.T) {
-//	cr, cl := newTestRegistry(&mockRegistry{
-//		err: errors.New("client-error"),
-//		url: "/v1/health/service/service-name",
-//	})
-//	defer cl()
-//
-//	if _, err := cr.GetService("test-service"); err == nil {
-//		t.Fatalf("Expected error not to be `nil`")
-//	} else {
-//		t.Log("%v",err)
-//	}
-//}
