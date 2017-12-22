@@ -1,7 +1,5 @@
 package registry
 //This is a test file that includes all function tests covered in registry.go.
-//To get this Test working, you need to run a consul agent in dev mode first
-//Just run command line "consul agent -dev" before you go test
 
 import (
 	"bytes"
@@ -11,6 +9,10 @@ import (
 	"net/http"
 	"testing"
 	consul "github.com/hashicorp/consul/api"
+	"strconv"
+	"os"
+	"os/exec"
+	"time"
 )
 
 func newHealthCheck(node, name, status string) *consul.HealthCheck {
@@ -67,8 +69,43 @@ func newNode(id string) *Node {
 	return &Node{id}
 }
 
-//This test covers Init, Register, Deregister, GetService, ListServices. This test needs a running consul agent to work
+func runConsulAgent() {
+	cmd:=exec.Command("consul","agent","-dev")
+	err := cmd.Start()
+	if err != nil {
+		panic(err.Error())
+	}
+}
+
+func stopConsulAgent(){
+	cmd := "echo $(ps cax | grep consul | grep -o '^[ ]*[0-9]*')"
+	out, err :=exec.Command("bash","-c",cmd).Output()
+	if err != nil {
+		panic(err.Error())
+	}
+	pid, err := strconv.Atoi(string(out[:len(out)-1]))
+	if err != nil {
+		panic(err.Error())
+	}
+
+	p, err := os.FindProcess(pid)
+	if err != nil {
+		panic(err.Error())
+	}
+	p.Kill()
+	if err != nil {
+		panic(err.Error())
+	}
+}
+
+//This test covers Init, Register, Deregister, GetService, ListServices
 func TestRegistry(t *testing.T) {
+	//setup a consul agent
+	{
+		runConsulAgent()
+	}
+	time.Sleep(300 * time.Millisecond)
+	//start up three services
 	{
 		//go runConsulAgent()
 		l1, err := net.Listen("tcp", "localhost:50000")
@@ -104,7 +141,7 @@ func TestRegistry(t *testing.T) {
 
 	client := NewRegistry()
 
-	//register three servers
+	//register three services
 	{
 		err := client.Init()
 		if err != nil {
@@ -214,6 +251,10 @@ func TestRegistry(t *testing.T) {
 			t.Fatalf("GetService faild. Cound not find order service")
 		}
 
+	}
+	//kill the consul agent process
+	{
+		stopConsulAgent()
 	}
 }
 
