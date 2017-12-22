@@ -15,13 +15,9 @@ func TestStrategies(t *testing.T) {
 			Nodes: []*registry.Node{
 				&registry.Node{
 					Id:      "test1-1",
-					Address: "10.0.0.1",
-					Port:    1001,
 				},
 				&registry.Node{
 					Id:      "test1-2",
-					Address: "10.0.0.2",
-					Port:    1002,
 				},
 			},
 		},
@@ -31,13 +27,9 @@ func TestStrategies(t *testing.T) {
 			Nodes: []*registry.Node{
 				&registry.Node{
 					Id:      "test1-3",
-					Address: "10.0.0.3",
-					Port:    1003,
 				},
 				&registry.Node{
 					Id:      "test1-4",
-					Address: "10.0.0.4",
-					Port:    1004,
 				},
 			},
 		},

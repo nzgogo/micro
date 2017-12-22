@@ -10,7 +10,7 @@ type Selector interface {
 	Init() error
 	Options() Options
 	// Select returns a function which should return the next node
-	Select(service string) (Next, error)
+	Select(service, version string) (string, error)
 	// Mark sets the success/error against a node
 	Mark(service string, node *registry.Node, err error)
 	// Reset returns state back to zero for a service
@@ -64,24 +64,31 @@ func (r *selector) Options() Options {
 	return r.opts
 }
 
-func (r *selector) Select(service string) (Next, error) {
+func (r *selector) Select(service, version string) (string, error) {
 	// get the service
 	services, err := r.opts.Registry.GetService(service)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
 	// apply the filters
-	for _, filter := range r.opts.Filters {
-		services = filter(services)
-	}
+	//for _, filter := range r.opts.Filters {
+	//	services = filter(services)
+	//}
+	filterVersion(services,version)
 
 	// if there's nothing left, return
 	if len(services) == 0 {
-		return nil, ErrNoneAvailable
+		return "", ErrNoneAvailable
 	}
 
-	return r.opts.Strategy(services), nil
+	next := r.opts.Strategy(services)
+	node, err:= next()
+	if err != nil {
+		return "", err
+	}
+
+	return service+"."+version+"."+node.Id,nil
 }
 
 func (r *selector) Mark(service string, node *registry.Node, err error) {
@@ -94,4 +101,16 @@ func (r *selector) Reset(service string) {
 
 func (r *selector) Close() error {
 	return nil
+}
+
+func filterVersion(old []*registry.Service, version string) []*registry.Service {
+	var services []*registry.Service
+
+	for _, service := range old {
+		if service.Version == version {
+			services = append(services, service)
+		}
+	}
+
+	return services
 }
