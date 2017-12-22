@@ -39,8 +39,8 @@ type Service struct {
 
 type Node struct {
 	Id       string            `json:"id"`
-	Address  string            `json:"address"`
-	Port     int               `json:"port"`
+	//Address  string            `json:"address"`
+	//Port     int               `json:"port"`
 }
 
 // NewRegistry function
@@ -104,7 +104,7 @@ func (r *registry) Register(s *Service) error {
 
 	// get existing hash
 	r.Lock()
-	v, ok := r.register[s.Name]
+	v, ok := r.register[s.Nodes[0].Id]
 	r.Unlock()
 
 	// if it's already registered and matches then just pass the check
@@ -133,8 +133,8 @@ func (r *registry) Register(s *Service) error {
 		ID:      node.Id,
 		Name:    s.Name,
 		Tags:    tags,
-		Port:    node.Port,
-		Address: node.Address,
+		//Port:    node.Port,
+		//Address: node.Address,
 		Check:   check,
 	}); err != nil {
 		return err
@@ -142,7 +142,7 @@ func (r *registry) Register(s *Service) error {
 
 	// save our hash of the service
 	r.Lock()
-	r.register[s.Name] = h
+	r.register[s.Nodes[0].Id] = h
 	r.Unlock()
 
 	return nil
@@ -186,7 +186,7 @@ func (r *registry) GetService(name string) ([]*Service, error) {
 		// key is always the version
 		key := version
 		// address is service address
-		address := s.Service.Address
+		//address := s.Service.Address
 
 		svc, ok := serviceMap[key]
 		if !ok {
@@ -213,8 +213,8 @@ func (r *registry) GetService(name string) ([]*Service, error) {
 
 		svc.Nodes = append(svc.Nodes, &Node{
 			Id:       id,
-			Address:  address,
-			Port:     s.Service.Port,
+			//Address:  address,
+			//Port:     s.Service.Port,
 		})
 	}
 
