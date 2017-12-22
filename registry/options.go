@@ -48,6 +48,6 @@ func TLSConfig(t *tls.Config) Option {
 //specify consul Agent check args
 func Args(a []string) Option {
 	return func(o *Options) {
-		o.Args = a
+		o.CheckArgs = a
 	}
 }
