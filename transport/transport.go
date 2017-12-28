@@ -14,8 +14,8 @@ import (
 type Transport interface {
 	Options() Options
 	Init() error
-	Request([]byte, ResponseHandler) error
-	Publish([]byte) error
+	Request(string, []byte, ResponseHandler) error
+	Publish(string ,[]byte) error
 	Close() error
 }
 
