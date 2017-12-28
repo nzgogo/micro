@@ -1,4 +1,4 @@
-package natsproxy
+package gogoapi
 
 import (
 	"fmt"
@@ -13,10 +13,11 @@ var (
 
 // URLToNats builds the channel name
 // from an URL and Method of http.Request
-func URLToNats(method string, urlPath string) string {
-	subURL := strings.Replace(urlPath, "/", ".", -1)
-	subURL = fmt.Sprintf("%s:%s", method, subURL)
-	return subURL
+func URLToNats(host string, path string) string {
+	subURI := strings.Replace(path, "/", ".", -1)
+	subHost:=strings.Replace(host, "/", ".", -1)
+
+	return subURI+subHost
 }
 
 // SubscribeURLToNats buils the subscription
@@ -29,4 +30,3 @@ func SubscribeURLToNats(method string, urlPath string) string {
 	subURL = fmt.Sprintf("%s:%s", method, subURL)
 	return subURL
 }
-

@@ -110,19 +110,16 @@ func TestRegistry(t *testing.T) {
 		//go runConsulAgent()
 		l1, err := net.Listen("tcp", "localhost:50000")
 		if err != nil {
-			// blurgh?!!
 			panic(err.Error())
 		}
 
 		l2, err := net.Listen("tcp", "localhost:50001")
 		if err != nil {
-			// blurgh?!!
 			panic(err.Error())
 		}
 
 		l3, err := net.Listen("tcp", "localhost:50002")
 		if err != nil {
-			// blurgh?!!
 			panic(err.Error())
 		}
 
@@ -262,7 +259,6 @@ func TestRegistry(t *testing.T) {
 func newConsulTestRegistry(r *mockRegistry) (*registry, func()) {
 	l, err := net.Listen("tcp", "localhost:0")
 	if err != nil {
-		// blurgh?!!
 		panic(err.Error())
 	}
 	cfg := consul.DefaultConfig()
