@@ -20,13 +20,19 @@ type service struct {
 	name    string
 	version string
 	id      string
+
 }
+
+type Option func(*Options)
 
 func (s *service) Options() Options {
 	return s.opts
 }
 
-func (s *service) Init(opts ...Options) error {
+func (s *service) Init(opts ...Option) error {
+	for _, o := range opts {
+		o(&s.opts)
+	}
 	return nil
 }
 
