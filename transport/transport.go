@@ -28,6 +28,7 @@ type transport struct {
 type ResponseHandler func([]byte) error
 
 var (
+	DefaultTransport Transport = NewTransport()
 	DefaultTimeout     = time.Second * 15
 	DefaultDialTimeout = time.Second * 5
 )

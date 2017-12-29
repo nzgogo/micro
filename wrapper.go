@@ -13,7 +13,7 @@ type HttpHandlerFunc func(w http.ResponseWriter, r *http.Request) error
 type HttpHandlerWrapper func(HttpHandlerFunc) HttpHandlerFunc
 
 // HandlerFunc represents a single method of a service handler. It's used primarily
-// for the wrappers.
+// for the wrappers (after api interpreter and before service handler).
 type HandlerFunc func(ctx context.Context, req codec.Request) error
 
 // HandlerWrapper wraps the HandlerFunc and returns the equivalent

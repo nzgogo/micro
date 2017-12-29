@@ -16,6 +16,7 @@ type Registry interface {
 	GetService(string) ([]*Service, error)
 	ListServices() ([]*Service, error)
 	Options() Options
+	Client() *consul.Client
 	//Watch() (Watcher, error)
 }
 
@@ -23,7 +24,7 @@ type Option func(*Options)
 
 // Registry service
 type registry struct {
-	Client *consul.Client
+	Conn *consul.Client
 	opts Options
 
 	sync.Mutex
@@ -43,6 +44,11 @@ type Node struct {
 	//Port     int               `json:"port"`
 }
 
+var (
+	DefaultRegistry = NewRegistry()
+
+	ErrNotFound = errors.New("not found")
+)
 // NewRegistry function
 func NewRegistry(opts ...Option) *registry {
 	var options Options
@@ -81,7 +87,7 @@ func (r *registry) Init() error{
 		config.HttpClient.Timeout = r.opts.Timeout
 	}
 
-	r.Client = client
+	r.Conn = client
 	r.register = make(map[string]uint64)
 
 	return nil
@@ -129,7 +135,7 @@ func (r *registry) Register(s *Service) error {
 	}
 
 	// register the service
-	if err := r.Client.Agent().ServiceRegister(&consul.AgentServiceRegistration{
+	if err := r.Conn.Agent().ServiceRegister(&consul.AgentServiceRegistration{
 		ID:      node.Id,
 		Name:    s.Name,
 		Tags:    tags,
@@ -160,11 +166,11 @@ func (r *registry) Deregister(s *Service) error {
 	r.Unlock()
 
 	node := s.Nodes[0]
-	return r.Client.Agent().ServiceDeregister(node.Id)
+	return r.Conn.Agent().ServiceDeregister(node.Id)
 }
 
 func (r *registry) GetService(name string) ([]*Service, error) {
-	rsp, _, err := r.Client.Health().Service(name, "", false, nil)
+	rsp, _, err := r.Conn.Health().Service(name, "", false, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -226,7 +232,7 @@ func (r *registry) GetService(name string) ([]*Service, error) {
 }
 
 func (r *registry) ListServices() ([]*Service, error) {
-	rsp, _, err := r.Client.Catalog().Services(nil)
+	rsp, _, err := r.Conn.Catalog().Services(nil)
 	if err != nil {
 		return nil, err
 	}
@@ -242,4 +248,8 @@ func (r *registry) ListServices() ([]*Service, error) {
 
 func (r *registry) Options() Options {
 	return r.opts
+}
+
+func (r *registry) Client() *consul.Client{
+	return r.Conn
 }
