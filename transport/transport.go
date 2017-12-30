@@ -98,11 +98,6 @@ func (n *transport) Init() error {
 	client_opts.Servers = cAddrs
 	client_opts.Timeout = options.Timeout
 
-	// secure might not be set
-	if client_opts.TLSConfig != nil {
-		client_opts.Secure = true
-	}
-
 	c, err := client_opts.Connect()
 	if err != nil {
 		return err
@@ -131,11 +126,8 @@ func NewTransport(opts ...Option) *transport {
 		o(&options)
 	}
 
-	fmt.Printf("[Transport][Address] %s\n", options.Addrs)
-	fmt.Printf("[Transport][Subject] %s\n", options.Subject)
-	fmt.Printf("[Transport][Timeout] %s\n", options.Timeout)
-
 	return &transport{
 		opts: options,
 	}
 }
+

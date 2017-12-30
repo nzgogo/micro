@@ -21,5 +21,8 @@
 
 .idea/workspace.xml
 
+*.xml
+*.iml
+
 vendor/*/
 test/
