@@ -5,7 +5,6 @@ package transport
 
 import (
 	"errors"
-	"fmt"
 	"strings"
 	"time"
 
@@ -130,4 +129,3 @@ func NewTransport(opts ...Option) *transport {
 		opts: options,
 	}
 }
-
