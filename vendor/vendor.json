@@ -1,0 +1,37 @@
+{
+	"comment": "",
+	"ignore": "test",
+	"package": [
+		{
+			"checksumSHA1": "t1X5uFE3zdGP5ZODYVE9CgAL7KI=",
+			"path": "github.com/json-iterator/go",
+			"revision": "13f86432b882000a51c6e610c620974462691a97",
+			"revisionTime": "2017-12-12T10:52:41Z"
+		},
+		{
+			"checksumSHA1": "lp3JKfbdvC6862l/XFR1Vky1X6w=",
+			"path": "github.com/nats-io/go-nats",
+			"revision": "f0d9c5988d4c2a17ad466fcdffe010165c46434e",
+			"revisionTime": "2017-11-14T23:23:38Z"
+		},
+		{
+			"checksumSHA1": "Q2c9uTEIGhSIddv5pntYdFNtUdk=",
+			"path": "github.com/nats-io/go-nats/encoders/builtin",
+			"revision": "f0d9c5988d4c2a17ad466fcdffe010165c46434e",
+			"revisionTime": "2017-11-14T23:23:38Z"
+		},
+		{
+			"checksumSHA1": "LhbIA/oMWpscEPPK9Wrx5GLcz44=",
+			"path": "github.com/nats-io/go-nats/util",
+			"revision": "f0d9c5988d4c2a17ad466fcdffe010165c46434e",
+			"revisionTime": "2017-11-14T23:23:38Z"
+		},
+		{
+			"checksumSHA1": "wcu8OXDGeGvmK9JY73+aoOQf1Ho=",
+			"path": "github.com/nats-io/nuid",
+			"revision": "33c603157d6fd1b0ac2599bcc4a286b36479a06d",
+			"revisionTime": "2017-10-25T20:31:29Z"
+		}
+	],
+	"rootPath": "micro"
+}

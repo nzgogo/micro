@@ -4,10 +4,11 @@
 package transport
 
 import (
-	"strings"
-	"fmt"
-	"time"
 	"errors"
+	"fmt"
+	"strings"
+	"time"
+
 	"github.com/nats-io/go-nats"
 )
 
@@ -15,7 +16,7 @@ type Transport interface {
 	Options() Options
 	Init() error
 	Request(string, []byte, ResponseHandler) error
-	Publish(string ,[]byte) error
+	Publish(string, []byte) error
 	Close() error
 }
 
@@ -28,20 +29,9 @@ type transport struct {
 type ResponseHandler func([]byte) error
 
 var (
-	DefaultTransport Transport = NewTransport()
 	DefaultTimeout     = time.Second * 15
 	DefaultDialTimeout = time.Second * 5
 )
-
-func (n *transport) TestConnection() error {
-	if n.conn == nil {
-		return fmt.Errorf("Connection cannot be nil")
-	}
-	if n.conn.Status() != nats.CONNECTED {
-		return fmt.Errorf("Client not connected")
-	}
-	return nil
-}
 
 func (n *transport) Options() Options {
 	return n.opts
@@ -108,11 +98,6 @@ func (n *transport) Init() error {
 	client_opts.Servers = cAddrs
 	client_opts.Timeout = options.Timeout
 
-	// secure might not be set
-	if client_opts.TLSConfig != nil {
-		client_opts.Secure = true
-	}
-
 	c, err := client_opts.Connect()
 	if err != nil {
 		return err
@@ -145,3 +130,4 @@ func NewTransport(opts ...Option) *transport {
 		opts: options,
 	}
 }
+
