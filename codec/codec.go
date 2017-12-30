@@ -26,6 +26,7 @@ type Request struct {
 	Path   string              `json:"path,omitempty"`
 	Host   string              `json:"host,omitempty"`
 	Scheme string              `json:"scheme"`
+	Node   string              `json:"node,omitempty"`
 	Header map[string][]string `json:"header"`
 	Get    map[string]*Pair    `json:"get,omitempty"`
 	Post   map[string]*Pair    `json:"post,omitempty"`
