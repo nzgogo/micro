@@ -22,10 +22,7 @@ type service struct {
 	name    string
 	version string
 	id      string
-
 }
-
-type Option func(*Options)
 
 func (s *service) Options() Options {
 	return s.opts
@@ -131,6 +128,7 @@ func NewService(n string, v string) *service {
 		transport.Subject(s.name+"."+s.version+"."+s.id),
 		transport.Addrs(*transportFlags["nats_addr"]),
 	)
+
 	r := registry.NewRegistry(registry.Addrs(*registryFlags["consul_addr"]))
 
 	s.opts = newOptions(

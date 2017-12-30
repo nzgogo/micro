@@ -1,4 +1,5 @@
 package gogo
+
 import (
 	"micro/codec"
 	"micro/transport"
@@ -20,6 +21,8 @@ type Options struct {
 	// can be stored in a context
 	Context context.Context
 }
+
+type Option func(*Options)
 
 func newOptions(opts ...Option) Options {
 	opt := Options{

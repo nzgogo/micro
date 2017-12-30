@@ -1,19 +1,18 @@
 package transport
 
 import (
-	"crypto/tls"
 	"time"
 )
 
 type Options struct {
-	Subject	string	//  Message destination address
-	Addrs     []string	// A configured set of nats servers which this client will use when attempting to connect.
-	Secure    bool
-	TLSConfig *tls.Config
+	Subject string   //  Message destination address
+	Addrs   []string // A configured set of nats servers which this client will use when attempting to connect.
 	// Timeout sets the timeout for Send/Recv
 	Timeout time.Duration
 }
-type Option func (*Options)
+
+type Option func(*Options)
+
 // subject to use for transport
 func Subject(sub string) Option {
 	return func(o *Options) {
@@ -32,20 +31,5 @@ func Addrs(addrs ...string) Option {
 func Timeout(t time.Duration) Option {
 	return func(o *Options) {
 		o.Timeout = t
-	}
-}
-
-// Use secure communication. If TLSConfig is not specified we
-// use InsecureSkipVerify and generate a self signed cert
-func Secure(b bool) Option {
-	return func(o *Options) {
-		o.Secure = b
-	}
-}
-
-// TLSConfig to be used for the transport.
-func TLSConfig(t *tls.Config) Option {
-	return func(o *Options) {
-		o.TLSConfig = t
 	}
 }
