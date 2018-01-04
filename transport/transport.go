@@ -7,15 +7,15 @@ import (
 	"errors"
 	"strings"
 	"time"
-
 	"github.com/nats-io/go-nats"
 )
 
 type Transport interface {
 	Options() Options
 	Init() error
-	Request(string, []byte, ResponseHandler) error
+	Request(string, []byte, ResponseHandler)  error
 	Publish(string, []byte) error
+	Subscribe(nats.MsgHandler) error
 	Close() error
 }
 
@@ -28,6 +28,7 @@ type transport struct {
 type ResponseHandler func([]byte) error
 
 var (
+	DefaultTransport   = NewTransport()
 	DefaultTimeout     = time.Second * 15
 	DefaultDialTimeout = time.Second * 5
 )
@@ -43,7 +44,11 @@ func (n *transport) Request(sub string, req []byte, handler ResponseHandler) err
 		return respErr
 	}
 
-	return handler(rsp.Data)
+	if handler != nil{
+		return handler(rsp.Data)
+	}
+
+	return nil
 }
 
 func (n *transport) Publish(sub string, b []byte) error {
@@ -68,8 +73,17 @@ func (n *transport) Publish(sub string, b []byte) error {
 	}
 }
 
+func (n *transport) Subscribe (subscribeHdler nats.MsgHandler) error {
+	if subscribeHdler == nil{
+		return nil
+	}
+	var err error
+	n.sub, err = n.conn.Subscribe(n.opts.Subject, subscribeHdler)
+	return err
+}
+
 func (n *transport) Close() error {
-	n.sub.Unsubscribe()
+	//n.sub.Unsubscribe()
 	n.conn.Close()
 	return nil
 }
@@ -104,14 +118,15 @@ func (n *transport) Init() error {
 
 	options.Timeout = DefaultDialTimeout
 
-	sub, err := n.conn.SubscribeSync(options.Subject)
+	//sub, err := n.conn.SubscribeSync(options.Subject)
+
 	if err != nil {
 		return err
 	}
 
 	n.conn = c
 	n.opts = options
-	n.sub = sub
+	//n.sub = sub
 
 	return nil
 }
