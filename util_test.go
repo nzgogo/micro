@@ -1,4 +1,4 @@
-package gogoapi
+package gogo
 
 import (
 	"fmt"

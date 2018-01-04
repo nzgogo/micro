@@ -4,6 +4,8 @@ import (
 	"micro/codec"
 	"micro/transport"
 	"micro/registry"
+	"micro/router"
+
 	"context"
 )
 
@@ -12,10 +14,11 @@ type Options struct {
 	Codec     codec.Codec
 	Transport transport.Transport
 	Registry  registry.Registry
+	Router    router.Router
 
 	//wrappers
 	HdlrWrappers []HandlerWrapper
-	HttpHdlrWrappers []HttpHandlerWrapper
+	//HttpHdlrWrappers []HttpHandlerWrapper
 
 	// Other options for implementations of the interface
 	// can be stored in a context
@@ -62,6 +65,12 @@ func Registry(r registry.Registry) Option {
 	}
 }
 
+func Router(r router.Router) Option {
+	return func(o *Options) {
+		o.Router = r
+	}
+}
+
 // WrapHandler adds a service handler Wrapper to a list of options passed into the server
 func WrapHandler(w ...HandlerWrapper) Option {
 	return func(o *Options) {
@@ -72,10 +81,10 @@ func WrapHandler(w ...HandlerWrapper) Option {
 }
 
 // WrapHttpHandler adds a http handler Wrapper to a list of options passed into the server
-func WrapHttpHandler(w ...HttpHandlerWrapper) Option {
-	return func(o *Options) {
-		for _, wrap := range w {
-			o.HttpHdlrWrappers = append(o.HttpHdlrWrappers, wrap)
-		}
-	}
-}
+//func WrapHttpHandler(w ...HttpHandlerWrapper) Option {
+//	return func(o *Options) {
+//		for _, wrap := range w {
+//			o.HttpHdlrWrappers = append(o.HttpHdlrWrappers, wrap)
+//		}
+//	}
+//}

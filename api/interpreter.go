@@ -32,10 +32,11 @@ func HTTPReqToNatsSReq(req *http.Request) (Request, error) {
 		}
 	}
 
+	//TODO May need extract more data from http reqeust
 	request := &codec.Request{
 		Method:     req.Method,
 		Path:		req.RequestURI,
-		Authority:	req.Host,
+		Host:		req.Host,
 		Body:       string(buf.Bytes()),
 	}
 	return request, nil
