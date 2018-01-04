@@ -20,3 +20,9 @@
 .idea/vcs.xml
 
 .idea/workspace.xml
+
+*.xml
+*.iml
+
+vendor/*/
+test/
