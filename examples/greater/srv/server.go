@@ -30,7 +30,7 @@ func Hello(req *codec.Request, tc transport.Transport, subject string) error {
 	response := &codec.Response{
 		200,
 		make(map[string][]string,0),
-		"fuck off",
+		"For the brave souls who get this far: You are the chosen ones, the valiant knights of programming who toil away, without rest, fixing our most awful code. To you, true saviors, kings of men, I say this: never gonna give you up, never gonna let you down, never gonna run around and desert you. Never gonna make you cry, never gonna say goodbye. Never gonna tell a lie and hurt you.",
 	}
 	resp, err := Codec.Marshal(response)
 	if err!=nil {
@@ -50,8 +50,8 @@ func main() {
 
 	route.Add(&router.Node{
 		Method:"GET",
-		Path:"/Hello",
-		ID: "/Hello",
+		Path:"/hello",
+		ID: "/hello",
 		Handler: Hello,
 	})
 
