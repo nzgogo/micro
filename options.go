@@ -2,9 +2,9 @@ package gogo
 
 import (
 	"micro/codec"
-	"micro/transport"
 	"micro/registry"
 	"micro/router"
+	"micro/transport"
 
 	"context"
 )

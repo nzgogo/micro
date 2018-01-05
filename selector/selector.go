@@ -75,7 +75,7 @@ func (r *selector) Select(service, version string) (string, error) {
 	//for _, filter := range r.opts.Filters {
 	//	services = filter(services)
 	//}
-	filterVersion(services,version)
+	filterVersion(services, version)
 
 	// if there's nothing left, return
 	if len(services) == 0 {
@@ -83,12 +83,12 @@ func (r *selector) Select(service, version string) (string, error) {
 	}
 
 	next := r.opts.Strategy(services)
-	node, err:= next()
+	node, err := next()
 	if err != nil {
 		return "", err
 	}
 
-	return service+"."+version+"."+node.Id,nil
+	return service + "." + version + "." + node.Id, nil
 }
 
 func (r *selector) Mark(service string, node *registry.Node, err error) {

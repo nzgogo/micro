@@ -1,4 +1,5 @@
 package registry
+
 //This is a test file that includes all function tests covered in registry.go.
 
 import (
@@ -7,12 +8,13 @@ import (
 	"errors"
 	"net"
 	"net/http"
-	"testing"
-	consul "github.com/hashicorp/consul/api"
-	"strconv"
 	"os"
 	"os/exec"
+	"strconv"
+	"testing"
 	"time"
+
+	consul "github.com/hashicorp/consul/api"
 )
 
 func newHealthCheck(node, name, status string) *consul.HealthCheck {
@@ -70,16 +72,16 @@ func newNode(id string) *Node {
 }
 
 func runConsulAgent() {
-	cmd:=exec.Command("consul","agent","-dev")
+	cmd := exec.Command("consul", "agent", "-dev")
 	err := cmd.Start()
 	if err != nil {
 		panic(err.Error())
 	}
 }
 
-func stopConsulAgent(){
+func stopConsulAgent() {
 	cmd := "echo $(ps cax | grep consul | grep -o '^[ ]*[0-9]*')"
-	out, err :=exec.Command("bash","-c",cmd).Output()
+	out, err := exec.Command("bash", "-c", cmd).Output()
 	if err != nil {
 		panic(err.Error())
 	}
@@ -125,8 +127,8 @@ func TestRegistry(t *testing.T) {
 
 		r := &mockRegistry{
 			status: 200,
-			body: []byte("Fuck off. I am retired, don't ask me to do a damn thing!"),
-			url: "/v1/health/service/service-name",
+			body:   []byte("Fuck off. I am retired, don't ask me to do a damn thing!"),
+			url:    "/v1/health/service/service-name",
 		}
 
 		//run three servers
@@ -134,7 +136,6 @@ func TestRegistry(t *testing.T) {
 		go newMockServer(r, l2)
 		go newMockServer(r, l3)
 	}
-
 
 	client := NewRegistry()
 
@@ -146,8 +147,8 @@ func TestRegistry(t *testing.T) {
 		}
 
 		err = client.Register(&Service{
-			Name: "order",
-			Version : "v-0.1",
+			Name:    "order",
+			Version: "v-0.1",
 			Nodes: []*Node{
 				newNode("123"),
 			},
@@ -157,8 +158,8 @@ func TestRegistry(t *testing.T) {
 		}
 
 		err = client.Register(&Service{
-			Name: "order",
-			Version : "v-0.1",
+			Name:    "order",
+			Version: "v-0.1",
 			Nodes: []*Node{
 				newNode("456"),
 			},
@@ -168,8 +169,8 @@ func TestRegistry(t *testing.T) {
 		}
 
 		err = client.Register(&Service{
-			Name: "porn",
-			Version : "v-0.1",
+			Name:    "porn",
+			Version: "v-0.1",
 			Nodes: []*Node{
 				newNode("789"),
 			},
@@ -188,11 +189,11 @@ func TestRegistry(t *testing.T) {
 
 		pcnt := false
 		ocnt := false
-		for _,service := range services {
-			if service.Name == "porn"{
+		for _, service := range services {
+			if service.Name == "porn" {
 				pcnt = true
 			}
-			if service.Name == "order"{
+			if service.Name == "order" {
 				ocnt = true
 			}
 
@@ -222,8 +223,8 @@ func TestRegistry(t *testing.T) {
 		}
 
 		pcnt := false
-		for _,service := range services {
-			if service.Name == "porn"{
+		for _, service := range services {
+			if service.Name == "porn" {
 				pcnt = true
 			}
 		}
@@ -239,12 +240,12 @@ func TestRegistry(t *testing.T) {
 			t.Fatalf("GetService faild. error: %v", err)
 		}
 		cnt := 0
-		for _,service := range services {
-			if service.Name == "order"{
+		for _, service := range services {
+			if service.Name == "order" {
 				cnt = len(service.Nodes)
 			}
 		}
-		if cnt != 2{
+		if cnt != 2 {
 			t.Fatalf("GetService faild. Cound not find order service")
 		}
 
@@ -268,11 +269,11 @@ func newConsulTestRegistry(r *mockRegistry) (*registry, func()) {
 	go newMockServer(r, l)
 
 	return &registry{
-		Client:   cl,
-		register: make(map[string]uint64),
-	}, func() {
-		l.Close()
-	}
+			Conn:     cl,
+			register: make(map[string]uint64),
+		}, func() {
+			l.Close()
+		}
 }
 
 func newServiceList(svc []*consul.ServiceEntry) []byte {
@@ -290,7 +291,7 @@ func TestConsul_GetService_WithError(t *testing.T) {
 	if _, err := cr.GetService("test-service"); err == nil {
 		t.Fatalf("Expected error not to be `nil`")
 	} else {
-		t.Log("%v",err)
+		t.Log("%v", err)
 	}
 }
 

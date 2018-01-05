@@ -2,10 +2,11 @@ package registry
 
 import (
 	"errors"
-	"net"
 	"fmt"
-	consul "github.com/hashicorp/consul/api"
+	"net"
 	"sync"
+
+	consul "github.com/hashicorp/consul/api"
 	hash "github.com/mitchellh/hashstructure"
 )
 
@@ -33,13 +34,13 @@ type registry struct {
 
 // Service struct
 type Service struct {
-	Name      string            `json:"name"`
-	Version   string            `json:"version"`
-	Nodes     []*Node           `json:"nodes"`
+	Name    string  `json:"name"`
+	Version string  `json:"version"`
+	Nodes   []*Node `json:"nodes"`
 }
 
 type Node struct {
-	Id       string            `json:"id"`
+	Id string `json:"id"`
 	//Address  string            `json:"address"`
 	//Port     int               `json:"port"`
 }
@@ -49,6 +50,7 @@ var (
 
 	ErrNotFound = errors.New("not found")
 )
+
 // NewRegistry function
 func NewRegistry(opts ...Option) *registry {
 	var options Options
@@ -58,11 +60,11 @@ func NewRegistry(opts ...Option) *registry {
 	}
 
 	return &registry{
-		opts:options,
+		opts: options,
 	}
 }
 
-func (r *registry) Init() error{
+func (r *registry) Init() error {
 	config := consul.DefaultConfig()
 
 	// check if there are any addrs
@@ -79,7 +81,7 @@ func (r *registry) Init() error{
 
 	// create the client
 	client, err := consul.NewClient(config)
-	if err !=nil{
+	if err != nil {
 		return err
 	}
 	// set timeout
@@ -118,7 +120,7 @@ func (r *registry) Register(s *Service) error {
 		//// if the err is nil we're all good, bail out
 		//// if not, we don't know what the state is, so full re-register
 		//if err := r.Client.Agent().PassTTL("service:"+node.Id, ""); err == nil {
-			return nil
+		return nil
 		//}
 	}
 
@@ -127,21 +129,20 @@ func (r *registry) Register(s *Service) error {
 
 	var check *consul.AgentServiceCheck
 
-
-	if len(r.opts.CheckArgs) > 0{
+	if len(r.opts.CheckArgs) > 0 {
 		check = &consul.AgentServiceCheck{
-			Args:r.opts.CheckArgs,
+			Args: r.opts.CheckArgs,
 		}
 	}
 
 	// register the service
 	if err := r.Conn.Agent().ServiceRegister(&consul.AgentServiceRegistration{
-		ID:      node.Id,
-		Name:    s.Name,
-		Tags:    tags,
+		ID:   node.Id,
+		Name: s.Name,
+		Tags: tags,
 		//Port:    node.Port,
 		//Address: node.Address,
-		Check:   check,
+		Check: check,
 	}); err != nil {
 		return err
 	}
@@ -182,7 +183,7 @@ func (r *registry) GetService(name string) ([]*Service, error) {
 			continue
 		}
 
-		if len(s.Service.Tags) <=0 {
+		if len(s.Service.Tags) <= 0 {
 			continue
 		}
 		// version is now a tag
@@ -197,8 +198,8 @@ func (r *registry) GetService(name string) ([]*Service, error) {
 		svc, ok := serviceMap[key]
 		if !ok {
 			svc = &Service{
-				Name:      s.Service.Service,
-				Version:   version,
+				Name:    s.Service.Service,
+				Version: version,
 			}
 			serviceMap[key] = svc
 		}
@@ -218,7 +219,7 @@ func (r *registry) GetService(name string) ([]*Service, error) {
 		}
 
 		svc.Nodes = append(svc.Nodes, &Node{
-			Id:       id,
+			Id: id,
 			//Address:  address,
 			//Port:     s.Service.Port,
 		})
@@ -250,6 +251,6 @@ func (r *registry) Options() Options {
 	return r.opts
 }
 
-func (r *registry) Client() *consul.Client{
+func (r *registry) Client() *consul.Client {
 	return r.Conn
 }
