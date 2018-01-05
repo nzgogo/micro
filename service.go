@@ -116,26 +116,27 @@ func (s *service) Start() error {
 	}
 
 	tc := s.Options().Transport
-	if err := tc.Subscribe(func(msg *nats.Msg) {
-		req := &codec.Message{}
-		s.opts.Codec.Unmarshal(msg.Data, req)
-		handler, err1 := s.opts.Router.Dispatch(req)
+	if err := tc.Subscribe(func(nMsg *nats.Msg) {
+		message := &codec.Message{}
+		s.opts.Codec.Unmarshal(nMsg.Data, message)
+		message.ReplyTo = nMsg.Reply
+		handler, err1 := s.opts.Router.Dispatch(message)
 		if err1 != nil || handler == nil {
 			resp, _ := s.opts.Codec.Marshal(codec.Message{
 				StatusCode: 404,
 				Header:     make(map[string][]string, 0),
 				Body:       "Page not found",
 			})
-			tc.Publish(msg.Reply, resp)
+			tc.Publish(nMsg.Reply, resp)
 		}
-		err2 := handler(req, tc)
+		err2 := handler(message, tc)
 		if err2 != nil {
 			resp, _ := s.opts.Codec.Marshal(codec.Message{
 				StatusCode: 500,
 				Header:     make(map[string][]string, 0),
 				Body:       "Internal Server Error",
 			})
-			tc.Publish(msg.Reply, resp)
+			tc.Publish(nMsg.Reply, resp)
 		}
 
 	}); err != nil {
