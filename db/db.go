@@ -62,5 +62,3 @@ func NewDB(u, p, name string, opts ...Option) *db {
 		opts: options,
 	}
 }
-
-
