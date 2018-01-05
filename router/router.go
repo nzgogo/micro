@@ -7,7 +7,7 @@ import (
 	"micro/codec"
 	"micro/transport"
 	"github.com/hashicorp/consul/api"
-	"strings"
+	"regexp"
 )
 
 type Handler func(*codec.Request, transport.Transport, string) error
@@ -35,9 +35,11 @@ type Node struct {
 }
 
 var(
+	ErrInvalidPath = errors.New("Invalid path. Cannot process.")
 	ErrNotFound = errors.New("Service not found")
 	ErrmethodNotAllowed = errors.New("Method not allowed")
 	Codec = codec.NewCodec()
+	pathrgxp = regexp.MustCompile("^/([^/]+)/([^/]+)/([^/]+)/")
 )
 
 func (r *router) Init(opts ...Option) error {
@@ -105,7 +107,10 @@ func (r *router) Deregister(key string) error {
 // this method will download all relavent nodes from consul KV store
 // according to parsed key (/gogox/v1/greeter) and find matching service (/hello)
 func (r *router) HttpMatch(req *codec.Request) error {
-	key, subpath := PathToKeySubpath(req.Path)
+	key, subpath, err := PathToKeySubpath(req.Path)
+	if err !=nil {
+		return nil
+	}
 	if err:=r.loadRouterNodes(key);err!=nil{
 		return err
 	}
@@ -174,18 +179,15 @@ func (r *router) loadRouterNodes(key string) error {
 	return nil
 }
 
-func PathToKeySubpath(path string) (key, subpath string){
-	i := 0
-	for m:=0;m<3;m++{
-		x := strings.Index(path[i+1:],"/")
-		if x < 0 {
-			break
-		}
-		i += x
-		i++
+// Mainly used by router.HttpMatch. Http request path contains
+// information(key and subpath) that used to look up service in kv store
+func PathToKeySubpath(path string) (string, string, error){
+	loc := pathrgxp.FindStringIndex(path)
+	if loc == nil {
+		return "","", ErrInvalidPath
 	}
-
-	return path[:i], path[i:]
+	sep := loc[1]-1
+	return path[:sep], path[sep:], nil
 }
 
 // Return routes key used by service kv store
