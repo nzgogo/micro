@@ -1,9 +1,10 @@
 package selector
+
 import (
 	"math/rand"
+	"micro/registry"
 	"sync"
 	"time"
-	"micro/registry"
 	//"github.com/nzgogo/micro/registry"
 )
 

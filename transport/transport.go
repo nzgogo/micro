@@ -7,13 +7,14 @@ import (
 	"errors"
 	"strings"
 	"time"
+
 	"github.com/nats-io/go-nats"
 )
 
 type Transport interface {
 	Options() Options
 	Init() error
-	Request(string, []byte, ResponseHandler)  error
+	Request(string, []byte, ResponseHandler) error
 	Publish(string, []byte) error
 	Subscribe(nats.MsgHandler) error
 	Close() error
@@ -44,7 +45,7 @@ func (n *transport) Request(sub string, req []byte, handler ResponseHandler) err
 		return respErr
 	}
 
-	if handler != nil{
+	if handler != nil {
 		return handler(rsp.Data)
 	}
 
@@ -73,8 +74,8 @@ func (n *transport) Publish(sub string, b []byte) error {
 	}
 }
 
-func (n *transport) Subscribe (subscribeHdler nats.MsgHandler) error {
-	if subscribeHdler == nil{
+func (n *transport) Subscribe(subscribeHdler nats.MsgHandler) error {
+	if subscribeHdler == nil {
 		return nil
 	}
 	var err error
