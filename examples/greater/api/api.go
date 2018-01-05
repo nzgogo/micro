@@ -1,18 +1,19 @@
 package main
 
 import (
-	"log"
 	"fmt"
-	"net/http"
+	"log"
 	micro "micro"
 	"micro/api"
-	"micro/selector"
 	"micro/router"
+	"micro/selector"
+	"net/http"
 )
 
-type MyHandler struct{
+type MyHandler struct {
 	srv micro.Service
 }
+
 func (h *MyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// map the HTTP request to internal transport request struct.
 	request, err := gogoapi.HTTPReqToNatsSReq(r)
@@ -29,8 +30,8 @@ func (h *MyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 	var response = gogoapi.NewResponse()
 
-	srvName := micro.URLToIntnlTrans(request.Host,request.Path)
-	fmt.Println("Dispatch to server: "+srvName)
+	srvName := micro.URLToIntnlTrans(request.Host, request.Path)
+	fmt.Println("Dispatch to server: " + srvName)
 
 	//service discovery
 	slt := selector.NewSelector(selector.Registry(h.srv.Options().Registry), selector.SetStrategy(selector.RoundRobin))
@@ -40,18 +41,18 @@ func (h *MyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	subj, err := slt.Select(srvName,"v1")
+	subj, err := slt.Select(srvName, "v1")
 	if err != nil {
 		fmt.Printf("Selector failed. error: %v", err)
 		http.Error(w, "Cannot process request", http.StatusInternalServerError)
 		return
 	}
-	fmt.Println("Found service: "+subj)
+	fmt.Println("Found service: " + subj)
 
 	//transport
 	natsClient := h.srv.Options().Transport
 	c := h.srv.Options().Codec
-	bytes,_ := c.Marshal(request)
+	bytes, _ := c.Marshal(request)
 	respErr := natsClient.Request(subj, bytes, func(bytes []byte) error {
 		return c.Unmarshal(bytes, response)
 	})
@@ -74,7 +75,7 @@ func main() {
 		"v1",
 	)
 
-	if err := service.Init(micro.Router(route)); err != nil{
+	if err := service.Init(micro.Router(route)); err != nil {
 		log.Fatal(err)
 	}
 

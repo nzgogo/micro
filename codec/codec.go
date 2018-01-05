@@ -42,6 +42,7 @@ type Pair struct {
 
 type Message struct {
 	Type       string              `json:"type"`
+	ReplyTo    string              `json:"replyTo,omitempty"`
 	Method     string              `json:"method,omitempty"`
 	Path       string              `json:"path,omitempty"`
 	Host       string              `json:"host,omitempty"`
