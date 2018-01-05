@@ -47,7 +47,7 @@ func NewResponse() *codec.Message {
 	}
 }
 
-func WriteResponse(rw http.ResponseWriter, response codec.Message) {
+func WriteResponse(rw http.ResponseWriter, response *codec.Message) {
 	// Copy headers
 	// from NATS response.
 	copyHeader(response.Header, rw.Header())
