@@ -4,18 +4,14 @@ package gogoapi
 
 import (
 	"bytes"
-	"net/http"
 	"errors"
+	"net/http"
 	//"github.com/nzgogo/micro/codec"
 	"micro/codec"
 )
 
-// Request Response server as structure to transport http response throu NATS message queue
-type Request *codec.Request
-type Response *codec.Response
-
 // NewRequestFromHTTP creates the Request struct from regular *http.Request by serialization of main parts of it.
-func HTTPReqToNatsSReq(req *http.Request) (Request, error) {
+func HTTPReqToNatsSReq(req *http.Request) (*codec.Message, error) {
 	if req == nil {
 		return nil, errors.New("natsproxy: Request cannot be nil")
 	}
@@ -33,25 +29,25 @@ func HTTPReqToNatsSReq(req *http.Request) (Request, error) {
 	}
 
 	//TODO May need extract more data from http reqeust
-	request := &codec.Request{
-		Method:     req.Method,
-		Path:		req.RequestURI,
-		Host:		req.Host,
-		Body:       string(buf.Bytes()),
+	request := &codec.Message{
+		Method: req.Method,
+		Path:   req.RequestURI,
+		Host:   req.Host,
+		Body:   string(buf.Bytes()),
 	}
 	return request, nil
 }
 
 // NewResponse creates blank initialized Response object.
-func NewResponse() Response {
-	return &codec.Response{
-		200,
-		make(map[string][]string, 0),
-		"",
+func NewResponse() *codec.Message {
+	return &codec.Message{
+		StatusCode: 200,
+		Header:     make(map[string][]string, 0),
+		Body:       "",
 	}
 }
 
-func WriteResponse(rw http.ResponseWriter, response Response) {
+func WriteResponse(rw http.ResponseWriter, response codec.Message) {
 	// Copy headers
 	// from NATS response.
 	copyHeader(response.Header, rw.Header())
@@ -71,5 +67,3 @@ func copyHeader(src, dst http.Header) {
 		}
 	}
 }
-
-

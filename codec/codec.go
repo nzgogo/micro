@@ -21,22 +21,36 @@ type Pair struct {
 }
 
 // Request struct represents a request message
-type Request struct {
-	Method string              `json:"method,omitempty"`
-	Path   string              `json:"path,omitempty"`
-	Host   string              `json:"host,omitempty"`
-	Scheme string              `json:"scheme"`
-	Node   []byte              `json:"node,omitempty"`
-	Header map[string][]string `json:"header"`
-	Get    map[string]*Pair    `json:"get,omitempty"`
-	Post   map[string]*Pair    `json:"post,omitempty"`
-	Body   string              `json:"body"`
-}
+// type Request struct {
+// 	Method string              `json:"method,omitempty"`
+// 	Path   string              `json:"path,omitempty"`
+// 	Host   string              `json:"host,omitempty"`
+// 	Scheme string              `json:"scheme"`
+// 	Node   []byte              `json:"node,omitempty"`
+// 	Header map[string][]string `json:"header"`
+// 	Get    map[string]*Pair    `json:"get,omitempty"`
+// 	Post   map[string]*Pair    `json:"post,omitempty"`
+// 	Body   string              `json:"body"`
+// }
 
 // Response struct represents a response message
-type Response struct {
+// type Response struct {
+// 	StatusCode int                 `json:"statusCode"`
+// 	Header     map[string][]string `json:"header"`
+// 	Body       string              `json:"body"`
+// }
+
+type Message struct {
+	Type       string              `json:"type"`
+	Method     string              `json:"method,omitempty"`
+	Path       string              `json:"path,omitempty"`
+	Host       string              `json:"host,omitempty"`
+	Scheme     string              `json:"scheme"`
 	StatusCode int                 `json:"statusCode"`
+	Node       []byte              `json:"node,omitempty"`
 	Header     map[string][]string `json:"header"`
+	Get        map[string]*Pair    `json:"get,omitempty"`
+	Post       map[string]*Pair    `json:"post,omitempty"`
 	Body       string              `json:"body"`
 }
 
