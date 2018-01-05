@@ -9,8 +9,8 @@ An example Greeter application
 
 ## Deps
 
-Service discovery is required for all services. Default is Consul.
-Nats-io is defaultly used as all Service internal transport.
+- Service discovery is required for all services. Default is Consul.
+- Nats-io is defaultly used as all Service internal transport.
 
 ### Consul
 
