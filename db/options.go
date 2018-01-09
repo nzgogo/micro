@@ -16,24 +16,6 @@ type Options struct {
 
 type Option func(*Options)
 
-func Username(username string) Option {
-	return func(o *Options) {
-		o.Username = username
-	}
-}
-
-func Password(pwd string) Option {
-	return func(o *Options) {
-		o.Password = pwd
-	}
-}
-
-func DBName(db string) Option {
-	return func(o *Options) {
-		o.DBName = db
-	}
-}
-
 func Charset(charset string) Option {
 	return func(o *Options) {
 		o.Charset = charset
