@@ -19,17 +19,20 @@ type context struct {
 
 type Conversation struct {
 	done     chan int
+	ID       string
 	Request  string
 	Response *http.ResponseWriter
 }
 
 func (ctx context) Add(c *Conversation) string {
-	id := uuid.NewV4()
+	if _, err := uuid.FromString(c.ID); err != nil {
+		c.ID = uuid.NewV4().String()
+	}
 	c.done = make(chan int)
 
-	ctx.pool[id.String()] = c
+	ctx.pool[c.ID] = c
 
-	return id.String()
+	return c.ID
 }
 
 func (ctx context) Get(id string) *Conversation {
