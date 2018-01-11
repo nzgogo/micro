@@ -1,10 +1,16 @@
 package db
 
-import "time"
+import (
+	"time"
+	"net/http"
+)
 
 type Options struct {
+	Dialects		string //suppport mypath and yet more coming...
 	Username        string
 	Password        string
+	Protocol		string
+	Address			string
 	DBName          string
 	Charset         string
 	ParseTime       bool
@@ -15,6 +21,24 @@ type Options struct {
 }
 
 type Option func(*Options)
+
+func Dialects(dialects string) Option {
+	return func(o *Options){
+		o.Dialects = dialects
+	}
+}
+
+func Protocol(p string) Option {
+	return func(o *Options) {
+		o.Protocol = p
+	}
+}
+
+func Address(addr string) Option {
+	return func(o *Options) {
+		o.Address = addr
+	}
+}
 
 func Charset(charset string) Option {
 	return func(o *Options) {
