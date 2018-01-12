@@ -40,7 +40,7 @@ type Service struct {
 }
 
 type Node struct {
-	Id string `json:"id"`
+	ID string `json:"id"`
 	//Address  string            `json:"address"`
 	//Port     int               `json:"port"`
 }
@@ -112,14 +112,14 @@ func (r *registry) Register(s *Service) error {
 
 	// get existing hash
 	r.Lock()
-	v, ok := r.register[s.Nodes[0].Id]
+	v, ok := r.register[s.Nodes[0].ID]
 	r.Unlock()
 
 	// if it's already registered and matches then just pass the check
 	if ok && v == h {
 		//// if the err is nil we're all good, bail out
 		//// if not, we don't know what the state is, so full re-register
-		//if err := r.Client.Agent().PassTTL("service:"+node.Id, ""); err == nil {
+		//if err := r.Client.Agent().PassTTL("service:"+node.ID, ""); err == nil {
 		return nil
 		//}
 	}
@@ -137,7 +137,7 @@ func (r *registry) Register(s *Service) error {
 
 	// register the service
 	if err := r.Conn.Agent().ServiceRegister(&consul.AgentServiceRegistration{
-		ID:   node.Id,
+		ID:   node.ID,
 		Name: s.Name,
 		Tags: tags,
 		//Port:    node.Port,
@@ -149,7 +149,7 @@ func (r *registry) Register(s *Service) error {
 
 	// save our hash of the service
 	r.Lock()
-	r.register[s.Nodes[0].Id] = h
+	r.register[s.Nodes[0].ID] = h
 	r.Unlock()
 
 	return nil
@@ -167,7 +167,7 @@ func (r *registry) Deregister(s *Service) error {
 	r.Unlock()
 
 	node := s.Nodes[0]
-	return r.Conn.Agent().ServiceDeregister(node.Id)
+	return r.Conn.Agent().ServiceDeregister(node.ID)
 }
 
 func (r *registry) GetService(name string) ([]*Service, error) {
@@ -219,7 +219,7 @@ func (r *registry) GetService(name string) ([]*Service, error) {
 		}
 
 		svc.Nodes = append(svc.Nodes, &Node{
-			Id: id,
+			ID: id,
 			//Address:  address,
 			//Port:     s.Service.Port,
 		})

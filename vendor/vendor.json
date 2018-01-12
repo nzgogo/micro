@@ -3,10 +3,50 @@
 	"ignore": "test",
 	"package": [
 		{
+			"checksumSHA1": "bmg4kBp5Lyw7itBV3S8ElfkjmYY=",
+			"path": "github.com/hashicorp/consul/api",
+			"revision": "b73ad8b68e5052fd7795c3d89dc7c6ebfb30a23c",
+			"revisionTime": "2017-12-21T03:54:49Z"
+		},
+		{
+			"checksumSHA1": "YAq1rqZIp+M74Q+jMBQkkMKm3VM=",
+			"origin": "github.com/hashicorp/consul/vendor/github.com/hashicorp/go-cleanhttp",
+			"path": "github.com/hashicorp/go-cleanhttp",
+			"revision": "b73ad8b68e5052fd7795c3d89dc7c6ebfb30a23c",
+			"revisionTime": "2017-12-21T03:54:49Z"
+		},
+		{
+			"checksumSHA1": "A1PcINvF3UiwHRKn8UcgARgvGRs=",
+			"origin": "github.com/hashicorp/consul/vendor/github.com/hashicorp/go-rootcerts",
+			"path": "github.com/hashicorp/go-rootcerts",
+			"revision": "b73ad8b68e5052fd7795c3d89dc7c6ebfb30a23c",
+			"revisionTime": "2017-12-21T03:54:49Z"
+		},
+		{
+			"checksumSHA1": "mS15CkImPzXYsgNwl3Mt9Gh3Vb0=",
+			"origin": "github.com/hashicorp/consul/vendor/github.com/hashicorp/serf/coordinate",
+			"path": "github.com/hashicorp/serf/coordinate",
+			"revision": "b73ad8b68e5052fd7795c3d89dc7c6ebfb30a23c",
+			"revisionTime": "2017-12-21T03:54:49Z"
+		},
+		{
 			"checksumSHA1": "t1X5uFE3zdGP5ZODYVE9CgAL7KI=",
 			"path": "github.com/json-iterator/go",
 			"revision": "13f86432b882000a51c6e610c620974462691a97",
 			"revisionTime": "2017-12-12T10:52:41Z"
+		},
+		{
+			"checksumSHA1": "V/quM7+em2ByJbWBLOsEwnY3j/Q=",
+			"origin": "github.com/hashicorp/consul/vendor/github.com/mitchellh/go-homedir",
+			"path": "github.com/mitchellh/go-homedir",
+			"revision": "b73ad8b68e5052fd7795c3d89dc7c6ebfb30a23c",
+			"revisionTime": "2017-12-21T03:54:49Z"
+		},
+		{
+			"checksumSHA1": "tWUjKyFOGJtYExocPWVYiXBYsfE=",
+			"path": "github.com/mitchellh/hashstructure",
+			"revision": "2bca23e0e452137f789efbc8610126fd8b94f73b",
+			"revisionTime": "2017-06-09T04:59:27Z"
 		},
 		{
 			"checksumSHA1": "lp3JKfbdvC6862l/XFR1Vky1X6w=",
@@ -31,6 +71,18 @@
 			"path": "github.com/nats-io/nuid",
 			"revision": "33c603157d6fd1b0ac2599bcc4a286b36479a06d",
 			"revisionTime": "2017-10-25T20:31:29Z"
+		},
+		{
+			"checksumSHA1": "zmC8/3V4ls53DJlNTKDZwPSC/dA=",
+			"path": "github.com/satori/go.uuid",
+			"revision": "5bf94b69c6b68ee1b541973bb8e1144db23a194b",
+			"revisionTime": "2017-03-21T23:07:31Z"
+		},
+		{
+			"checksumSHA1": "GtamqiJoL7PGHsN454AoffBFMa8=",
+			"path": "golang.org/x/net/context",
+			"revision": "d866cfc389cec985d6fda2859936a575a55a3ab6",
+			"revisionTime": "2017-12-11T20:45:21Z"
 		}
 	],
 	"rootPath": "micro"

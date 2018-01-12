@@ -2,11 +2,10 @@ package gogo
 
 import (
 	"micro/codec"
+	"micro/context"
 	"micro/registry"
 	"micro/router"
 	"micro/transport"
-
-	"context"
 )
 
 // Options of a service
@@ -15,21 +14,19 @@ type Options struct {
 	Transport transport.Transport
 	Registry  registry.Registry
 	Router    router.Router
+	Context   context.Context
 
 	//wrappers
 	HdlrWrappers []HandlerWrapper
 	//HttpHdlrWrappers []HttpHandlerWrapper
-
-	// Other options for implementations of the interface
-	// can be stored in a context
-	Context context.Context
 }
 
 type Option func(*Options)
 
 func newOptions(opts ...Option) Options {
 	opt := Options{
-		Codec: codec.NewCodec(),
+		Codec:   codec.NewCodec(),
+		Context: context.NewContext(),
 	}
 
 	for _, o := range opts {
@@ -68,6 +65,12 @@ func Registry(r registry.Registry) Option {
 func Router(r router.Router) Option {
 	return func(o *Options) {
 		o.Router = r
+	}
+}
+
+func Context(c context.Context) Option {
+	return func(o *Options) {
+		o.Context = c
 	}
 }
 
