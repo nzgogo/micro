@@ -2,7 +2,8 @@ package transport
 
 import (
 	"time"
-	//"github.com/nats-io/go-nats"
+
+	"github.com/nats-io/go-nats"
 )
 
 type Options struct {
@@ -12,6 +13,7 @@ type Options struct {
 	Timeout time.Duration
 
 	//SubscribeHdler nats.MsgHandler
+	Handler nats.MsgHandler
 }
 
 type Option func(*Options)
@@ -34,5 +36,11 @@ func Addrs(addrs ...string) Option {
 func Timeout(t time.Duration) Option {
 	return func(o *Options) {
 		o.Timeout = t
+	}
+}
+
+func Handler(h nats.MsgHandler) Option {
+	return func(o *Options) {
+		o.Handler = h
 	}
 }

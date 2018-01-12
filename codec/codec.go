@@ -49,7 +49,7 @@ type Message struct {
 	Host       string              `json:"host,omitempty"`
 	Scheme     string              `json:"scheme"`
 	StatusCode int                 `json:"statusCode"`
-	Node       []byte              `json:"node,omitempty"`
+	Node       string              `json:"node,omitempty"`
 	Header     map[string][]string `json:"header"`
 	Get        map[string]*Pair    `json:"get,omitempty"`
 	Post       map[string]*Pair    `json:"post,omitempty"`

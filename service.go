@@ -2,7 +2,6 @@ package gogo
 
 import (
 	"fmt"
-	"micro/codec"
 	"micro/registry"
 	"micro/router"
 	"micro/transport"
@@ -11,17 +10,13 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/nats-io/go-nats"
 	"github.com/satori/go.uuid"
 )
 
 type Service interface {
 	Options() Options
 	Init(...Option) error
-	Start() error
-	Stop() error
 	Run() error
-	Close()
 }
 
 type service struct {
@@ -46,116 +41,11 @@ func (s *service) Init(opts ...Option) error {
 	if err := s.opts.Registry.Init(); err != nil {
 		return err
 	}
-	if s.opts.Router == nil {
-		return nil
-	}
-	if err := s.opts.Router.Init(router.Client(s.opts.Registry.Client())); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (s *service) Register() error {
-	config := s.Options()
-	// register service
-	node := &registry.Node{
-		Id: s.id,
-	}
-
-	service := &registry.Service{
-		Name:    s.name,
-		Version: s.version,
-		Nodes:   []*registry.Node{node},
-	}
-
-	if err := config.Registry.Register(service); err != nil {
-		return err
-	}
-
-	if config.Router == nil {
-		return nil
-	}
-	if err := config.Router.Register(config.Router.String()); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (s *service) Deregister() error {
-	config := s.Options()
-
-	node := &registry.Node{
-		Id: s.id,
-	}
-
-	service := &registry.Service{
-		Name:    s.name,
-		Version: s.version,
-		Nodes:   []*registry.Node{node},
-	}
-
-	fmt.Printf("Deregistering node: %s", node.Id)
-	if err := config.Registry.Deregister(service); err != nil {
-		return err
-	}
-
-	if config.Router == nil {
-		return nil
-	}
-	//delete all service kv
-	if err := config.Router.Deregister(config.Router.String()); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (s *service) Start() error {
-	if err := s.Register(); err != nil {
-		return err
-	}
-
-	tc := s.Options().Transport
-	if err := tc.Subscribe(func(nMsg *nats.Msg) {
-		message := &codec.Message{}
-		s.opts.Codec.Unmarshal(nMsg.Data, message)
-		message.ReplyTo = nMsg.Reply
-		handler, err1 := s.opts.Router.Dispatch(message)
-		if err1 != nil || handler == nil {
-			resp, _ := s.opts.Codec.Marshal(codec.Message{
-				StatusCode: 404,
-				Header:     make(map[string][]string, 0),
-				Body:       "Page not found",
-			})
-			tc.Publish(nMsg.Reply, resp)
-		}
-		err2 := handler(message, tc)
-		if err2 != nil {
-			resp, _ := s.opts.Codec.Marshal(codec.Message{
-				StatusCode: 500,
-				Header:     make(map[string][]string, 0),
-				Body:       "Internal Server Error",
-			})
-			tc.Publish(nMsg.Reply, resp)
-		}
-
-	}); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (s *service) Stop() error {
-	if err := s.Deregister(); err != nil {
-		return err
-	}
-
 	return nil
 }
 
 func (s *service) Run() error {
-	if err := s.Start(); err != nil {
+	if err := s.start(); err != nil {
 		return err
 	}
 
@@ -169,14 +59,103 @@ func (s *service) Run() error {
 		//case <-s.opts.Context.Done():
 	}
 
-	if err := s.Stop(); err != nil {
+	if err := s.stop(); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (s *service) Close() {
+func (s *service) start() error {
+	if err := s.register(); err != nil {
+		return err
+	}
+	tc := s.Options().Transport
+
+	// Example MsgHandler
+	// func(nMsg *nats.Msg) {
+	// 	message := &codec.Message{}
+	// 	s.opts.Codec.Unmarshal(nMsg.Data, message)
+	// 	message.ReplyTo = s.name + "." + s.version + "." + s.id
+	// 	handler, routerErr := s.opts.Router.Dispatch(message)
+	// 	if routerErr != nil {
+	// 		resp, _ := s.opts.Codec.Marshal(codec.Message{
+	// 			StatusCode: 404,
+	// 			Header:     make(map[string][]string, 0),
+	// 			Body:       "Page not found",
+	// 		})
+	// 		tc.Publish(nMsg.Reply, resp)
+	// 	}
+	// 	go handler(message, tc)
+	// }
+	if err := tc.Subscribe(s.opts.Transport.Options().Handler); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *service) stop() error {
+	if err := s.deregister(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *service) register() error {
+	config := s.Options()
+	// register service
+	node := &registry.Node{
+		ID: s.id,
+	}
+
+	service := &registry.Service{
+		Name:    s.name,
+		Version: s.version,
+		Nodes:   []*registry.Node{node},
+	}
+
+	if config.Router != nil {
+		if err := config.Router.Register(); err != nil {
+			return err
+		}
+	}
+
+	if err := config.Registry.Register(service); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *service) deregister() error {
+	config := s.Options()
+
+	node := &registry.Node{
+		ID: s.id,
+	}
+
+	service := &registry.Service{
+		Name:    s.name,
+		Version: s.version,
+		Nodes:   []*registry.Node{node},
+	}
+
+	fmt.Printf("Deregistering node: %s", node.ID)
+	if err := config.Registry.Deregister(service); err != nil {
+		return err
+	}
+
+	if config.Router == nil {
+		return nil
+	}
+	//delete all service kv
+	if err := config.Router.Deregister(); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func NewService(n string, v string) *service {
@@ -194,16 +173,22 @@ func NewService(n string, v string) *service {
 
 	parseFlags()
 
-	t := transport.NewTransport(
+	trans := transport.NewTransport(
 		transport.Subject(s.name+"."+s.version+"."+s.id),
 		transport.Addrs(*transportFlags["nats_addr"]),
 	)
 
-	r := registry.NewRegistry(registry.Addrs(*registryFlags["consul_addr"]))
+	reg := registry.NewRegistry(registry.Addrs(*registryFlags["consul_addr"]))
+
+	router := router.NewRouter(
+		router.Name(strings.Replace(n, ".", "/", -1)+"/"+v),
+		router.Client(reg.Client()),
+	)
 
 	s.opts = newOptions(
-		Transport(t),
-		Registry(r),
+		Transport(trans),
+		Registry(reg),
+		Router(router),
 	)
 	return s
 }
