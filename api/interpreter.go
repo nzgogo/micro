@@ -5,9 +5,8 @@ package gogoapi
 import (
 	"bytes"
 	"errors"
+	"github.com/nzgogo/micro/codec"
 	"net/http"
-	//"github.com/nzgogo/micro/codec"
-	"micro/codec"
 )
 
 // NewRequestFromHTTP creates the Request struct from regular *http.Request by serialization of main parts of it.

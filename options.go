@@ -1,11 +1,11 @@
 package gogo
 
 import (
-	"micro/codec"
-	"micro/context"
-	"micro/registry"
-	"micro/router"
-	"micro/transport"
+	"github.com/nzgogo/micro/codec"
+	"github.com/nzgogo/micro/context"
+	"github.com/nzgogo/micro/registry"
+	"github.com/nzgogo/micro/router"
+	"github.com/nzgogo/micro/transport"
 )
 
 // Options of a service

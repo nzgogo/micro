@@ -3,8 +3,7 @@ package selector
 import (
 	"testing"
 
-	"micro/registry"
-	//"github.com/nzgogo/micro/registry"
+	"github.com/nzgogo/micro/registry"
 )
 
 func TestStrategies(t *testing.T) {
@@ -14,10 +13,10 @@ func TestStrategies(t *testing.T) {
 			Version: "latest",
 			Nodes: []*registry.Node{
 				&registry.Node{
-					Id:      "test1-1",
+					ID: "test1-1",
 				},
 				&registry.Node{
-					Id:      "test1-2",
+					ID: "test1-2",
 				},
 			},
 		},
@@ -26,10 +25,10 @@ func TestStrategies(t *testing.T) {
 			Version: "default",
 			Nodes: []*registry.Node{
 				&registry.Node{
-					Id:      "test1-3",
+					ID: "test1-3",
 				},
 				&registry.Node{
-					Id:      "test1-4",
+					ID: "test1-4",
 				},
 			},
 		},
@@ -44,7 +43,7 @@ func TestStrategies(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			counts[node.Id]++
+			counts[node.ID]++
 		}
 
 		t.Logf("%s: %+v\n", name, counts)

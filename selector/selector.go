@@ -2,8 +2,7 @@ package selector
 
 import (
 	"errors"
-	"micro/registry"
-	//"github.com/nzgogo/micro/registry"
+	"github.com/nzgogo/micro/registry"
 )
 
 type Selector interface {
@@ -88,7 +87,7 @@ func (r *selector) Select(service, version string) (string, error) {
 		return "", err
 	}
 
-	return service + "." + version + "." + node.Id, nil
+	return service + "." + version + "." + node.ID, nil
 }
 
 func (r *selector) Mark(service string, node *registry.Node, err error) {

@@ -35,11 +35,11 @@ go run srv/server.go
 ## API
 
 Micro logically separates API services from backend services. By default the micro API
-accepts HTTP requests and converts to *codec.Request and *codec.Response types. Find them here [micro/api/proto](https://github.com/nzgogo/micro/codec).
+accepts HTTP requests and converts to *codec.Request and *codec.Response types.
 
 Run the micro.api.greeter API Service
 ```shell
-go run api/api.go 
+go run api/api.go
 ```
 
 ## Call greeter service
