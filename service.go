@@ -160,7 +160,8 @@ func (s *service) deregister() error {
 }
 
 func NewService(n string, v string) *service {
-	id := strings.Replace(uuid.NewV4().String(), "-", "", -1)
+	newUUID, _ := uuid.NewV4()
+	id := strings.Replace(newUUID.String(), "-", "", -1)
 
 	s := &service{
 		name:    n,

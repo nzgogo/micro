@@ -75,8 +75,8 @@
 		{
 			"checksumSHA1": "oK/Zd/38ujsmkP4rU9fU8JAjFCU=",
 			"path": "github.com/nzgogo/micro",
-			"revision": "21e12d5dfa4ab7540d358d74f969eb13fdf47732",
-			"revisionTime": "2018-01-13T01:21:15Z",
+			"revision": "5274c4add5d6190a97764b3584d7bbc47d4cef8b",
+			"revisionTime": "2018-01-13T01:22:25Z",
 			"version": "async",
 			"versionExact": "async"
 		},
@@ -121,10 +121,10 @@
 			"versionExact": "async"
 		},
 		{
-			"checksumSHA1": "zmC8/3V4ls53DJlNTKDZwPSC/dA=",
+			"checksumSHA1": "eDQ6f1EsNf+frcRO/9XukSEchm8=",
 			"path": "github.com/satori/go.uuid",
-			"revision": "5bf94b69c6b68ee1b541973bb8e1144db23a194b",
-			"revisionTime": "2017-03-21T23:07:31Z"
+			"revision": "36e9d2ebbde5e3f13ab2e25625fd453271d6522e",
+			"revisionTime": "2018-01-03T17:44:51Z"
 		},
 		{
 			"checksumSHA1": "GtamqiJoL7PGHsN454AoffBFMa8=",
