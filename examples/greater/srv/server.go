@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	micro "github.com/nzgogo/micro"
+	"github.com/nzgogo/micro"
 	"github.com/nzgogo/micro/codec"
 	"github.com/nzgogo/micro/router"
 	"github.com/nzgogo/micro/transport"
@@ -56,11 +56,11 @@ func main() {
 		Handler: Hello,
 	})
 
-	service := micro.NewService(
+	service := gogo.NewService(
 		"gogox.core.greeter",
 		"v1",
 	)
-	if err := service.Init(micro.Router(route)); err != nil {
+	if err := service.Init(gogo.Router(route)); err != nil {
 		log.Fatal(err)
 	}
 
