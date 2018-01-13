@@ -2,13 +2,14 @@ package gogo
 
 import (
 	"fmt"
-	"micro/registry"
-	"micro/router"
-	"micro/transport"
 	"os"
 	"os/signal"
 	"strings"
 	"syscall"
+
+	"github.com/nzgogo/micro/registry"
+	"github.com/nzgogo/micro/router"
+	"github.com/nzgogo/micro/transport"
 
 	"github.com/satori/go.uuid"
 )

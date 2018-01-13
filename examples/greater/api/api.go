@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"log"
 	micro "micro"
-	"micro/api"
-	"micro/router"
-	"micro/selector"
+	"github.com/nzgogo/micro/api"
+	"github.com/nzgogo/micro/router"
+	"github.com/nzgogo/micro/selector"
 	"net/http"
 )
 

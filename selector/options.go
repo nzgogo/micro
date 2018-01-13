@@ -1,8 +1,7 @@
 package selector
 
 import (
-	"micro/registry"
-	//"github.com/nzgogo/micro/registry"
+	"github.com/nzgogo/micro/registry"
 )
 
 type Options struct {

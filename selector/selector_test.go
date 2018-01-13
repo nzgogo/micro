@@ -1,14 +1,14 @@
 package selector
 
 import (
-	"testing"
+	"github.com/nzgogo/micro/registry"
 	"net"
 	"net/http"
-	registry "micro/registry"
-	"os/exec"
-	"time"
-	"strconv"
 	"os"
+	"os/exec"
+	"strconv"
+	"testing"
+	"time"
 )
 
 type mockRegistry struct {
@@ -36,16 +36,16 @@ func newNode(id string) *registry.Node {
 }
 
 func runConsulAgent() {
-	cmd:=exec.Command("consul","agent","-dev")
+	cmd := exec.Command("consul", "agent", "-dev")
 	err := cmd.Start()
 	if err != nil {
 		panic(err.Error())
 	}
 }
 
-func stopConsulAgent(){
+func stopConsulAgent() {
 	cmd := "echo $(ps cax | grep consul | grep -o '^[ ]*[0-9]*')"
-	out, err :=exec.Command("bash","-c",cmd).Output()
+	out, err := exec.Command("bash", "-c", cmd).Output()
 	if err != nil {
 		panic(err.Error())
 	}
@@ -64,7 +64,7 @@ func stopConsulAgent(){
 	}
 }
 
-func TestSelector(t *testing.T){
+func TestSelector(t *testing.T) {
 	//setup a consul agent
 	{
 		runConsulAgent()
@@ -90,8 +90,8 @@ func TestSelector(t *testing.T){
 
 		r := &mockRegistry{
 			status: 200,
-			body: []byte("Fuck off. I am retired, don't ask me to do a damn thing!"),
-			url: "/v1/health/service/service-name",
+			body:   []byte("Fuck off. I am retired, don't ask me to do a damn thing!"),
+			url:    "/v1/health/service/service-name",
 		}
 
 		//run three servers
@@ -110,8 +110,8 @@ func TestSelector(t *testing.T){
 		}
 
 		err = client.Register(&registry.Service{
-			Name: "gogo.core.api",
-			Version : "v-0.1",
+			Name:    "gogo.core.api",
+			Version: "v-0.1",
 			Nodes: []*registry.Node{
 				newNode("123"),
 			},
@@ -121,8 +121,8 @@ func TestSelector(t *testing.T){
 		}
 
 		err = client.Register(&registry.Service{
-			Name: "gogo.core.api",
-			Version : "v-0.2",
+			Name:    "gogo.core.api",
+			Version: "v-0.2",
 			Nodes: []*registry.Node{
 				newNode("456"),
 			},
@@ -132,8 +132,8 @@ func TestSelector(t *testing.T){
 		}
 
 		err = client.Register(&registry.Service{
-			Name: "porn",
-			Version : "v-0.1",
+			Name:    "porn",
+			Version: "v-0.1",
 			Nodes: []*registry.Node{
 				newNode("789"),
 			},
@@ -150,7 +150,7 @@ func TestSelector(t *testing.T){
 		if err != nil {
 			t.Fatalf("NewSelector init failed. error: %v", err)
 		}
-		subject, err := slt.Select("gogo.core.api","v-0.1")
+		subject, err := slt.Select("gogo.core.api", "v-0.1")
 		if err != nil {
 			t.Fatalf("Selector failed. error: %v", err)
 		}

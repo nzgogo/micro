@@ -1,7 +1,7 @@
 package router
 
 import (
-	"micro/codec"
+	"github.com/nzgogo/micro/codec"
 
 	"github.com/hashicorp/consul/api"
 )

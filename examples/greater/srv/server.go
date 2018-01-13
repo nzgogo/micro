@@ -3,9 +3,9 @@ package main
 import (
 	"log"
 	micro "micro"
-	"micro/codec"
-	"micro/router"
-	"micro/transport"
+	"github.com/nzgogo/micro/codec"
+	"github.com/nzgogo/micro/router"
+	"github.com/nzgogo/micro/transport"
 )
 
 var (

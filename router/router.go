@@ -4,8 +4,8 @@ import (
 	"errors"
 	"strings"
 
-	"micro/codec"
-	"micro/transport"
+	"github.com/nzgogo/micro/codec"
+	"github.com/nzgogo/micro/transport"
 
 	"github.com/hashicorp/consul/api"
 )
