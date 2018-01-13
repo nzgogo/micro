@@ -17,6 +17,7 @@ type Transport interface {
 	Request(string, []byte, ResponseHandler) error
 	Publish(string, []byte) error
 	Subscribe(nats.MsgHandler) error
+	SetHandler(nats.MsgHandler)
 	Close() error
 }
 
@@ -81,6 +82,10 @@ func (n *transport) Subscribe(subscribeHdler nats.MsgHandler) error {
 	var err error
 	n.sub, err = n.conn.Subscribe(n.opts.Subject, subscribeHdler)
 	return err
+}
+
+func (n *transport) SetHandler(handler nats.MsgHandler) {
+	n.opts.Handler = handler
 }
 
 func (n *transport) Close() error {
