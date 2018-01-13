@@ -2,9 +2,10 @@ package selector
 
 import (
 	"math/rand"
-	"github.com/nzgogo/micro/registry"
 	"sync"
 	"time"
+
+	"github.com/nzgogo/micro/registry"
 )
 
 func init() {
