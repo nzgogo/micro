@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"log"
 	micro "micro"
-	"github.com/nzgogo/micro/api"
+	"net/http"
+
 	"github.com/nzgogo/micro/router"
 	"github.com/nzgogo/micro/selector"
-	"net/http"
 )
 
 type MyHandler struct {
