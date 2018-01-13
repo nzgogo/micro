@@ -3,16 +3,17 @@ package main
 import (
 	"fmt"
 	"log"
-	micro "micro"
 	"net/http"
 
+	"github.com/nzgogo/micro"
+	"github.com/nzgogo/micro/api"
 	"github.com/nzgogo/micro/context"
 	"github.com/nzgogo/micro/router"
 	"github.com/nzgogo/micro/selector"
 )
 
 type MyHandler struct {
-	srv micro.Service
+	srv gogo.Service
 }
 
 func (h *MyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -34,7 +35,7 @@ func (h *MyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 	var response = gogoapi.NewResponse()
 
-	srvName := micro.URLToIntnlTrans(request.Host, request.Path)
+	srvName := gogo.URLToIntnlTrans(request.Host, request.Path)
 	fmt.Println("Dispatch to server: " + srvName)
 
 	//service discovery
@@ -74,12 +75,12 @@ func (h *MyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 func main() {
 	route := router.NewRouter(router.Name("gogox/v1/api"))
 
-	service := micro.NewService(
+	service := gogo.NewService(
 		"gogox.core.api",
 		"v1",
 	)
 
-	if err := service.Init(micro.Router(route)); err != nil {
+	if err := service.Init(gogo.Router(route)); err != nil {
 		log.Fatal(err)
 	}
 
