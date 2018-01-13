@@ -180,7 +180,9 @@ func NewService(n string, v string) *service {
 		transport.Addrs(*transportFlags["nats_addr"]),
 	)
 
-	reg := registry.NewRegistry(registry.Addrs(*registryFlags["consul_addr"]))
+	reg := registry.NewRegistry(
+		registry.Addrs(*registryFlags["consul_addr"]),
+	)
 
 	router := router.NewRouter(
 		router.Name(strings.Replace(n, ".", "/", -1)+"/"+v),
