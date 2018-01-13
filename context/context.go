@@ -26,7 +26,8 @@ type Conversation struct {
 
 func (ctx context) Add(c *Conversation) string {
 	if _, err := uuid.FromString(c.ID); err != nil {
-		c.ID = uuid.NewV4().String()
+		newUUID, _ := uuid.NewV4()
+		c.ID = newUUID.String()
 	}
 	c.done = make(chan int)
 
