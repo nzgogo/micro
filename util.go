@@ -16,5 +16,5 @@ func URLToIntnlTrans(host string, path string) string {
 	//subHost:=strings.Replace(host, "/", ".", -1)
 	str := strings.Split(path, "/")
 
-	return str[1]+".core."+str[3]
+	return str[1] + ".core." + str[3]
 }

@@ -2,7 +2,8 @@ package main
 
 import (
 	"log"
-	micro "micro"
+
+	micro "github.com/nzgogo/micro"
 	"github.com/nzgogo/micro/codec"
 	"github.com/nzgogo/micro/router"
 	"github.com/nzgogo/micro/transport"
@@ -49,9 +50,9 @@ func main() {
 	})
 
 	route.Add(&router.Node{
-		Method:"GET",
-		Path:"/hello",
-		ID: "/hello",
+		Method:  "GET",
+		Path:    "/hello",
+		ID:      "/hello",
 		Handler: Hello,
 	})
 

@@ -6,9 +6,9 @@ import (
 	micro "micro"
 	"net/http"
 
+	"github.com/nzgogo/micro/context"
 	"github.com/nzgogo/micro/router"
 	"github.com/nzgogo/micro/selector"
-	"github.com/nzgogo/micro/context"
 )
 
 type MyHandler struct {
@@ -17,9 +17,7 @@ type MyHandler struct {
 
 func (h *MyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	contxt := h.srv.Options().Context
-	contxt.Add(&context.Conversation{
-
-	})
+	contxt.Add(&context.Conversation{})
 
 	// map the HTTP request to internal transport request struct.
 	request, err := gogoapi.HTTPReqToNatsSReq(r)
