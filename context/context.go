@@ -4,12 +4,14 @@ import (
 	"net/http"
 
 	"github.com/satori/go.uuid"
+	"github.com/hashicorp/consul/agent/pool"
 )
 
 type Context interface {
 	Add(*Conversation) string
 	Get(string) *Conversation
-	Wait(string)
+	Delete (id string)
+Wait(string)
 	Done(string)
 }
 
@@ -24,7 +26,7 @@ type Conversation struct {
 	Response *http.ResponseWriter
 }
 
-func (ctx context) Add(c *Conversation) string {
+func (ctx *context) Add(c *Conversation) string {
 	if _, err := uuid.FromString(c.ID); err != nil {
 		newUUID, _ := uuid.NewV4()
 		c.ID = newUUID.String()
@@ -36,11 +38,11 @@ func (ctx context) Add(c *Conversation) string {
 	return c.ID
 }
 
-func (ctx context) Get(id string) *Conversation {
+func (ctx *context) Get(id string) *Conversation {
 	return ctx.pool[id]
 }
 
-func (ctx context) Wait(id string) {
+func (ctx *context) Wait(id string) {
 	select {
 	case sig := <-ctx.pool[id].done:
 		if sig == 1 {
@@ -49,12 +51,16 @@ func (ctx context) Wait(id string) {
 	}
 }
 
-func (ctx context) Done(id string) {
+func (ctx *context) Delete (id string) {
+	delete(ctx.pool, id)
+}
+
+func (ctx *context) Done(id string) {
 	ctx.pool[id].done <- 1
 }
 
 func NewContext() Context {
-	ctx := context{
+	ctx := &context{
 		pool: make(map[string]*Conversation),
 	}
 

@@ -13,7 +13,7 @@ import (
 type Handler func(*codec.Message, transport.Transport) error
 
 type Router interface {
-	Init(opts ...Option) error
+	//Init(opts ...Option) error
 	Add(*Node)
 	Dispatch(*codec.Message) (Handler, error)
 	HttpMatch(*codec.Message) error
@@ -40,19 +40,19 @@ var (
 	Codec               = codec.NewCodec()
 )
 
-func (r *router) Init(opts ...Option) error {
-	for _, o := range opts {
-		o(&r.opts)
-	}
-	if *r.opts.Client == (api.Client{}) {
-		var err error
-		r.opts.Client, err = api.NewClient(api.DefaultConfig())
-		if err != nil {
-			return err
-		}
-	}
-	return nil
-}
+//func (r *router) Init(opts ...Option) error {
+//	for _, o := range opts {
+//		o(&r.opts)
+//	}
+//	if *r.opts.Client == (api.Client{}) {
+//		var err error
+//		r.opts.Client, err = api.NewClient(api.DefaultConfig())
+//		if err != nil {
+//			return err
+//		}
+//	}
+//	return nil
+//}
 
 // Pack supported service into a node struct and add to routes
 func (r *router) Add(n *Node) {
@@ -126,9 +126,6 @@ func (r *router) HttpMatch(req *codec.Message) error {
 	}
 
 	if len(routes) == 0 || routes == nil {
-		if r.opts.notFound != nil {
-			return r.opts.notFound(req)
-		}
 		return ErrNotFound
 	}
 
@@ -184,7 +181,6 @@ func (r *router) splitPath(path string) (srvPath, subPath string, err error) {
 	return
 }
 
-//TODO may need to move this shit to somewhere else
 func (r *router) loadRemoteRoutes(key string) ([]*Node, error) {
 	routes := make([]*Node, 0)
 	kv := r.opts.Client.KV()
