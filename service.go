@@ -10,7 +10,6 @@ import (
 	"github.com/nzgogo/micro/registry"
 	"github.com/nzgogo/micro/router"
 	"github.com/nzgogo/micro/transport"
-
 	"github.com/satori/go.uuid"
 )
 
@@ -42,6 +41,7 @@ func (s *service) Init(opts ...Option) error {
 	if err := s.opts.Registry.Init(); err != nil {
 		return err
 	}
+
 	return nil
 }
 
@@ -73,22 +73,6 @@ func (s *service) start() error {
 	}
 	tc := s.Options().Transport
 
-	// Example MsgHandler
-	// func(nMsg *nats.Msg) {
-	// 	message := &codec.Message{}
-	// 	s.opts.Codec.Unmarshal(nMsg.Data, message)
-	// 	message.ReplyTo = s.name + "." + s.version + "." + s.id
-	// 	handler, routerErr := s.opts.Router.Dispatch(message)
-	// 	if routerErr != nil {
-	// 		resp, _ := s.opts.Codec.Marshal(codec.Message{
-	// 			StatusCode: 404,
-	// 			Header:     make(map[string][]string, 0),
-	// 			Body:       "Page not found",
-	// 		})
-	// 		tc.Publish(nMsg.Reply, resp)
-	// 	}
-	// 	go handler(message, tc)
-	// }
 	if err := tc.Subscribe(s.opts.Transport.Options().Handler); err != nil {
 		return err
 	}
