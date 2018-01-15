@@ -62,7 +62,9 @@ func (ctx *context) Delete(id string) {
 }
 
 func (ctx *context) Done(id string) {
+	mutex.Lock()
 	ctx.pool[id].done <- 1
+	mutex.Unlock()
 }
 
 func NewContext() Context {
