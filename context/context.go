@@ -4,13 +4,12 @@ import (
 	"net/http"
 
 	"github.com/satori/go.uuid"
-	//"github.com/hashicorp/consul/agent/pool"
 )
 
 type Context interface {
 	Add(*Conversation) string
 	Get(string) *Conversation
-	Delete (id string)
+	Delete(id string)
 	Wait(string)
 	Done(string)
 }
@@ -51,7 +50,7 @@ func (ctx *context) Wait(id string) {
 	}
 }
 
-func (ctx *context) Delete (id string) {
+func (ctx *context) Delete(id string) {
 	delete(ctx.pool, id)
 }
 

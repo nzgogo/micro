@@ -68,12 +68,11 @@ func main() {
 	})
 
 	route.Add(&router.Node{
-		Method:"GET",
-		Path:"/hello",
-		ID: "/hello",
+		Method:  "GET",
+		Path:    "/hello",
+		ID:      "/hello",
 		Handler: Hello,
 	})
-
 
 	// Run server
 	if err := service.Run(); err != nil {

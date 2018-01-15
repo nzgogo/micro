@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-
 	"github.com/nzgogo/micro/selector"
 	"github.com/nzgogo/micro/context"
 	"github.com/nzgogo/micro/api"
 	micro "github.com/nzgogo/micro"
 	"strings"
+
 )
 
 type MyHandler struct {
@@ -83,6 +83,7 @@ func main() {
 	service.Options().Transport.SetHandler(service.ApiHandler)
 
 	if err := service.Init(); err != nil {
+
 		log.Fatal(err)
 	}
 
