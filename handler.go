@@ -7,7 +7,6 @@ import (
 )
 
 func (s *service) ServerHandler(nMsg *nats.Msg) {
-	tc := s.Options().Transport
 	message := &codec.Message{}
 	codec.Unmarshal(nMsg.Data, message)
 	if message.Type == "request" {
@@ -20,12 +19,12 @@ func (s *service) ServerHandler(nMsg *nats.Msg) {
 				Header:     make(map[string][]string, 0),
 				Body:       routerErr.Error(),
 			})
-			tc.Publish(message.ReplyTo, resp)
+			s.opts.Transport.Publish(message.ReplyTo, resp)
 		}
-		go handler(message, tc)
+		go handler(message)
 	} else {
 		rpl := s.opts.Context.Get(message.Context).Request
-		tc.Publish(rpl, nMsg.Data)
+		s.opts.Transport.Publish(rpl, nMsg.Data)
 		s.opts.Context.Delete(message.Context)
 	}
 }
