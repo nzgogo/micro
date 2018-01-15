@@ -2,9 +2,12 @@ package context
 
 import (
 	"net/http"
+	"sync"
 
 	"github.com/satori/go.uuid"
 )
+
+var mutex sync.Mutex
 
 type Context interface {
 	Add(*Conversation) string
@@ -32,7 +35,9 @@ func (ctx *context) Add(c *Conversation) string {
 	}
 	c.done = make(chan int)
 
+	mutex.Lock()
 	ctx.pool[c.ID] = c
+	mutex.Unlock()
 
 	return c.ID
 }
@@ -51,7 +56,9 @@ func (ctx *context) Wait(id string) {
 }
 
 func (ctx *context) Delete(id string) {
+	mutex.Lock()
 	delete(ctx.pool, id)
+	mutex.Unlock()
 }
 
 func (ctx *context) Done(id string) {
