@@ -42,6 +42,12 @@ func (s *service) Init(opts ...Option) error {
 		return err
 	}
 
+	router := router.NewRouter(
+		router.Name(strings.Replace(s.name, "-", "/", -1)+"/"+s.version),
+		router.Client(s.opts.Registry.Client()),
+	)
+	s.opts.Router = router
+
 	return nil
 }
 
@@ -73,7 +79,7 @@ func (s *service) start() error {
 	}
 	tc := s.Options().Transport
 
-	if err := tc.Subscribe(s.opts.Transport.Options().Handler); err != nil {
+	if err := tc.Subscribe(); err != nil {
 		return err
 	}
 
@@ -160,7 +166,7 @@ func NewService(n string, v string) *service {
 	parseFlags()
 
 	trans := transport.NewTransport(
-		transport.Subject(s.name+"."+s.version+"."+s.id),
+		transport.Subject(strings.Replace(s.name,"-",".",-1)+"."+s.version+"."+s.id),
 		transport.Addrs(*transportFlags["nats_addr"]),
 	)
 
@@ -168,15 +174,9 @@ func NewService(n string, v string) *service {
 		registry.Addrs(*registryFlags["consul_addr"]),
 	)
 
-	router := router.NewRouter(
-		router.Name(strings.Replace(n, ".", "/", -1)+"/"+v),
-		router.Client(reg.Client()),
-	)
-
 	s.opts = newOptions(
 		Transport(trans),
 		Registry(reg),
-		Router(router),
 	)
 	return s
 }
