@@ -7,7 +7,7 @@ import (
 	"github.com/satori/go.uuid"
 )
 
-var mutex sync.Mutex
+var mutex = &sync.Mutex{}
 
 type Context interface {
 	Add(*Conversation) string
