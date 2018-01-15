@@ -16,7 +16,7 @@ type Transport interface {
 	Init() error
 	Request(string, []byte, ResponseHandler) error
 	Publish(string, []byte) error
-	Subscribe(nats.MsgHandler) error
+	Subscribe() error
 	SetHandler(nats.MsgHandler)
 	Close() error
 }
@@ -25,6 +25,8 @@ type transport struct {
 	conn *nats.Conn
 	sub  *nats.Subscription
 	opts Options
+	//SubscribeHdler nats.MsgHandler
+	handler nats.MsgHandler
 }
 
 type ResponseHandler func([]byte) error
@@ -75,17 +77,14 @@ func (n *transport) Publish(sub string, b []byte) error {
 	}
 }
 
-func (n *transport) Subscribe(subscribeHdler nats.MsgHandler) error {
-	if subscribeHdler == nil {
-		return nil
-	}
+func (n *transport) Subscribe() error {
 	var err error
-	n.sub, err = n.conn.Subscribe(n.opts.Subject, subscribeHdler)
+	n.sub, err = n.conn.Subscribe(n.opts.Subject, n.handler)
 	return err
 }
 
 func (n *transport) SetHandler(handler nats.MsgHandler) {
-	n.opts.Handler = handler
+	n.handler = handler
 }
 
 func (n *transport) Close() error {

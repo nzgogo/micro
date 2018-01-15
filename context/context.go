@@ -4,14 +4,14 @@ import (
 	"net/http"
 
 	"github.com/satori/go.uuid"
-	"github.com/hashicorp/consul/agent/pool"
+	//"github.com/hashicorp/consul/agent/pool"
 )
 
 type Context interface {
 	Add(*Conversation) string
 	Get(string) *Conversation
 	Delete (id string)
-Wait(string)
+	Wait(string)
 	Done(string)
 }
 
@@ -23,7 +23,7 @@ type Conversation struct {
 	done     chan int
 	ID       string
 	Request  string
-	Response *http.ResponseWriter
+	Response http.ResponseWriter
 }
 
 func (ctx *context) Add(c *Conversation) string {

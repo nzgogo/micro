@@ -11,13 +11,13 @@ import (
  	message := &codec.Message{}
  	s.opts.Codec.Unmarshal(nMsg.Data, message)
  	if message.Type == "request" {
-		message.ReplyTo = s.name + "." + s.version + "." + s.id
+		//message.ReplyTo = s.name + "." + s.version + "." + s.id
 		handler, routerErr := s.opts.Router.Dispatch(message)
 		if routerErr != nil {
 			resp, _ := s.opts.Codec.Marshal(codec.Message{
 				StatusCode: 404,
 				Header:     make(map[string][]string, 0),
-				Body:       "Page not found",
+				Body:       routerErr.Error(),
 			})
 			tc.Publish(message.ReplyTo, resp)
 		}
@@ -34,11 +34,11 @@ func (s *service)ApiHandler(nMsg *nats.Msg) {
 	message := &codec.Message{}
 	s.opts.Codec.Unmarshal(nMsg.Data, message)
 	ctx := s.opts.Context
+
 	r := ctx.Get(message.Context).Response
 
 	gogoapi.WriteResponse(r ,message)
 
 	ctx.Done(message.Context)
 	ctx.Delete(message.Context)
-
 }

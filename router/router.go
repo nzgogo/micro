@@ -8,12 +8,14 @@ import (
 	"github.com/nzgogo/micro/transport"
 
 	"github.com/hashicorp/consul/api"
+	"fmt"
+	"log"
 )
 
 type Handler func(*codec.Message, transport.Transport) error
 
 type Router interface {
-	//Init(opts ...Option) error
+	Init(opts ...Option) error
 	Add(*Node)
 	Dispatch(*codec.Message) (Handler, error)
 	HttpMatch(*codec.Message) error
@@ -40,19 +42,19 @@ var (
 	Codec               = codec.NewCodec()
 )
 
-//func (r *router) Init(opts ...Option) error {
-//	for _, o := range opts {
-//		o(&r.opts)
-//	}
-//	if *r.opts.Client == (api.Client{}) {
-//		var err error
-//		r.opts.Client, err = api.NewClient(api.DefaultConfig())
-//		if err != nil {
-//			return err
-//		}
-//	}
-//	return nil
-//}
+func (r *router) Init(opts ...Option) error {
+	for _, o := range opts {
+		o(&r.opts)
+	}
+	if *r.opts.Client == (api.Client{}) {
+		var err error
+		r.opts.Client, err = api.NewClient(api.DefaultConfig())
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
 
 // Pack supported service into a node struct and add to routes
 func (r *router) Add(n *Node) {
@@ -68,6 +70,11 @@ func (r *router) Add(n *Node) {
 // Put all nodes to consul key value store
 func (r *router) Register() error {
 	if len(r.routes) == 0 {
+		return nil
+	}
+
+	if r.opts.Client == nil {
+		log.Println("this is router client failure")
 		return nil
 	}
 
@@ -173,11 +180,11 @@ func (r *router) splitPath(path string) (srvPath, subPath string, err error) {
 	}
 
 	srvPath = "gogo/" + results[1] + "/" + results[2] + "/" + results[0]
-
+	fmt.Println("srvpath: "+srvPath)
 	for i := 3; i < len(results); i++ {
 		subPath += "/" + results[i]
 	}
-
+	fmt.Println("subpath: "+subPath)
 	return
 }
 

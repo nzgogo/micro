@@ -29,6 +29,7 @@ func HTTPReqToNatsSReq(req *http.Request) (*codec.Message, error) {
 
 	//TODO May need extract more data from http reqeust
 	request := &codec.Message{
+		Type:   "request",
 		Method: req.Method,
 		Path:   req.RequestURI,
 		Host:   req.Host,
@@ -38,13 +39,13 @@ func HTTPReqToNatsSReq(req *http.Request) (*codec.Message, error) {
 }
 
 // NewResponse creates blank initialized Response object.
-func NewResponse() *codec.Message {
-	return &codec.Message{
-		StatusCode: 200,
-		Header:     make(map[string][]string, 0),
-		Body:       "",
-	}
-}
+//func NewResponse() *codec.Message {
+//	return &codec.Message{
+//		StatusCode: 200,
+//		Header:     make(map[string][]string, 0),
+//		Body:       "",
+//	}
+//}
 
 func WriteResponse(rw http.ResponseWriter, response *codec.Message) {
 	// Copy headers
