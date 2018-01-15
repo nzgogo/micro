@@ -1,7 +1,6 @@
 package gogo
 
 import (
-	"github.com/nzgogo/micro/codec"
 	"github.com/nzgogo/micro/context"
 	"github.com/nzgogo/micro/registry"
 	"github.com/nzgogo/micro/router"
@@ -10,7 +9,6 @@ import (
 
 // Options of a service
 type Options struct {
-	Codec     codec.Codec
 	Transport transport.Transport
 	Registry  registry.Registry
 	Router    router.Router
@@ -25,7 +23,6 @@ type Option func(*Options)
 
 func newOptions(opts ...Option) Options {
 	opt := Options{
-		Codec:   codec.NewCodec(),
 		Context: context.NewContext(),
 	}
 
@@ -42,12 +39,6 @@ func newOptions(opts ...Option) Options {
 	}
 
 	return opt
-}
-
-func Codec(c codec.Codec) Option {
-	return func(o *Options) {
-		o.Codec = c
-	}
 }
 
 func Transport(t transport.Transport) Option {

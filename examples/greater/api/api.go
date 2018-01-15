@@ -8,6 +8,7 @@ import (
 
 	"github.com/nzgogo/micro"
 	"github.com/nzgogo/micro/api"
+	"github.com/nzgogo/micro/codec"
 	"github.com/nzgogo/micro/context"
 	"github.com/nzgogo/micro/selector"
 )
@@ -60,8 +61,7 @@ func (h *MyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	//transport
 	natsClient := h.srv.Options().Transport
 	request.ReplyTo = natsClient.Options().Subject
-	c := h.srv.Options().Codec
-	bytes, _ := c.Marshal(request)
+	bytes, _ := codec.Marshal(request)
 
 	respErr := natsClient.Publish(subj, bytes)
 

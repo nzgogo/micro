@@ -38,7 +38,6 @@ var (
 	ErrInvalidPath      = errors.New("Invalid path. Cannot process.")
 	ErrNotFound         = errors.New("Service not found")
 	ErrmethodNotAllowed = errors.New("Method not allowed")
-	Codec               = codec.NewCodec()
 )
 
 func (r *router) Init(opts ...Option) error {
@@ -85,7 +84,7 @@ func (r *router) Register() error {
 		}
 	}
 
-	value, err := Codec.Marshal(publicRoutes)
+	value, err := codec.Marshal(publicRoutes)
 	if err != nil {
 		return err
 	}
@@ -196,7 +195,7 @@ func (r *router) loadRemoteRoutes(key string) ([]*Node, error) {
 	}
 
 	if pair != nil {
-		if err := Codec.Unmarshal(pair.Value, &routes); err != nil {
+		if err := codec.Unmarshal(pair.Value, &routes); err != nil {
 			return nil, err
 		}
 		return routes, nil
