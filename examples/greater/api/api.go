@@ -4,21 +4,21 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"github.com/nzgogo/micro/selector"
-	"github.com/nzgogo/micro/context"
-	"github.com/nzgogo/micro/api"
-	micro "github.com/nzgogo/micro"
 	"strings"
 
+	"github.com/nzgogo/micro"
+	"github.com/nzgogo/micro/api"
+	"github.com/nzgogo/micro/context"
+	"github.com/nzgogo/micro/selector"
 )
 
 type MyHandler struct {
-	srv micro.Service
+	srv gogo.Service
 }
 
 func (h *MyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
-	fmt.Printf("http ResponseWriter; %v\n",w)
+	fmt.Printf("http ResponseWriter; %v\n", w)
 	// map the HTTP request to internal transport request message struct.
 	request, err := gogoapi.HTTPReqToNatsSReq(r)
 	if err != nil {
@@ -27,7 +27,7 @@ func (h *MyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 	contxt := h.srv.Options().Context
 	ctxId := contxt.Add(&context.Conversation{
-		Response:	w,
+		Response: w,
 	})
 	request.Context = ctxId
 
@@ -38,7 +38,7 @@ func (h *MyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	srvName := micro.URLToIntnlTrans(request.Host, request.Path)
+	srvName := gogo.URLToIntnlTrans(request.Host, request.Path)
 	fmt.Println("Dispatch to server: " + srvName)
 
 	//service discovery
@@ -56,15 +56,14 @@ func (h *MyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	fmt.Println("Found service: " + subj)
-	subj = strings.Replace(subj, "-",".",-1)
+	subj = strings.Replace(subj, "-", ".", -1)
 	//transport
 	natsClient := h.srv.Options().Transport
 	request.ReplyTo = natsClient.Options().Subject
 	c := h.srv.Options().Codec
 	bytes, _ := c.Marshal(request)
 
-
-	respErr := natsClient.Publish(subj,bytes)
+	respErr := natsClient.Publish(subj, bytes)
 
 	if respErr != nil {
 		fmt.Printf("failed to send message . error: %v", err)
@@ -75,7 +74,7 @@ func (h *MyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	service := micro.NewService(
+	service := gogo.NewService(
 		"gogo-core-api",
 		"v1",
 	)

@@ -1,8 +1,8 @@
 package db
 
 import (
-	"time"
 	"strconv"
+	"time"
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
@@ -11,7 +11,7 @@ import (
 type DB interface {
 	Options() Options
 	Connect() error
-	Close()	error
+	Close() error
 	DB() *gorm.DB
 }
 
@@ -21,9 +21,9 @@ type db struct {
 }
 
 var (
-	DefaultDialect		   = "mysql"
-	DefaultProtocol		   = "tcp"
-	DefaultAddress		   = "playground.cugybz6qn13l.ap-southeast-2.rds.amazonaws.com:3306"
+	DefaultDialect         = "mysql"
+	DefaultProtocol        = "tcp"
+	DefaultAddress         = "playground.cugybz6qn13l.ap-southeast-2.rds.amazonaws.com:3306"
 	DefaultCharset         = "utf8"
 	DefaultParseTime       = true
 	DefaultLoc             = "Local"
@@ -60,17 +60,17 @@ func (d db) Close() error {
 	return d.conn.Close()
 }
 
-func (d db) DB() *gorm.DB{
+func (d db) DB() *gorm.DB {
 	return d.conn
 }
 
 func NewDB(u, p, name string, opts ...Option) *db {
 	options := Options{
-		Dialects:		 DefaultDialect,
+		Dialects:        DefaultDialect,
 		Username:        u,
 		Password:        p,
-		Protocol:		 DefaultProtocol,
-		Address:		 DefaultAddress,
+		Protocol:        DefaultProtocol,
+		Address:         DefaultAddress,
 		DBName:          name,
 		Charset:         DefaultCharset,
 		ParseTime:       DefaultParseTime,

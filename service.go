@@ -166,7 +166,7 @@ func NewService(n string, v string) *service {
 	parseFlags()
 
 	trans := transport.NewTransport(
-		transport.Subject(strings.Replace(s.name,"-",".",-1)+"."+s.version+"."+s.id),
+		transport.Subject(strings.Replace(s.name, "-", ".", -1)+"."+s.version+"."+s.id),
 		transport.Addrs(*transportFlags["nats_addr"]),
 	)
 
