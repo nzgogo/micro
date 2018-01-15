@@ -101,50 +101,50 @@
 			"revisionTime": "2017-10-25T20:31:29Z"
 		},
 		{
-			"checksumSHA1": "tGypMG3gR1Cc08tgC4GH2tMo/eQ=",
+			"checksumSHA1": "+pFquW+RPaJ0lW5o+Vt2hIGxNV4=",
 			"path": "github.com/nzgogo/micro",
-			"revision": "b2078ff278a67609259676eae18f52607898d366",
-			"revisionTime": "2018-01-15T05:36:12Z",
+			"revision": "7bf0e9e5b13f3c3c557f94dd3e4bbe7aa1887860",
+			"revisionTime": "2018-01-15T05:45:56Z",
 			"version": "async",
 			"versionExact": "async"
 		},
 		{
 			"checksumSHA1": "3EQIEvzHr2fuovwS/aEryQRKQWY=",
 			"path": "github.com/nzgogo/micro/api",
-			"revision": "b2078ff278a67609259676eae18f52607898d366",
-			"revisionTime": "2018-01-15T05:36:12Z",
+			"revision": "7bf0e9e5b13f3c3c557f94dd3e4bbe7aa1887860",
+			"revisionTime": "2018-01-15T05:45:56Z",
 			"version": "async",
 			"versionExact": "async"
 		},
 		{
-			"checksumSHA1": "wpA3YpI4gYZWEHzXx9TRvx+8zZk=",
+			"checksumSHA1": "1ZAmK79hziI9cbi3Fgc2pc1owJQ=",
 			"path": "github.com/nzgogo/micro/codec",
-			"revision": "b2078ff278a67609259676eae18f52607898d366",
-			"revisionTime": "2018-01-15T05:36:12Z",
+			"revision": "7bf0e9e5b13f3c3c557f94dd3e4bbe7aa1887860",
+			"revisionTime": "2018-01-15T05:45:56Z",
 			"version": "async",
 			"versionExact": "async"
 		},
 		{
 			"checksumSHA1": "9xpv6g29ryRETD/rKHdRNWH1TnE=",
 			"path": "github.com/nzgogo/micro/context",
-			"revision": "b2078ff278a67609259676eae18f52607898d366",
-			"revisionTime": "2018-01-15T05:36:12Z",
+			"revision": "7bf0e9e5b13f3c3c557f94dd3e4bbe7aa1887860",
+			"revisionTime": "2018-01-15T05:45:56Z",
 			"version": "async",
 			"versionExact": "async"
 		},
 		{
 			"checksumSHA1": "L/oTXJ37rbAaJjqfMPCW3UFjQ/I=",
 			"path": "github.com/nzgogo/micro/registry",
-			"revision": "b2078ff278a67609259676eae18f52607898d366",
-			"revisionTime": "2018-01-15T05:36:12Z",
+			"revision": "7bf0e9e5b13f3c3c557f94dd3e4bbe7aa1887860",
+			"revisionTime": "2018-01-15T05:45:56Z",
 			"version": "async",
 			"versionExact": "async"
 		},
 		{
-			"checksumSHA1": "pjTPaT5VBEF8I0vT8B5xKD8bBUo=",
+			"checksumSHA1": "78q1gYrmi3HF2j01oWiwmSrM17E=",
 			"path": "github.com/nzgogo/micro/router",
-			"revision": "b2078ff278a67609259676eae18f52607898d366",
-			"revisionTime": "2018-01-15T05:36:12Z",
+			"revision": "7bf0e9e5b13f3c3c557f94dd3e4bbe7aa1887860",
+			"revisionTime": "2018-01-15T05:45:56Z",
 			"version": "async",
 			"versionExact": "async"
 		},
@@ -159,8 +159,8 @@
 		{
 			"checksumSHA1": "u3TKvVzaPqVZCT6uWURGudH5TCQ=",
 			"path": "github.com/nzgogo/micro/transport",
-			"revision": "b2078ff278a67609259676eae18f52607898d366",
-			"revisionTime": "2018-01-15T05:36:12Z",
+			"revision": "7bf0e9e5b13f3c3c557f94dd3e4bbe7aa1887860",
+			"revisionTime": "2018-01-15T05:45:56Z",
 			"version": "async",
 			"versionExact": "async"
 		},
