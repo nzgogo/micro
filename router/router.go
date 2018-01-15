@@ -8,10 +8,9 @@ import (
 
 	"github.com/hashicorp/consul/api"
 	"github.com/nzgogo/micro/codec"
-	"github.com/nzgogo/micro/transport"
 )
 
-type Handler func(*codec.Message, transport.Transport) error
+type Handler func(*codec.Message) error
 
 type Router interface {
 	Init(opts ...Option) error
