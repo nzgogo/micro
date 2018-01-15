@@ -4,12 +4,15 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/nzgogo/micro"
 	"github.com/nzgogo/micro/api"
 	"github.com/nzgogo/micro/codec"
 	"github.com/nzgogo/micro/context"
 	"github.com/nzgogo/micro/selector"
+	"os/signal"
+	"syscall"
 )
 
 type MyHandler struct {
@@ -17,8 +20,6 @@ type MyHandler struct {
 }
 
 func (h *MyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-
-	fmt.Printf("http ResponseWriter; %v\n", w)
 	// map the HTTP request to internal transport request message struct.
 	request, err := gogoapi.HTTPReqToNatsSReq(r)
 	if err != nil {
@@ -99,5 +100,22 @@ func main() {
 		Addr:    "127.0.0.1:8080",
 		Handler: &handler,
 	}
-	server.ListenAndServe()
+
+	go func() {
+		if err := server.ListenAndServe(); err != nil {
+			// cannot panic, because this probably is an intentional close
+			log.Printf("Httpserver: ListenAndServe() error: %s", err)
+		}
+	}()
+
+	ch := make(chan os.Signal, 1)
+	signal.Notify(ch, syscall.SIGTERM, syscall.SIGINT, syscall.SIGKILL)
+
+	select {
+	// wait on kill signal
+	case <-ch:
+		if err := server.Shutdown(nil); err != nil {
+			panic(err) // failure/timeout shutting down the server gracefully
+		}
+	}
 }
