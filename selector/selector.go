@@ -2,6 +2,7 @@ package selector
 
 import (
 	"errors"
+
 	"github.com/nzgogo/micro/registry"
 )
 
