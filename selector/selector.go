@@ -2,6 +2,7 @@ package selector
 
 import (
 	"errors"
+	"strings"
 
 	"github.com/nzgogo/micro/registry"
 )
@@ -88,7 +89,7 @@ func (r *selector) Select(service, version string) (string, error) {
 		return "", err
 	}
 
-	return service + "." + version + "." + node.ID, nil
+	return strings.Replace(service, "-", ".", -1) + "." + version + "." + node.ID, nil
 }
 
 func (r *selector) Mark(service string, node *registry.Node, err error) {
