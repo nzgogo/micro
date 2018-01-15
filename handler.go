@@ -9,13 +9,13 @@ import (
 func (s *service) ServerHandler(nMsg *nats.Msg) {
 	tc := s.Options().Transport
 	message := &codec.Message{}
-	s.opts.Codec.Unmarshal(nMsg.Data, message)
+	codec.Unmarshal(nMsg.Data, message)
 	if message.Type == "request" {
 		//message.ReplyTo = s.name + "." + s.version + "." + s.id
 
 		handler, routerErr := s.opts.Router.Dispatch(message)
 		if routerErr != nil {
-			resp, _ := s.opts.Codec.Marshal(codec.Message{
+			resp, _ := codec.Marshal(codec.Message{
 				StatusCode: 404,
 				Header:     make(map[string][]string, 0),
 				Body:       routerErr.Error(),
@@ -33,7 +33,7 @@ func (s *service) ServerHandler(nMsg *nats.Msg) {
 //Example MsgHandler
 func (s *service) ApiHandler(nMsg *nats.Msg) {
 	message := &codec.Message{}
-	s.opts.Codec.Unmarshal(nMsg.Data, message)
+	codec.Unmarshal(nMsg.Data, message)
 	ctx := s.opts.Context
 
 	r := ctx.Get(message.Context).Response
