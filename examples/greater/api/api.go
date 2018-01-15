@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"strings"
 
 	"github.com/nzgogo/micro"
 	"github.com/nzgogo/micro/api"
@@ -43,7 +42,10 @@ func (h *MyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Dispatch to server: " + srvName)
 
 	//service discovery
-	slt := selector.NewSelector(selector.Registry(h.srv.Options().Registry), selector.SetStrategy(selector.RoundRobin))
+	slt := selector.NewSelector(
+		selector.Registry(h.srv.Options().Registry),
+		selector.SetStrategy(selector.RoundRobin),
+	)
 	if err := slt.Init(); err != nil {
 		fmt.Printf("NewSelector init failed. error: %v", err)
 		http.Error(w, "Cannot process request", http.StatusInternalServerError)
@@ -57,7 +59,7 @@ func (h *MyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	fmt.Println("Found service: " + subj)
-	subj = strings.Replace(subj, "-", ".", -1)
+
 	//transport
 	natsClient := h.srv.Options().Transport
 	request.ReplyTo = natsClient.Options().Subject
