@@ -6,13 +6,14 @@ import (
 	"net/http"
 	"os"
 
+	"os/signal"
+	"syscall"
+
 	"github.com/nzgogo/micro"
 	"github.com/nzgogo/micro/api"
 	"github.com/nzgogo/micro/codec"
 	"github.com/nzgogo/micro/context"
 	"github.com/nzgogo/micro/selector"
-	"os/signal"
-	"syscall"
 )
 
 type MyHandler struct {
