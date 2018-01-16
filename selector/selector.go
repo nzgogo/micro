@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/nzgogo/micro/registry"
+	"strings"
 )
 
 type Selector interface {

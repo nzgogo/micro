@@ -25,6 +25,7 @@ func (s *server) ChangHenGe(req *codec.Message) error {
 	if err != nil {
 		return err
 	}
+	fmt.Println("Message received: " + req.ReplyTo)
 	return s.srv.Options().Transport.Publish(req.ReplyTo, resp)
 }
 
@@ -40,7 +41,7 @@ func (s *server) Hello(req *codec.Message) error {
 		return err
 	}
 
-	fmt.Println("hello idiot" + req.ReplyTo)
+	fmt.Println("Message received: " + req.ReplyTo)
 
 	return s.srv.Options().Transport.Publish(req.ReplyTo, resp)
 }
