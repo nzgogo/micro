@@ -7,8 +7,6 @@ import (
 	"github.com/satori/go.uuid"
 )
 
-var mutex sync.Mutex
-
 type Context interface {
 	Add(*Conversation) string
 	Get(string) *Conversation
@@ -18,6 +16,7 @@ type Context interface {
 }
 
 type context struct {
+	sync.Mutex
 	pool map[string]*Conversation
 }
 
@@ -29,8 +28,8 @@ type Conversation struct {
 }
 
 func (ctx *context) Add(c *Conversation) string {
-	defer mutex.Unlock()
-	mutex.Lock()
+	defer ctx.Unlock()
+	ctx.Lock()
 
 	if _, err := uuid.FromString(c.ID); err != nil {
 		newUUID, _ := uuid.NewV4()
@@ -44,8 +43,8 @@ func (ctx *context) Add(c *Conversation) string {
 }
 
 func (ctx *context) Get(id string) *Conversation {
-	defer mutex.Unlock()
-	mutex.Lock()
+	defer ctx.Unlock()
+	ctx.Lock()
 
 	return ctx.pool[id]
 }
@@ -60,15 +59,15 @@ func (ctx *context) Wait(id string) {
 }
 
 func (ctx *context) Delete(id string) {
-	defer mutex.Unlock()
-	mutex.Lock()
+	defer ctx.Unlock()
+	ctx.Lock()
 
 	delete(ctx.pool, id)
 }
 
 func (ctx *context) Done(id string) {
-	defer mutex.Unlock()
-	mutex.Lock()
+	defer ctx.Unlock()
+	ctx.Lock()
 
 	ctx.pool[id].done <- 1
 }
