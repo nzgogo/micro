@@ -16,8 +16,9 @@ type Context interface {
 }
 
 type context struct {
-	sync.RWMutex
-	pool map[string]*Conversation
+	// sync.RWMutex
+	// pool map[string]*Conversation
+	pool sync.Map
 }
 
 type Conversation struct {
@@ -28,8 +29,8 @@ type Conversation struct {
 }
 
 func (ctx *context) Add(c *Conversation) string {
-	defer ctx.Unlock()
-	ctx.Lock()
+	// defer ctx.Unlock()
+	// ctx.Lock()
 
 	if _, err := uuid.FromString(c.ID); err != nil {
 		newUUID, _ := uuid.NewV4()
@@ -37,24 +38,35 @@ func (ctx *context) Add(c *Conversation) string {
 	}
 	c.done = make(chan int)
 
-	ctx.pool[c.ID] = c
+	// ctx.pool[c.ID] = c
+	ctx.pool.Store(c.ID, c)
 
 	return c.ID
 }
 
 func (ctx *context) Get(id string) *Conversation {
-	defer ctx.Unlock()
-	ctx.Lock()
-
-	return ctx.pool[id]
+	// defer ctx.Unlock()
+	// ctx.Lock()
+	//
+	// return ctx.pool[id]
+	conv, _ := ctx.pool.Load(id)
+	return conv.(*Conversation)
 }
 
 func (ctx *context) Wait(id string) {
-	defer ctx.RUnlock()
-	ctx.RLock()
+	// defer ctx.RUnlock()
+	// ctx.RLock()
+	//
+	// select {
+	// case sig := <-ctx.pool[id].done:
+	// 	if sig == 1 {
+	// 		return
+	// 	}
+	// }
 
+	conv, _ := ctx.pool.Load(id)
 	select {
-	case sig := <-ctx.pool[id].done:
+	case sig := <-conv.(*Conversation).done:
 		if sig == 1 {
 			return
 		}
@@ -62,23 +74,24 @@ func (ctx *context) Wait(id string) {
 }
 
 func (ctx *context) Delete(id string) {
-	defer ctx.Unlock()
-	ctx.Lock()
+	// defer ctx.Unlock()
+	// ctx.Lock()
+	//
+	// delete(ctx.pool, id)
 
-	delete(ctx.pool, id)
+	ctx.pool.Delete(id)
 }
 
 func (ctx *context) Done(id string) {
-	defer ctx.Unlock()
-	ctx.Lock()
+	// defer ctx.Unlock()
+	// ctx.Lock()
+	//
+	// ctx.pool[id].done <- 1
 
-	ctx.pool[id].done <- 1
+	conv, _ := ctx.pool.Load(id)
+	conv.(*Conversation).done <- 1
 }
 
 func NewContext() Context {
-	ctx := &context{
-		pool: make(map[string]*Conversation),
-	}
-
-	return ctx
+	return &context{}
 }
