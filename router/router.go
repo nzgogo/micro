@@ -2,7 +2,7 @@ package router
 
 import (
 	"errors"
-	"fmt"
+	//"fmt"
 	"log"
 	"strings"
 
@@ -177,11 +177,11 @@ func (r *router) splitPath(path string) (srvPath, subPath string, err error) {
 	}
 
 	srvPath = "gogo/" + results[1] + "/" + results[2] + "/" + results[0]
-	fmt.Println("srvpath: " + srvPath)
+	//fmt.Println("srvpath: " + srvPath)
 	for i := 3; i < len(results); i++ {
 		subPath += "/" + results[i]
 	}
-	fmt.Println("subpath: " + subPath)
+	//fmt.Println("subpath: " + subPath)
 	return
 }
 

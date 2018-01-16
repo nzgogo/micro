@@ -67,6 +67,7 @@ func (h *MyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	request.ReplyTo = natsClient.Options().Subject
 	bytes, _ := codec.Marshal(request)
 
+	fmt.Println("send to service: " + subj)
 	respErr := natsClient.Publish(subj, bytes)
 
 	if respErr != nil {
@@ -98,7 +99,7 @@ func main() {
 
 	handler := MyHandler{service}
 	server := http.Server{
-		Addr:    "127.0.0.1:8080",
+		Addr:    "0.0.0.0:8080",
 		Handler: &handler,
 	}
 
