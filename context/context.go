@@ -16,7 +16,7 @@ type Context interface {
 }
 
 type context struct {
-	sync.Mutex
+	sync.RWMutex
 	pool map[string]*Conversation
 }
 
@@ -50,8 +50,8 @@ func (ctx *context) Get(id string) *Conversation {
 }
 
 func (ctx *context) Wait(id string) {
-	defer ctx.Unlock()
-	ctx.Lock()
+	defer ctx.RUnlock()
+	ctx.RLock()
 
 	select {
 	case sig := <-ctx.pool[id].done:
