@@ -50,6 +50,9 @@ func (ctx *context) Get(id string) *Conversation {
 }
 
 func (ctx *context) Wait(id string) {
+	defer ctx.Unlock()
+	ctx.Lock()
+
 	select {
 	case sig := <-ctx.pool[id].done:
 		if sig == 1 {
