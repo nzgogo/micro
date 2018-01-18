@@ -9,7 +9,6 @@ import (
 	"github.com/nzgogo/micro"
 	"github.com/nzgogo/micro/codec"
 	"github.com/nzgogo/micro/router"
-	"github.com/nzgogo/micro/selector"
 	"github.com/nzgogo/micro/db"
 	"github.com/jinzhu/gorm"
 
@@ -50,22 +49,13 @@ func (s *server) GetMoiveInfo(req *codec.Message) error {
 	//search in database
 	db.Where(&Movies{Name: req.Query["movie"][0]}).Find(&movie)
 	fmt.Println(movie)
-
 	req.Body = fmt.Sprint(movie.ID)
 
 	//service discovery
-	slt := selector.NewSelector(
-		selector.Registry(config.Registry),
-		selector.SetStrategy(selector.RoundRobin),
-	)
-	if err := slt.Init(); err != nil {
-		fmt.Printf("NewSelector init failed. error: %v\n", err)
-
-	}
 	rpy := req.ReplyTo
 	req.ReplyTo = "nats-request"
 	req.Node = SrvCastCastHandler
-	subj, err := slt.Select(SrvCast, "v1")
+	subj, err := config.Selector.Select(SrvCast, "v1")
 	if err != nil {
 		fmt.Printf("Selector failed. error: %v\n", err)
 		s.errHandler(req, err)
@@ -100,22 +90,12 @@ func (s *server) Cast(req *codec.Message) error {
 	//search in database
 	db.Where(&Movies{Name: req.Query["movie"][0]}).Find(&movie)
 	fmt.Println(movie)
-
 	req.Body = fmt.Sprint(movie.ID)
 
 	//service discovery
-	slt := selector.NewSelector(
-		selector.Registry(config.Registry),
-		selector.SetStrategy(selector.RoundRobin),
-	)
-	if err := slt.Init(); err != nil {
-		fmt.Printf("NewSelector init failed. error: %v", err)
-
-	}
-	//rpy := req.ReplyTo
 	req.ReplyTo = config.Transport.Options().Subject
 	req.Node = SrvCastCastHandler
-	subj, err := slt.Select(SrvCast, "v1")
+	subj, err := config.Selector.Select(SrvCast, "v1")
 	if err != nil {
 		fmt.Printf("Selector failed. error: %v", err)
 		s.errHandler(req, err)

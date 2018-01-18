@@ -10,6 +10,7 @@ import (
 	"github.com/nzgogo/micro/registry"
 	"github.com/nzgogo/micro/router"
 	"github.com/nzgogo/micro/transport"
+	"github.com/nzgogo/micro/selector"
 	"github.com/satori/go.uuid"
 )
 
@@ -39,6 +40,10 @@ func (s *service) Init(opts ...Option) error {
 	}
 
 	if err := s.opts.Registry.Init(); err != nil {
+		return err
+	}
+
+	if err := s.opts.Selector.Init(); err != nil {
 		return err
 	}
 
@@ -172,9 +177,15 @@ func NewService(n string, v string) *service {
 		registry.Addrs(*registryFlags["consul_addr"]),
 	)
 
+	sel := selector.NewSelector(
+		selector.Registry(reg),
+		selector.SetStrategy(selector.RoundRobin),
+	)
+
 	s.opts = newOptions(
 		Transport(trans),
 		Registry(reg),
+		Selector(sel),
 	)
 	return s
 }

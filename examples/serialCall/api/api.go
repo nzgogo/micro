@@ -13,7 +13,6 @@ import (
 	"github.com/nzgogo/micro/api"
 	"github.com/nzgogo/micro/codec"
 	"github.com/nzgogo/micro/context"
-	"github.com/nzgogo/micro/selector"
 )
 
 type MyHandler struct {
@@ -21,22 +20,22 @@ type MyHandler struct {
 }
 
 func (h *MyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	config := h.srv.Options()
+
 	// map the HTTP request to internal transport request message struct.
 	request, err := gogoapi.HTTPReqToNatsSReq(r)
 	if err != nil {
 		http.Error(w, "Cannot process request", http.StatusInternalServerError)
 		return
 	}
-	fmt.Println(request.Query)
-	fmt.Println(request.Path)
-	contxt := h.srv.Options().Context
-	ctxId := contxt.Add(&context.Conversation{
+
+	ctxId := config.Context.Add(&context.Conversation{
 		Response: w,
 	})
 	request.ContextID = ctxId
 
 	//look up registered service in kv store
-	err = h.srv.Options().Router.HttpMatch(request)
+	err = config.Router.HttpMatch(request)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
@@ -46,17 +45,8 @@ func (h *MyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Dispatch to server: " + srvName)
 
 	//service discovery
-	slt := selector.NewSelector(
-		selector.Registry(h.srv.Options().Registry),
-		selector.SetStrategy(selector.RoundRobin),
-	)
-	if err := slt.Init(); err != nil {
-		fmt.Printf("NewSelector init failed. error: %v", err)
-		http.Error(w, "Cannot process request", http.StatusInternalServerError)
-		return
-	}
 
-	subj, err := slt.Select(srvName, "v1")
+	subj, err := config.Selector.Select(srvName, "v1")
 	if err != nil {
 		fmt.Printf("Selector failed. error: %v", err)
 		http.Error(w, "Cannot process request", http.StatusInternalServerError)
@@ -65,19 +55,18 @@ func (h *MyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Found service: " + subj)
 
 	//transport
-	natsClient := h.srv.Options().Transport
-	request.ReplyTo = natsClient.Options().Subject
+	request.ReplyTo = config.Transport.Options().Subject
 	bytes, _ := codec.Marshal(request)
 
 	fmt.Println("send to service: " + subj)
-	respErr := natsClient.Publish(subj, bytes)
+	respErr := config.Transport.Publish(subj, bytes)
 
 	if respErr != nil {
 		fmt.Printf("failed to send message . error: %v", err)
 		http.Error(w, "No response", http.StatusInternalServerError)
 		return
 	}
-	contxt.Wait(ctxId)
+	config.Context.Wait(ctxId)
 }
 
 func main() {

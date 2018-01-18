@@ -34,6 +34,7 @@ type Filter func([]*registry.Service) []*registry.Service
 type Strategy func([]*registry.Service) Next
 
 var (
+	ErrNoRegistry	 = errors.New("Registry option can not be empty")
 	ErrNotFound      = errors.New("not found")
 	ErrNoneAvailable = errors.New("none available")
 )
@@ -55,7 +56,7 @@ func (r *selector) Init() error {
 		r.opts.Strategy = Random
 	}
 	if r.opts.Registry == nil {
-		r.opts.Registry = registry.NewRegistry()
+		return ErrNoRegistry
 	}
 
 	return nil
