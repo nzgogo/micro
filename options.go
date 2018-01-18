@@ -5,6 +5,7 @@ import (
 	"github.com/nzgogo/micro/registry"
 	"github.com/nzgogo/micro/router"
 	"github.com/nzgogo/micro/transport"
+	"github.com/nzgogo/micro/selector"
 )
 
 // Options of a service
@@ -13,6 +14,7 @@ type Options struct {
 	Registry  registry.Registry
 	Router    router.Router
 	Context   context.Context
+	Selector  selector.Selector
 
 	//wrappers
 	HdlrWrappers []HandlerWrapper
@@ -62,6 +64,12 @@ func Router(r router.Router) Option {
 func Context(c context.Context) Option {
 	return func(o *Options) {
 		o.Context = c
+	}
+}
+
+func Selector(s selector.Selector) Option {
+	return func(o *Options) {
+		o.Selector = s
 	}
 }
 
