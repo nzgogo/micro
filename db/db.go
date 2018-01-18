@@ -23,7 +23,7 @@ type db struct {
 var (
 	DefaultDialect         = "mysql"
 	DefaultProtocol        = "tcp"
-	DefaultAddress         = "playground.cugybz6qn13l.ap-southeast-2.rds.amazonaws.com:3306"
+	DefaultAddress         = "workbench.cugybz6qn13l.ap-southeast-2.rds.amazonaws.com"
 	DefaultCharset         = "utf8"
 	DefaultParseTime       = true
 	DefaultLoc             = "Local"
@@ -32,7 +32,7 @@ var (
 	DefaultMaxConnLifetime = time.Hour * 2
 )
 
-func (d db) Connect() error {
+func (d *db) Connect() error {
 	// The Data Source Name has a common format, like e.g. PEAR DB uses it, but without type-prefix (optional parts marked by squared brackets):
 	// [username[:password]@][protocol[(address)]]/dbname[?param1=value1&...&paramN=valueN]
 	dsn := d.opts.Username
@@ -56,11 +56,15 @@ func (d db) Connect() error {
 	return nil
 }
 
-func (d db) Close() error {
+func (d *db) Options() Options {
+	return d.opts
+}
+
+func (d *db) Close() error {
 	return d.conn.Close()
 }
 
-func (d db) DB() *gorm.DB {
+func (d *db) DB() *gorm.DB {
 	return d.conn
 }
 

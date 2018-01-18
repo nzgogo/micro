@@ -18,7 +18,7 @@ func (s *service) ServerHandler(nMsg *nats.Msg) {
 		contxt := s.Options().Context
 		contxt.Add(&context.Conversation{
 			ID:		 message.ContextID,
-			Request: s.Options().Transport.Options().Subject,
+			Request: message.ReplyTo,
 		})
 
 		handler, routerErr := s.opts.Router.Dispatch(message)

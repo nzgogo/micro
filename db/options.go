@@ -2,7 +2,6 @@ package db
 
 import (
 	"time"
-	"net/http"
 )
 
 type Options struct {
