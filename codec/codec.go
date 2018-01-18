@@ -34,13 +34,16 @@ type Pair struct {
 
 type Message struct {
 	Type       string              `json:"type"`
-	Context    string              `json:"context"`
+	ContextID    string              `json:"contextid"`
 	ReplyTo    string              `json:"replyTo,omitempty"`
+
 	Method     string              `json:"method,omitempty"`
 	Path       string              `json:"path,omitempty"`
+
 	Host       string              `json:"host,omitempty"`
 	Scheme     string              `json:"scheme"`
 	StatusCode int                 `json:"statusCode"`
+
 	Node       string              `json:"node,omitempty"`
 	Header     map[string][]string `json:"header"`
 	Get        map[string]*Pair    `json:"get,omitempty"`

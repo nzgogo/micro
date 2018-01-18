@@ -62,8 +62,6 @@ func (s *service) Run() error {
 	select {
 	// wait on kill signal
 	case <-ch:
-		// wait on context cancel
-		//case <-s.opts.Context.Done():
 	}
 
 	if err := s.stop(); err != nil {
@@ -133,7 +131,7 @@ func (s *service) deregister() error {
 		Nodes:   []*registry.Node{node},
 	}
 
-	fmt.Printf("Deregistering node: %s", node.ID)
+	fmt.Printf("Deregistering node: %s\n", node.ID)
 	if err := config.Registry.Deregister(service); err != nil {
 		return err
 	}

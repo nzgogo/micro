@@ -4,13 +4,22 @@ import (
 	"github.com/nats-io/go-nats"
 	"github.com/nzgogo/micro/api"
 	"github.com/nzgogo/micro/codec"
+	"github.com/nzgogo/micro/context"
 )
 
 func (s *service) ServerHandler(nMsg *nats.Msg) {
 	message := &codec.Message{}
 	codec.Unmarshal(nMsg.Data, message)
+	if message.ReplyTo =="nats-request" {
+		message.ReplyTo = nMsg.Reply
+	}
 	if message.Type == "request" {
-		//message.ReplyTo = s.name + "." + s.version + "." + s.id
+		//TODO if this is last endpoint in a serial call, we should not add this conversation
+		contxt := s.Options().Context
+		contxt.Add(&context.Conversation{
+			ID:		 message.ContextID,
+			Request: s.Options().Transport.Options().Subject,
+		})
 
 		handler, routerErr := s.opts.Router.Dispatch(message)
 		if routerErr != nil {
@@ -23,9 +32,9 @@ func (s *service) ServerHandler(nMsg *nats.Msg) {
 		}
 		go handler(message)
 	} else {
-		rpl := s.opts.Context.Get(message.Context).Request
+		rpl := s.opts.Context.Get(message.ContextID).Request
 		s.opts.Transport.Publish(rpl, nMsg.Data)
-		s.opts.Context.Delete(message.Context)
+		s.opts.Context.Delete(message.ContextID)
 	}
 }
 
@@ -35,11 +44,11 @@ func (s *service) ApiHandler(nMsg *nats.Msg) {
 	codec.Unmarshal(nMsg.Data, message)
 	ctx := s.opts.Context
 
-	r := ctx.Get(message.Context).Response
+	r := ctx.Get(message.ContextID).Response
 
 	gogoapi.WriteResponse(r, message)
 
-	ctx.Done(message.Context)
-	ctx.Delete(message.Context)
+	ctx.Done(message.ContextID)
+	ctx.Delete(message.ContextID)
 
 }
