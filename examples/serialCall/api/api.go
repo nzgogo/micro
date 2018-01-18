@@ -27,6 +27,8 @@ func (h *MyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Cannot process request", http.StatusInternalServerError)
 		return
 	}
+	fmt.Println(request.Query)
+	fmt.Println(request.Path)
 	contxt := h.srv.Options().Context
 	ctxId := contxt.Add(&context.Conversation{
 		Response: w,

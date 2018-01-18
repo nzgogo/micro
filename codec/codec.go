@@ -46,7 +46,7 @@ type Message struct {
 
 	Node       string              `json:"node,omitempty"`
 	Header     map[string][]string `json:"header"`
-	Get        map[string]*Pair    `json:"get,omitempty"`
+	Query      map[string][]string    `json:"get,omitempty"`
 	Post       map[string]*Pair    `json:"post,omitempty"`
 	Body       string              `json:"body"`
 }

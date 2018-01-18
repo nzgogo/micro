@@ -28,13 +28,15 @@ func HTTPReqToNatsSReq(req *http.Request) (*codec.Message, error) {
 		}
 	}
 
+
 	//TODO May need extract more data from http reqeust
 	request := &codec.Message{
 		Type:   "request",
 		Method: req.Method,
-		Path:   req.RequestURI,
+		Path:   req.URL.Path,
 		Host:   req.Host,
 		Body:   string(buf.Bytes()),
+		Query:  req.URL.Query(),
 	}
 	return request, nil
 }

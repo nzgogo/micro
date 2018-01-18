@@ -3,22 +3,55 @@ package main
 import (
 	"fmt"
 	"log"
+	"time"
+	"errors"
 
 	"github.com/nzgogo/micro"
 	"github.com/nzgogo/micro/codec"
 	"github.com/nzgogo/micro/router"
 	"github.com/nzgogo/micro/selector"
+	"github.com/nzgogo/micro/db"
+	"github.com/jinzhu/gorm"
+
 )
+
+var(
+	SrvCastCastHandler = "/movie_cast"
+	SrvCast = "gogo-core-crew"
+	ErrQueryFailure = errors.New("Query Faileld")
+)
+
+type Movies struct {
+	gorm.Model
+	Name string
+	Director string
+	Budget   int
+	Producer string
+	InitRlease time.Time
+}
 
 type server struct {
 	srv gogo.Service
+	movieDB db.DB
 }
 
-func (s *server) Moive(req *codec.Message) error {
-	config := s.srv.Options()
 
-	req.Node = "/movie_cast"
-	//req.Body = ""
+
+func (s *server) GetMoiveInfo(req *codec.Message) error {
+	config := s.srv.Options()
+	db := s.movieDB.DB()
+
+	if len(req.Query["movie"]) == 0 {
+		fmt.Printf("Query failed. \n")
+		s.errHandler(req, ErrQueryFailure)
+		return ErrQueryFailure
+	}
+	movie := Movies{}
+	//search in database
+	db.Where(&Movies{Name: req.Query["movie"][0]}).Find(&movie)
+	fmt.Println(movie)
+
+	req.Body = fmt.Sprint(movie.ID)
 
 	//service discovery
 	slt := selector.NewSelector(
@@ -26,15 +59,15 @@ func (s *server) Moive(req *codec.Message) error {
 		selector.SetStrategy(selector.RoundRobin),
 	)
 	if err := slt.Init(); err != nil {
-		fmt.Printf("NewSelector init failed. error: %v", err)
+		fmt.Printf("NewSelector init failed. error: %v\n", err)
 
 	}
 	rpy := req.ReplyTo
 	req.ReplyTo = "nats-request"
-
-	subj, err := slt.Select("gogo-core-crew", "v1")
+	req.Node = SrvCastCastHandler
+	subj, err := slt.Select(SrvCast, "v1")
 	if err != nil {
-		fmt.Printf("Selector failed. error: %v", err)
+		fmt.Printf("Selector failed. error: %v\n", err)
 		s.errHandler(req, err)
 	}
 	fmt.Println("Found service: " + subj)
@@ -45,7 +78,7 @@ func (s *server) Moive(req *codec.Message) error {
 	return config.Transport.Request(subj,resp , func(bytes []byte) error {
 		message := &codec.Message{}
 		codec.Unmarshal(bytes, message)
-		message.Body = "The cast of movie 'Legend of The Demon Cat' includes " + message.Body
+		message.Body = "The cast of movie " + movie.Name + " includes " + message.Body
 		resp1, err := codec.Marshal(message)
 		if err != nil {
 			return err
@@ -56,9 +89,19 @@ func (s *server) Moive(req *codec.Message) error {
 
 func (s *server) Cast(req *codec.Message) error {
 	config := s.srv.Options()
+	db := s.movieDB.DB()
 
-	req.Node = "/movie_cast"
-	//req.Body = ""
+	if len(req.Query["movie"]) == 0 {
+		fmt.Printf("Query failed. \n")
+		s.errHandler(req, ErrQueryFailure)
+		return ErrQueryFailure
+	}
+	movie := Movies{}
+	//search in database
+	db.Where(&Movies{Name: req.Query["movie"][0]}).Find(&movie)
+	fmt.Println(movie)
+
+	req.Body = fmt.Sprint(movie.ID)
 
 	//service discovery
 	slt := selector.NewSelector(
@@ -71,8 +114,8 @@ func (s *server) Cast(req *codec.Message) error {
 	}
 	//rpy := req.ReplyTo
 	req.ReplyTo = config.Transport.Options().Subject
-
-	subj, err := slt.Select("gogo-core-crew", "v1")
+	req.Node = SrvCastCastHandler
+	subj, err := slt.Select(SrvCast, "v1")
 	if err != nil {
 		fmt.Printf("Selector failed. error: %v", err)
 		s.errHandler(req, err)
@@ -100,6 +143,12 @@ func (s *server)errHandler(req *codec.Message, err error){
 
 func main() {
 	server := server{}
+	server.movieDB = db.NewDB("kai","qiekai1234","mydb")
+	if err := server.movieDB.Connect(); err!=nil {
+		log.Fatal(err)
+	}
+	defer server.movieDB.Close()
+
 	service := gogo.NewService(
 		"gogo-core-movie",
 		"v1",
@@ -119,7 +168,7 @@ func main() {
 		Method:  "GET",
 		Path:    "/movie",
 		ID:      "/movie",
-		Handler: server.Moive,
+		Handler: server.GetMoiveInfo,
 	})
 	r.Add(&router.Node{
 		Method:  "GET",
@@ -132,4 +181,5 @@ func main() {
 	if err := server.srv.Run(); err != nil {
 		log.Fatal(err)
 	}
+
 }
