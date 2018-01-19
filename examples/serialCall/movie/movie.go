@@ -34,13 +34,13 @@ type server struct {
 	movieDB db.DB
 }
 
-func (s *server) GetMovieInfo(req *codec.Message) error {
+func (s *server) GetMovieInfo(req *codec.Message) (error,bool) {
 	config := s.srv.Options()
 	db := s.movieDB.DB()
 
 	if len(req.Query["movie"]) == 0 {
 		fmt.Printf("Query failed. \n")
-		return ErrQueryFailure
+		return ErrQueryFailure, true
 	}
 	movie := Movies{}
 	//search in database
@@ -52,7 +52,7 @@ func (s *server) GetMovieInfo(req *codec.Message) error {
 	subj, err := config.Selector.Select(SrvCast, "v1")
 	if err != nil {
 		fmt.Printf("Selector failed. error: %v\n", err)
-		return err
+		return err, true
 	}
 	fmt.Println("Found service: " + subj)
 
@@ -61,7 +61,7 @@ func (s *server) GetMovieInfo(req *codec.Message) error {
 	req.Node = SrvCastCastHandler
 	resp, err := codec.Marshal(req)
 	if err != nil {
-		return err
+		return err, true
 	}
 
 	return config.Transport.Request(subj,resp , func(bytes []byte) error {
@@ -73,16 +73,16 @@ func (s *server) GetMovieInfo(req *codec.Message) error {
 			return err
 		}
 		return config.Transport.Publish(rpy, resp1)
-	})
+	}), true
 }
 
-func (s *server) Cast(req *codec.Message) error {
+func (s *server) Cast(req *codec.Message) (error,bool) {
 	config := s.srv.Options()
 	db := s.movieDB.DB()
 
 	if len(req.Query["movie"]) == 0 {
 		fmt.Printf("Query failed. \n")
-		return ErrQueryFailure
+		return ErrQueryFailure, true
 	}
 	movie := Movies{}
 	//search in database
@@ -94,7 +94,7 @@ func (s *server) Cast(req *codec.Message) error {
 	subj, err := config.Selector.Select(SrvCast, "v1")
 	if err != nil {
 		fmt.Printf("Selector failed. error: %v", err)
-		return err
+		return err, true
 	}
 	fmt.Println("Found service: " + subj)
 
@@ -102,9 +102,9 @@ func (s *server) Cast(req *codec.Message) error {
 	req.Node = SrvCastCastHandler
 	resp, err := codec.Marshal(req)
 	if err != nil {
-		return err
+		return err, true
 	}
-	return config.Transport.Publish(subj, resp)
+	return config.Transport.Publish(subj, resp), false
 }
 
 //func (s *server)errHandler(req *codec.Message, err error){
@@ -121,7 +121,7 @@ func (s *server) Cast(req *codec.Message) error {
 
 func main() {
 	server := server{}
-	server.movieDB = db.NewDB("kai","qiekai1234","mydb")
+	server.movieDB = db.NewDB("kai","gogo1234","mydb")
 	if err := server.movieDB.Connect(); err!=nil {
 		log.Fatal(err)
 	}

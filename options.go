@@ -17,8 +17,9 @@ type Options struct {
 	Selector  selector.Selector
 
 	//wrappers
-	HdlrWrappers []HandlerWrapper
+	//HdlrWrappers []HandlerWrapper
 	//HttpHdlrWrappers []HttpHandlerWrapper
+	wrappers  wrapper
 }
 
 type Option func(*Options)
