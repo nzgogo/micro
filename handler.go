@@ -31,7 +31,11 @@ func (s *service) ServerHandler(nMsg *nats.Msg) {
 			s.opts.Transport.Publish(message.ReplyTo, resp)
 		}
 		go func() {
-			err, endCall := handler(message)
+			_, endCall := handler(message)
+			if endCall {
+				s.opts.Context.Delete(message.ContextID)
+			}
+
 
 		}()
 	} else {
