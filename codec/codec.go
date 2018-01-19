@@ -33,21 +33,25 @@ type Pair struct {
 // }
 
 type Message struct {
-	Type       string              `json:"type"`
-	ContextID    string              `json:"contextid"`
-	ReplyTo    string              `json:"replyTo,omitempty"`
-
+	//pre-process
 	Method     string              `json:"method,omitempty"`
 	Path       string              `json:"path,omitempty"`
-
 	Host       string              `json:"host,omitempty"`
+
+	//request fields
+	ReplyTo    string              `json:"replyTo,omitempty"`
+	Node       string              `json:"node,omitempty"`
+	Query      map[string][]string `json:"get,omitempty"`
+	Post       map[string]*Pair    `json:"post,omitempty"`
 	Scheme     string              `json:"scheme"`
+
+	//response fields
 	StatusCode int                 `json:"statusCode"`
 
-	Node       string              `json:"node,omitempty"`
+	//common fields
+	Type       string              `json:"type"`
+	ContextID  string              `json:"contextId"`
 	Header     map[string][]string `json:"header"`
-	Query      map[string][]string    `json:"get,omitempty"`
-	Post       map[string]*Pair    `json:"post,omitempty"`
 	Body       string              `json:"body"`
 }
 

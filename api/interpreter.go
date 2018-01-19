@@ -10,8 +10,8 @@ import (
 	"github.com/nzgogo/micro/codec"
 )
 
-// NewRequestFromHTTP creates the Request struct from regular *http.Request by serialization of main parts of it.
-func HTTPReqToNatsSReq(req *http.Request) (*codec.Message, error) {
+// HTTPReqToIntrlSReq creates the Request struct from regular *http.Request by serialization of main parts of it.
+func HTTPReqToIntrlSReq(req *http.Request, rplSub, ctxid string) (*codec.Message, error) {
 	if req == nil {
 		return nil, errors.New("natsproxy: Request cannot be nil")
 	}
@@ -28,27 +28,35 @@ func HTTPReqToNatsSReq(req *http.Request) (*codec.Message, error) {
 		}
 	}
 
-
 	//TODO May need extract more data from http reqeust
 	request := &codec.Message{
-		Type:   "request",
-		Method: req.Method,
-		Path:   req.URL.Path,
-		Host:   req.Host,
-		Body:   string(buf.Bytes()),
-		Query:  req.URL.Query(),
+		Type:   	"request",
+		ContextID:  ctxid,
+		Header: 	req.Header,
+		Body:   	string(buf.Bytes()),
+
+		Method: 	req.Method,
+		Path:   	req.URL.Path,
+		Host:   	req.Host,
+
+		ReplyTo:  	rplSub,
+		Query:  	req.URL.Query(),
+		//Post
+		//Scheme
 	}
 	return request, nil
 }
 
-// NewResponse creates blank initialized Response object.
-//func NewResponse() *codec.Message {
-//	return &codec.Message{
-//		StatusCode: 200,
-//		Header:     make(map[string][]string, 0),
-//		Body:       "",
-//	}
-//}
+ //NewResponse creates Response Message object.
+func NewResponse(statusCode int, msgType, contextID string, body *string, header map[string][]string) *codec.Message {
+	return &codec.Message{
+		Type:       msgType,
+		StatusCode: statusCode,
+		Header:     header,
+		ContextID:  contextID,
+		Body:       *body,
+	}
+}
 
 func WriteResponse(rw http.ResponseWriter, response *codec.Message) {
 	// Copy headers
