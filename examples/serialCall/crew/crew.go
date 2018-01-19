@@ -3,14 +3,14 @@ package main
 import (
 	"fmt"
 	"log"
+	"strconv"
 
 	"github.com/nzgogo/micro"
 	"github.com/nzgogo/micro/codec"
 	"github.com/nzgogo/micro/router"
 	"github.com/nzgogo/micro/db"
 	"github.com/jinzhu/gorm"
-	"strconv"
-	"micro/api"
+	"github.com/nzgogo/micro/api"
 )
 
 type server struct {
@@ -26,7 +26,7 @@ type Casts struct {
 }
 
 func (s *server) Cast(req *codec.Message) error {
-	fmt.Println("Message received: " + req.ContextID)
+	fmt.Println("Message received: " + req.Body)
 
 	db := s.castDB.DB()
 	movieid, _ := strconv.ParseUint(req.Body, 10, 32)
