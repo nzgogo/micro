@@ -30,7 +30,10 @@ func (s *service) ServerHandler(nMsg *nats.Msg) {
 			})
 			s.opts.Transport.Publish(message.ReplyTo, resp)
 		}
-		go handler(message)
+		go func() {
+			err, endCall := handler(message)
+
+		}()
 	} else {
 		rpl := s.opts.Context.Get(message.ContextID).Request
 		s.opts.Transport.Publish(rpl, nMsg.Data)

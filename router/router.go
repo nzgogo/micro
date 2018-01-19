@@ -10,7 +10,7 @@ import (
 	"github.com/nzgogo/micro/codec"
 )
 
-type Handler func(*codec.Message) error
+type Handler func(*codec.Message) (error, bool)
 
 type Router interface {
 	Init(opts ...Option) error
@@ -34,9 +34,9 @@ type Node struct {
 }
 
 var (
-	ErrInvalidPath      = errors.New("Invalid path. Cannot process.")
-	ErrNotFound         = errors.New("Service not found")
-	ErrmethodNotAllowed = errors.New("Method not allowed")
+	ErrInvalidPath      = errors.New("invalid path cannot process")
+	ErrNotFound         = errors.New("service not found")
+	ErrmethodNotAllowed = errors.New("method not allowed")
 )
 
 func (r *router) Init(opts ...Option) error {
