@@ -10,6 +10,7 @@ import (
 	"github.com/nzgogo/micro/db"
 	"github.com/jinzhu/gorm"
 	"strconv"
+	"micro/api"
 )
 
 type server struct {
@@ -25,6 +26,8 @@ type Casts struct {
 }
 
 func (s *server) Cast(req *codec.Message) error {
+	fmt.Println("Message received: " + req.ContextID)
+
 	db := s.castDB.DB()
 	movieid, _ := strconv.ParseUint(req.Body, 10, 32)
 	casts := []Casts{}
@@ -36,19 +39,12 @@ func (s *server) Cast(req *codec.Message) error {
 		castlist = castlist + cast.Name + ". "
 	}
 
-	response := &codec.Message{
-		Type:	    "response",
-		StatusCode: 200,
-		Header:     make(map[string][]string, 0),
-		Body:       castlist,
-		ContextID:    req.ContextID,
-	}
+	response := gogoapi.NewResponse(200, "response", req.ContextID, &castlist, req.Header)
 
 	resp, err := codec.Marshal(response)
 	if err != nil {
 		return err
 	}
-	fmt.Println("Message received: " + req.ContextID)
 	return s.srv.Options().Transport.Publish(req.ReplyTo, resp)
 }
 

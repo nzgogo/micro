@@ -23,16 +23,16 @@ type MyHandler struct {
 func (h *MyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	config := h.srv.Options()
 
+	ctxId := config.Context.Add(&context.Conversation{
+		Response: w,
+	})
+
 	// map the HTTP request to internal transport request message struct.
-	request, err := gogoapi.HTTPReqToNatsSReq(r)
+	request, err := gogoapi.HTTPReqToIntrlSReq(r,config.Transport.Options().Subject,ctxId)
 	if err != nil {
 		http.Error(w, "Cannot process request", http.StatusInternalServerError)
 		return
 	}
-	ctxId := config.Context.Add(&context.Conversation{
-		Response: w,
-	})
-	request.ContextID = ctxId
 
 	//look up registered service in kv store
 	err = config.Router.HttpMatch(request)
@@ -54,17 +54,15 @@ func (h *MyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Found service: " + subj)
 
 	//transport
-	request.ReplyTo = config.Transport.Options().Subject
 	bytes, _ := codec.Marshal(request)
-
 	fmt.Println("send to service: " + subj)
 	respErr := config.Transport.Publish(subj, bytes)
-
 	if respErr != nil {
 		fmt.Printf("failed to send message . error: %v", err)
 		http.Error(w, "No response", http.StatusInternalServerError)
 		return
 	}
+
 	config.Context.Wait(ctxId)
 }
 
