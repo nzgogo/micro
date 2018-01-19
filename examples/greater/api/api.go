@@ -13,7 +13,6 @@ import (
 	"github.com/nzgogo/micro/api"
 	"github.com/nzgogo/micro/codec"
 	"github.com/nzgogo/micro/context"
-	"github.com/nzgogo/micro/selector"
 )
 
 type MyHandler struct {

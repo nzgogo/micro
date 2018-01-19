@@ -17,7 +17,7 @@ import (
 var(
 	SrvCastCastHandler = "/movie_cast"
 	SrvCast = "gogo-core-crew"
-	ErrQueryFailure = errors.New("Query Faileld")
+	ErrQueryFailure = errors.New("query field is empty")
 )
 
 type Movies struct {
@@ -26,7 +26,7 @@ type Movies struct {
 	Director string
 	Budget   int
 	Producer string
-	InitRlease time.Time
+	InitRelease time.Time
 }
 
 type server struct {
@@ -34,15 +34,12 @@ type server struct {
 	movieDB db.DB
 }
 
-
-
-func (s *server) GetMoiveInfo(req *codec.Message) error {
+func (s *server) GetMovieInfo(req *codec.Message) error {
 	config := s.srv.Options()
 	db := s.movieDB.DB()
 
 	if len(req.Query["movie"]) == 0 {
 		fmt.Printf("Query failed. \n")
-		s.errHandler(req, ErrQueryFailure)
 		return ErrQueryFailure
 	}
 	movie := Movies{}
@@ -52,19 +49,21 @@ func (s *server) GetMoiveInfo(req *codec.Message) error {
 	req.Body = fmt.Sprint(movie.ID)
 
 	//service discovery
-	rpy := req.ReplyTo
-	req.ReplyTo = "nats-request"
-	req.Node = SrvCastCastHandler
 	subj, err := config.Selector.Select(SrvCast, "v1")
 	if err != nil {
 		fmt.Printf("Selector failed. error: %v\n", err)
-		s.errHandler(req, err)
+		return err
 	}
 	fmt.Println("Found service: " + subj)
+
+	rpy := req.ReplyTo
+	req.ReplyTo = "nats-request"
+	req.Node = SrvCastCastHandler
 	resp, err := codec.Marshal(req)
 	if err != nil {
 		return err
 	}
+
 	return config.Transport.Request(subj,resp , func(bytes []byte) error {
 		message := &codec.Message{}
 		codec.Unmarshal(bytes, message)
@@ -83,7 +82,6 @@ func (s *server) Cast(req *codec.Message) error {
 
 	if len(req.Query["movie"]) == 0 {
 		fmt.Printf("Query failed. \n")
-		s.errHandler(req, ErrQueryFailure)
 		return ErrQueryFailure
 	}
 	movie := Movies{}
@@ -93,15 +91,15 @@ func (s *server) Cast(req *codec.Message) error {
 	req.Body = fmt.Sprint(movie.ID)
 
 	//service discovery
-	req.ReplyTo = config.Transport.Options().Subject
-	req.Node = SrvCastCastHandler
 	subj, err := config.Selector.Select(SrvCast, "v1")
 	if err != nil {
 		fmt.Printf("Selector failed. error: %v", err)
-		s.errHandler(req, err)
+		return err
 	}
 	fmt.Println("Found service: " + subj)
 
+	req.ReplyTo = config.Transport.Options().Subject
+	req.Node = SrvCastCastHandler
 	resp, err := codec.Marshal(req)
 	if err != nil {
 		return err
@@ -109,17 +107,17 @@ func (s *server) Cast(req *codec.Message) error {
 	return config.Transport.Publish(subj, resp)
 }
 
-func (s *server)errHandler(req *codec.Message, err error){
-	response := &codec.Message{
-		Type:	    "response",
-		StatusCode: 500,
-		Header:     make(map[string][]string, 0),
-		Body:       err.Error(),
-		ContextID:    req.ContextID,
-	}
-	resp, _ := codec.Marshal(response)
-	s.srv.Options().Transport.Publish(req.ReplyTo, resp)
-}
+//func (s *server)errHandler(req *codec.Message, err error){
+//	response := &codec.Message{
+//		Type:	    "response",
+//		StatusCode: 500,
+//		Header:     make(map[string][]string, 0),
+//		Body:       err.Error(),
+//		ContextID:    req.ContextID,
+//	}
+//	resp, _ := codec.Marshal(response)
+//	s.srv.Options().Transport.Publish(req.ReplyTo, resp)
+//}
 
 func main() {
 	server := server{}
@@ -148,7 +146,7 @@ func main() {
 		Method:  "GET",
 		Path:    "/movie",
 		ID:      "/movie",
-		Handler: server.GetMoiveInfo,
+		Handler: server.GetMovieInfo,
 	})
 	r.Add(&router.Node{
 		Method:  "GET",
