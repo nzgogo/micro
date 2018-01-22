@@ -21,7 +21,7 @@ var (
 
 func (s *server) ChangHenGe(req *codec.Message, reply string) error {
 	fmt.Println("Message received: " + req.Body)
-	response := gogoapi.NewResponse(200, "response", req.ContextID, &changhenge, req.Header)
+	response := gogoapi.NewResponse(200, req.ContextID, &changhenge, req.Header)
 
 	resp, err := codec.Marshal(response)
 	if err != nil {
@@ -33,7 +33,7 @@ func (s *server) ChangHenGe(req *codec.Message, reply string) error {
 
 func (s *server) Hello(req *codec.Message, reply string) error {
 	fmt.Println("Message received: " + req.Body)
-	response := gogoapi.NewResponse(200, "response", req.ContextID, &responsecode, req.Header)
+	response := gogoapi.NewResponse(200, req.ContextID, &responsecode, req.Header)
 
 	resp, err := codec.Marshal(response)
 	if err != nil {

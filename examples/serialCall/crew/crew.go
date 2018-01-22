@@ -39,7 +39,7 @@ func (s *server) Cast(req *codec.Message, reply string) error {
 		castlist = castlist + cast.Name + ". "
 	}
 
-	response := gogoapi.NewResponse(200, "response", req.ContextID, &castlist, req.Header)
+	response := gogoapi.NewResponse(200, req.ContextID, &castlist, req.Header)
 
 	resp, err := codec.Marshal(response)
 	if err != nil {
@@ -75,7 +75,6 @@ func main() {
 		ID:      "/movie_cast",
 		Handler: server.Cast,
 	})
-
 
 	// Run server
 	if err := server.srv.Run(); err != nil {

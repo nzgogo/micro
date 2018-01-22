@@ -48,9 +48,9 @@ func HTTPReqToIntrlSReq(req *http.Request, rplSub, ctxid string) (*codec.Message
 }
 
 //NewResponse creates Response Message object.
-func NewResponse(statusCode int, msgType, contextID string, body *string, header map[string][]string) *codec.Message {
+func NewResponse(statusCode int, contextID string, body *string, header map[string][]string) *codec.Message {
 	return &codec.Message{
-		Type:       msgType,
+		Type:       "response",
 		StatusCode: statusCode,
 		Header:     header,
 		ContextID:  contextID,
