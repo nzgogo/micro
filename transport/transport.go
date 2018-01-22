@@ -4,7 +4,6 @@
 package transport
 
 import (
-	"errors"
 	"strings"
 	"time"
 
@@ -25,7 +24,6 @@ type transport struct {
 	conn *nats.Conn
 	sub  *nats.Subscription
 	opts Options
-	//SubscribeHdler nats.MsgHandler
 	handler nats.MsgHandler
 }
 
@@ -62,19 +60,7 @@ func (n *transport) Publish(sub string, b []byte) error {
 		return n.conn.Publish(sub, b)
 	}
 
-	// use the deadline
-	ch := make(chan error, 1)
-
-	go func() {
-		ch <- n.conn.Publish(sub, b)
-	}()
-
-	select {
-	case err := <-ch:
-		return err
-	case <-time.After(n.opts.Timeout):
-		return errors.New("deadline exceeded")
-	}
+	return n.conn.Publish(sub, b)
 }
 
 func (n *transport) Subscribe() error {
@@ -122,8 +108,6 @@ func (n *transport) Init() error {
 	}
 
 	options.Timeout = DefaultDialTimeout
-
-	//sub, err := n.conn.SubscribeSync(options.Subject)
 
 	if err != nil {
 		return err

@@ -41,11 +41,7 @@ func (s *server) Cast(req *codec.Message, reply string) error {
 
 	response := gogoapi.NewResponse(200, req.ContextID, &castlist, req.Header)
 
-	resp, err := codec.Marshal(response)
-	if err != nil {
-		return err
-	}
-	return s.srv.Options().Transport.Publish(reply, resp)
+	return s.srv.Respond(response, reply)
 }
 
 func main() {

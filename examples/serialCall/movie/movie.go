@@ -66,11 +66,7 @@ func (s *server) GetMovieInfo(req *codec.Message, reply string) error {
 		message := &codec.Message{}
 		codec.Unmarshal(bytes, message)
 		message.Body = "The cast of movie " + movie.Name + " includes " + message.Body
-		resp1, err := codec.Marshal(message)
-		if err != nil {
-			return err
-		}
-		return config.Transport.Publish(reply, resp1)
+		return s.srv.Respond(message, reply)
 	})
 }
 
