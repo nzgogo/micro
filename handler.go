@@ -30,7 +30,7 @@ func (s *service) ServerHandler(nMsg *nats.Msg) {
 
 		handler, routerErr := s.opts.Router.Dispatch(message)
 		if routerErr != nil {
-			errResp := gogoapi.NewResponse(404, "response", message.ContextID, nil, message.Header)
+			errResp := gogoapi.NewResponse(404, message.ContextID, nil, message.Header)
 			resp, _ := codec.Marshal(errResp)
 			s.opts.Transport.Publish(message.ReplyTo, resp)
 		}
