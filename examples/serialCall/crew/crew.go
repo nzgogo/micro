@@ -25,7 +25,7 @@ type Casts struct {
 	MovieId uint
 }
 
-func (s *server) Cast(req *codec.Message) (error,bool) {
+func (s *server) Cast(req *codec.Message, reply string) error {
 	fmt.Println("Message received: " + req.Body)
 
 	db := s.castDB.DB()
@@ -43,9 +43,9 @@ func (s *server) Cast(req *codec.Message) (error,bool) {
 
 	resp, err := codec.Marshal(response)
 	if err != nil {
-		return err, true
+		return err
 	}
-	return s.srv.Options().Transport.Publish(req.ReplyTo, resp), true
+	return s.srv.Options().Transport.Publish(reply, resp)
 }
 
 func main() {

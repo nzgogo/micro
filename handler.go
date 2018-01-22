@@ -1,8 +1,6 @@
 package gogo
 
 import (
-	"strings"
-
 	"github.com/nats-io/go-nats"
 	"github.com/nzgogo/micro/api"
 	"github.com/nzgogo/micro/codec"
@@ -10,12 +8,18 @@ import (
 )
 
 func (s *service) ServerHandler(nMsg *nats.Msg) {
-	sub := strings.Replace(s.name, "-", ".", -1) + "." + s.version + "." + s.id
+	//decode message
 	message := &codec.Message{}
 	codec.Unmarshal(nMsg.Data, message)
+
+	sub :=  s.opts.Transport.Options().Subject
+
+	//check if the message is a Request or Publish.
 	if nMsg.Reply != sub {
 		message.ReplyTo = nMsg.Reply
 	}
+
+	//check message type, response or request
 	if message.Type == "request" {
 		//TODO if this is last endpoint in a serial call, we should not add this conversation
 		contxt := s.Options().Context
@@ -26,16 +30,14 @@ func (s *service) ServerHandler(nMsg *nats.Msg) {
 
 		handler, routerErr := s.opts.Router.Dispatch(message)
 		if routerErr != nil {
-			resp, _ := codec.Marshal(codec.Message{
-				StatusCode: 404,
-				Header:     make(map[string][]string, 0),
-				Body:       routerErr.Error(),
-			})
+			errResp := gogoapi.NewResponse(404, "response", message.ContextID, nil, message.Header)
+			resp, _ := codec.Marshal(errResp)
 			s.opts.Transport.Publish(message.ReplyTo, resp)
 		}
-
+		reply := message.ReplyTo
 		message.ReplyTo = sub
-		go handler(message)
+		//TODO: error handle
+		go handler(message, reply)
 	} else {
 		rpl := s.opts.Context.Get(message.ContextID).Request
 		s.opts.Transport.Publish(rpl, nMsg.Data)

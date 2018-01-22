@@ -2,7 +2,6 @@ package router
 
 import (
 	"errors"
-	//"fmt"
 	"log"
 	"strings"
 
@@ -10,7 +9,7 @@ import (
 	"github.com/nzgogo/micro/codec"
 )
 
-type Handler func(*codec.Message) error
+type Handler func(*codec.Message, string) error
 
 type Router interface {
 	Init(opts ...Option) error

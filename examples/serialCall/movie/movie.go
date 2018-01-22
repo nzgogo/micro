@@ -34,13 +34,13 @@ type server struct {
 	movieDB db.DB
 }
 
-func (s *server) GetMovieInfo(req *codec.Message) (error,bool) {
+func (s *server) GetMovieInfo(req *codec.Message, reply string) error {
 	config := s.srv.Options()
 	db := s.movieDB.DB()
 
 	if len(req.Query["movie"]) == 0 {
 		fmt.Printf("Query failed. \n")
-		return ErrQueryFailure, true
+		return ErrQueryFailure
 	}
 	movie := Movies{}
 	//search in database
@@ -52,19 +52,17 @@ func (s *server) GetMovieInfo(req *codec.Message) (error,bool) {
 	subj, err := config.Selector.Select(SrvCast, "v1")
 	if err != nil {
 		fmt.Printf("Selector failed. error: %v\n", err)
-		return err, true
+		return err
 	}
 	fmt.Println("Found service: " + subj)
 
-	rpy := req.ReplyTo
-	req.ReplyTo = "nats-request"
 	req.Node = SrvCastCastHandler
 	resp, err := codec.Marshal(req)
 	if err != nil {
-		return err, true
+		return err
 	}
 
-	return config.Transport.Request(subj,resp , func(bytes []byte) error {
+	return config.Transport.Request(subj, resp, func(bytes []byte) error {
 		message := &codec.Message{}
 		codec.Unmarshal(bytes, message)
 		message.Body = "The cast of movie " + movie.Name + " includes " + message.Body
@@ -72,17 +70,17 @@ func (s *server) GetMovieInfo(req *codec.Message) (error,bool) {
 		if err != nil {
 			return err
 		}
-		return config.Transport.Publish(rpy, resp1)
-	}), true
+		return config.Transport.Publish(reply, resp1)
+	})
 }
 
-func (s *server) Cast(req *codec.Message) (error,bool) {
+func (s *server) Cast(req *codec.Message, reply string) error {
 	config := s.srv.Options()
 	db := s.movieDB.DB()
 
 	if len(req.Query["movie"]) == 0 {
 		fmt.Printf("Query failed. \n")
-		return ErrQueryFailure, true
+		return ErrQueryFailure
 	}
 	movie := Movies{}
 	//search in database
@@ -94,30 +92,17 @@ func (s *server) Cast(req *codec.Message) (error,bool) {
 	subj, err := config.Selector.Select(SrvCast, "v1")
 	if err != nil {
 		fmt.Printf("Selector failed. error: %v", err)
-		return err, true
+		return err
 	}
 	fmt.Println("Found service: " + subj)
 
-	req.ReplyTo = config.Transport.Options().Subject
 	req.Node = SrvCastCastHandler
 	resp, err := codec.Marshal(req)
 	if err != nil {
-		return err, true
+		return err
 	}
-	return config.Transport.Publish(subj, resp), false
+	return config.Transport.Publish(subj, resp)
 }
-
-//func (s *server)errHandler(req *codec.Message, err error){
-//	response := &codec.Message{
-//		Type:	    "response",
-//		StatusCode: 500,
-//		Header:     make(map[string][]string, 0),
-//		Body:       err.Error(),
-//		ContextID:    req.ContextID,
-//	}
-//	resp, _ := codec.Marshal(response)
-//	s.srv.Options().Transport.Publish(req.ReplyTo, resp)
-//}
 
 func main() {
 	server := server{}
