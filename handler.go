@@ -5,6 +5,7 @@ import (
 	"github.com/nzgogo/micro/api"
 	"github.com/nzgogo/micro/codec"
 	"github.com/nzgogo/micro/context"
+	"fmt"
 )
 
 func (s *service) ServerHandler(nMsg *nats.Msg) {
@@ -17,7 +18,8 @@ func (s *service) ServerHandler(nMsg *nats.Msg) {
 	//check message type, response or request
 	if message.Type == "request" {
 		//check if the message is a Request or Publish.
-		if nMsg.Reply != sub {
+		fmt.Println("nMsg.reply : " + nMsg.Reply)
+		if nMsg.Reply != "" {
 			message.ReplyTo = nMsg.Reply
 		}
 		contxt := s.Options().Context
