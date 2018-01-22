@@ -1,6 +1,8 @@
 package gogo
 
 import (
+	"strings"
+
 	"github.com/nats-io/go-nats"
 	"github.com/nzgogo/micro/api"
 	"github.com/nzgogo/micro/codec"
@@ -8,16 +10,17 @@ import (
 )
 
 func (s *service) ServerHandler(nMsg *nats.Msg) {
+	sub := strings.Replace(s.name, "-", ".", -1) + "." + s.version + "." + s.id
 	message := &codec.Message{}
 	codec.Unmarshal(nMsg.Data, message)
-	if message.ReplyTo =="nats-request" {
+	if nMsg.Reply != sub {
 		message.ReplyTo = nMsg.Reply
 	}
 	if message.Type == "request" {
 		//TODO if this is last endpoint in a serial call, we should not add this conversation
 		contxt := s.Options().Context
 		contxt.Add(&context.Conversation{
-			ID:		 message.ContextID,
+			ID:      message.ContextID,
 			Request: message.ReplyTo,
 		})
 
@@ -30,14 +33,9 @@ func (s *service) ServerHandler(nMsg *nats.Msg) {
 			})
 			s.opts.Transport.Publish(message.ReplyTo, resp)
 		}
-		go func() {
-			_, endCall := handler(message)
-			if endCall {
-				s.opts.Context.Delete(message.ContextID)
-			}
 
-
-		}()
+		message.ReplyTo = sub
+		go handler(message)
 	} else {
 		rpl := s.opts.Context.Get(message.ContextID).Request
 		s.opts.Transport.Publish(rpl, nMsg.Data)

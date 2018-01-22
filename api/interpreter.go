@@ -30,24 +30,24 @@ func HTTPReqToIntrlSReq(req *http.Request, rplSub, ctxid string) (*codec.Message
 
 	//TODO May need extract more data from http reqeust
 	request := &codec.Message{
-		Type:   	"request",
-		ContextID:  ctxid,
-		Header: 	req.Header,
-		Body:   	string(buf.Bytes()),
+		Type:      "request",
+		ContextID: ctxid,
+		Header:    req.Header,
+		Body:      string(buf.Bytes()),
 
-		Method: 	req.Method,
-		Path:   	req.URL.Path,
-		Host:   	req.Host,
+		Method: req.Method,
+		Path:   req.URL.Path,
+		Host:   req.Host,
 
-		ReplyTo:  	rplSub,
-		Query:  	req.URL.Query(),
+		ReplyTo: rplSub,
+		Query:   req.URL.Query(),
 		//Post
 		//Scheme
 	}
 	return request, nil
 }
 
- //NewResponse creates Response Message object.
+//NewResponse creates Response Message object.
 func NewResponse(statusCode int, msgType, contextID string, body *string, header map[string][]string) *codec.Message {
 	return &codec.Message{
 		Type:       msgType,

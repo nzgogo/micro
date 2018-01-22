@@ -34,25 +34,25 @@ type Pair struct {
 
 type Message struct {
 	//pre-process
-	Method     string              `json:"method,omitempty"`
-	Path       string              `json:"path,omitempty"`
-	Host       string              `json:"host,omitempty"`
+	Method string `json:"method,omitempty"`
+	Path   string `json:"path,omitempty"`
+	Host   string `json:"host,omitempty"`
 
 	//request fields
-	ReplyTo    string              `json:"replyTo,omitempty"`
-	Node       string              `json:"node,omitempty"`
-	Query      map[string][]string `json:"get,omitempty"`
-	Post       map[string]*Pair    `json:"post,omitempty"`
-	Scheme     string              `json:"scheme"`
+	ReplyTo string              `json:"replyTo,omitempty"`
+	Node    string              `json:"node,omitempty"`
+	Query   map[string][]string `json:"get,omitempty"`
+	Post    map[string]*Pair    `json:"post,omitempty"`
+	Scheme  string              `json:"scheme"`
 
 	//response fields
-	StatusCode int                 `json:"statusCode"`
+	StatusCode int `json:"statusCode"`
 
 	//common fields
-	Type       string              `json:"type"`
-	ContextID  string              `json:"contextId"`
-	Header     map[string][]string `json:"header"`
-	Body       string              `json:"body"`
+	Type      string              `json:"type"`
+	ContextID string              `json:"contextId"`
+	Header    map[string][]string `json:"header"`
+	Body      string              `json:"body"`
 }
 
 func Marshal(v interface{}) ([]byte, error) {

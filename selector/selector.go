@@ -34,7 +34,7 @@ type Filter func([]*registry.Service) []*registry.Service
 type Strategy func([]*registry.Service) Next
 
 var (
-	ErrNoRegistry	 = errors.New("Registry option can not be empty")
+	ErrNoRegistry    = errors.New("Registry option can not be empty")
 	ErrNotFound      = errors.New("not found")
 	ErrNoneAvailable = errors.New("none available")
 )

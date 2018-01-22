@@ -10,7 +10,7 @@ import (
 	"github.com/nzgogo/micro/codec"
 )
 
-type Handler func(*codec.Message) (error, bool)
+type Handler func(*codec.Message) error
 
 type Router interface {
 	Init(opts ...Option) error

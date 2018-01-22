@@ -5,11 +5,11 @@ import (
 )
 
 type Options struct {
-	Dialects		string //suppport mypath and yet more coming...
+	Dialects        string //suppport mypath and yet more coming...
 	Username        string
 	Password        string
-	Protocol		string
-	Address			string
+	Protocol        string
+	Address         string
 	DBName          string
 	Charset         string
 	ParseTime       bool
@@ -22,7 +22,7 @@ type Options struct {
 type Option func(*Options)
 
 func Dialects(dialects string) Option {
-	return func(o *Options){
+	return func(o *Options) {
 		o.Dialects = dialects
 	}
 }

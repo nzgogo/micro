@@ -4,8 +4,8 @@ import (
 	"github.com/nzgogo/micro/context"
 	"github.com/nzgogo/micro/registry"
 	"github.com/nzgogo/micro/router"
-	"github.com/nzgogo/micro/transport"
 	"github.com/nzgogo/micro/selector"
+	"github.com/nzgogo/micro/transport"
 )
 
 // Options of a service
@@ -19,7 +19,7 @@ type Options struct {
 	//wrappers
 	//HdlrWrappers []HandlerWrapper
 	//HttpHdlrWrappers []HttpHandlerWrapper
-	wrappers  wrapper
+	wrappers wrapper
 }
 
 type Option func(*Options)
@@ -75,13 +75,13 @@ func Selector(s selector.Selector) Option {
 }
 
 // WrapHandler adds a service handler Wrapper to a list of options passed into the server
-func WrapHandler(w ...HandlerWrapper) Option {
-	return func(o *Options) {
-		for _, wrap := range w {
-			o.HdlrWrappers = append(o.HdlrWrappers, wrap)
-		}
-	}
-}
+// func WrapHandler(w ...HandlerWrapper) Option {
+// 	return func(o *Options) {
+// 		for _, wrap := range w {
+// 			o.HdlrWrappers = append(o.HdlrWrappers, wrap)
+// 		}
+// 	}
+// }
 
 // WrapHttpHandler adds a http handler Wrapper to a list of options passed into the server
 //func WrapHttpHandler(w ...HttpHandlerWrapper) Option {
