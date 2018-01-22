@@ -22,25 +22,13 @@ var (
 func (s *server) ChangHenGe(req *codec.Message, reply string) error {
 	fmt.Println("Message received: " + req.Body)
 	response := gogoapi.NewResponse(200, req.ContextID, &changhenge, req.Header)
-
-	resp, err := codec.Marshal(response)
-	if err != nil {
-		return err
-	}
-	fmt.Println("Message received from: " + req.Body)
-	return s.srv.Options().Transport.Publish(reply, resp)
+	return s.srv.Respond(response, reply)
 }
 
 func (s *server) Hello(req *codec.Message, reply string) error {
 	fmt.Println("Message received: " + req.Body)
 	response := gogoapi.NewResponse(200, req.ContextID, &responsecode, req.Header)
-
-	resp, err := codec.Marshal(response)
-	if err != nil {
-		return err
-	}
-
-	return s.srv.Options().Transport.Publish(reply, resp)
+	return s.srv.Respond(response, reply)
 }
 
 func main() {

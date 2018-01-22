@@ -14,14 +14,12 @@ func (s *service) ServerHandler(nMsg *nats.Msg) {
 
 	sub :=  s.opts.Transport.Options().Subject
 
-	//check if the message is a Request or Publish.
-	if nMsg.Reply != sub {
-		message.ReplyTo = nMsg.Reply
-	}
-
 	//check message type, response or request
 	if message.Type == "request" {
-		//TODO if this is last endpoint in a serial call, we should not add this conversation
+		//check if the message is a Request or Publish.
+		if nMsg.Reply != sub {
+			message.ReplyTo = nMsg.Reply
+		}
 		contxt := s.Options().Context
 		contxt.Add(&context.Conversation{
 			ID:      message.ContextID,

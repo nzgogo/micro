@@ -11,6 +11,7 @@ import (
 	"github.com/nzgogo/micro/router"
 	"github.com/nzgogo/micro/selector"
 	"github.com/nzgogo/micro/transport"
+	"github.com/nzgogo/micro/codec"
 	"github.com/satori/go.uuid"
 )
 
@@ -18,6 +19,7 @@ type Service interface {
 	Options() Options
 	Init(...Option) error
 	Run() error
+	Respond(message *codec.Message, subject string) error
 }
 
 type service struct {
@@ -74,6 +76,15 @@ func (s *service) Run() error {
 	}
 
 	return nil
+}
+
+func (s *service) Respond(message *codec.Message, subject string) error {
+	s.opts.Context.Delete(message.ContextID)
+	resp, err := codec.Marshal(message)
+	if err != nil {
+		return err
+	}
+	return s.opts.Transport.Publish(subject, resp)
 }
 
 func (s *service) start() error {
