@@ -4,10 +4,10 @@ import (
 	"net/http"
 
 	"github.com/nzgogo/micro/codec"
-	)
+)
 
-type wrapper struct{
-	handlerWrappers []HandlerWrapper
+type wrapper struct {
+	handlerWrappers     []HandlerWrapper
 	httpHandlerWrappers []HttpHandlerWrapper
 }
 
@@ -24,4 +24,3 @@ type HandlerFunc func(*codec.Message) error
 
 // HandlerWrapper wraps the HandlerFunc and returns the equivalent
 type HandlerWrapper func(HandlerFunc) HandlerFunc
-
