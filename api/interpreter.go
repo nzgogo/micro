@@ -4,18 +4,14 @@ package gogoapi
 
 import (
 	"bytes"
-	"net/http"
 	"errors"
-	//"github.com/nzgogo/micro/codec"
-	"micro/codec"
+	"net/http"
+
+	"github.com/nzgogo/micro/codec"
 )
 
-// Request Response server as structure to transport http response throu NATS message queue
-type Request *codec.Request
-type Response *codec.Response
-
-// NewRequestFromHTTP creates the Request struct from regular *http.Request by serialization of main parts of it.
-func HTTPReqToNatsSReq(req *http.Request) (Request, error) {
+// HTTPReqToIntrlSReq creates the Request struct from regular *http.Request by serialization of main parts of it.
+func HTTPReqToIntrlSReq(req *http.Request, rplSub, ctxid string) (*codec.Message, error) {
 	if req == nil {
 		return nil, errors.New("natsproxy: Request cannot be nil")
 	}
@@ -33,25 +29,36 @@ func HTTPReqToNatsSReq(req *http.Request) (Request, error) {
 	}
 
 	//TODO May need extract more data from http reqeust
-	request := &codec.Request{
-		Method:     req.Method,
-		Path:		req.RequestURI,
-		Host:		req.Host,
-		Body:       string(buf.Bytes()),
+	request := &codec.Message{
+		Type:      "request",
+		ContextID: ctxid,
+		Header:    req.Header,
+		Body:      string(buf.Bytes()),
+
+		Method: req.Method,
+		Path:   req.URL.Path,
+		Host:   req.Host,
+
+		ReplyTo: rplSub,
+		Query:   req.URL.Query(),
+		//Post
+		//Scheme
 	}
 	return request, nil
 }
 
-// NewResponse creates blank initialized Response object.
-func NewResponse() Response {
-	return &codec.Response{
-		200,
-		make(map[string][]string, 0),
-		"",
+//NewResponse creates Response Message object.
+func NewResponse(statusCode int, contextID string, body *string, header map[string][]string) *codec.Message {
+	return &codec.Message{
+		Type:       "response",
+		StatusCode: statusCode,
+		Header:     header,
+		ContextID:  contextID,
+		Body:       *body,
 	}
 }
 
-func WriteResponse(rw http.ResponseWriter, response Response) {
+func WriteResponse(rw http.ResponseWriter, response *codec.Message) {
 	// Copy headers
 	// from NATS response.
 	copyHeader(response.Header, rw.Header())
@@ -71,5 +78,3 @@ func copyHeader(src, dst http.Header) {
 		}
 	}
 }
-
-

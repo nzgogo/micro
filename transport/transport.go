@@ -4,25 +4,27 @@
 package transport
 
 import (
-	"errors"
 	"strings"
 	"time"
+
 	"github.com/nats-io/go-nats"
 )
 
 type Transport interface {
 	Options() Options
 	Init() error
-	Request(string, []byte, ResponseHandler)  error
+	Request(string, []byte, ResponseHandler) error
 	Publish(string, []byte) error
-	Subscribe(nats.MsgHandler) error
+	Subscribe() error
+	SetHandler(nats.MsgHandler)
 	Close() error
 }
 
 type transport struct {
-	conn *nats.Conn
-	sub  *nats.Subscription
-	opts Options
+	conn    *nats.Conn
+	sub     *nats.Subscription
+	opts    Options
+	handler nats.MsgHandler
 }
 
 type ResponseHandler func([]byte) error
@@ -44,7 +46,7 @@ func (n *transport) Request(sub string, req []byte, handler ResponseHandler) err
 		return respErr
 	}
 
-	if handler != nil{
+	if handler != nil {
 		return handler(rsp.Data)
 	}
 
@@ -58,28 +60,17 @@ func (n *transport) Publish(sub string, b []byte) error {
 		return n.conn.Publish(sub, b)
 	}
 
-	// use the deadline
-	ch := make(chan error, 1)
-
-	go func() {
-		ch <- n.conn.Publish(sub, b)
-	}()
-
-	select {
-	case err := <-ch:
-		return err
-	case <-time.After(n.opts.Timeout):
-		return errors.New("deadline exceeded")
-	}
+	return n.conn.Publish(sub, b)
 }
 
-func (n *transport) Subscribe (subscribeHdler nats.MsgHandler) error {
-	if subscribeHdler == nil{
-		return nil
-	}
+func (n *transport) Subscribe() error {
 	var err error
-	n.sub, err = n.conn.Subscribe(n.opts.Subject, subscribeHdler)
+	n.sub, err = n.conn.Subscribe(n.opts.Subject, n.handler)
 	return err
+}
+
+func (n *transport) SetHandler(handler nats.MsgHandler) {
+	n.handler = handler
 }
 
 func (n *transport) Close() error {
@@ -117,8 +108,6 @@ func (n *transport) Init() error {
 	}
 
 	options.Timeout = DefaultDialTimeout
-
-	//sub, err := n.conn.SubscribeSync(options.Subject)
 
 	if err != nil {
 		return err

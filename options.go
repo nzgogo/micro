@@ -1,35 +1,32 @@
 package gogo
 
 import (
-	"micro/codec"
-	"micro/transport"
-	"micro/registry"
-	"micro/router"
-
-	"context"
+	"github.com/nzgogo/micro/context"
+	"github.com/nzgogo/micro/registry"
+	"github.com/nzgogo/micro/router"
+	"github.com/nzgogo/micro/selector"
+	"github.com/nzgogo/micro/transport"
 )
 
 // Options of a service
 type Options struct {
-	Codec     codec.Codec
 	Transport transport.Transport
 	Registry  registry.Registry
 	Router    router.Router
+	Context   context.Context
+	Selector  selector.Selector
 
 	//wrappers
-	HdlrWrappers []HandlerWrapper
+	//HdlrWrappers []HandlerWrapper
 	//HttpHdlrWrappers []HttpHandlerWrapper
-
-	// Other options for implementations of the interface
-	// can be stored in a context
-	Context context.Context
+	wrappers wrapper
 }
 
 type Option func(*Options)
 
 func newOptions(opts ...Option) Options {
 	opt := Options{
-		Codec: codec.NewCodec(),
+		Context: context.NewContext(),
 	}
 
 	for _, o := range opts {
@@ -45,12 +42,6 @@ func newOptions(opts ...Option) Options {
 	}
 
 	return opt
-}
-
-func Codec(c codec.Codec) Option {
-	return func(o *Options) {
-		o.Codec = c
-	}
 }
 
 func Transport(t transport.Transport) Option {
@@ -71,14 +62,26 @@ func Router(r router.Router) Option {
 	}
 }
 
-// WrapHandler adds a service handler Wrapper to a list of options passed into the server
-func WrapHandler(w ...HandlerWrapper) Option {
+func Context(c context.Context) Option {
 	return func(o *Options) {
-		for _, wrap := range w {
-			o.HdlrWrappers = append(o.HdlrWrappers, wrap)
-		}
+		o.Context = c
 	}
 }
+
+func Selector(s selector.Selector) Option {
+	return func(o *Options) {
+		o.Selector = s
+	}
+}
+
+// WrapHandler adds a service handler Wrapper to a list of options passed into the server
+// func WrapHandler(w ...HandlerWrapper) Option {
+// 	return func(o *Options) {
+// 		for _, wrap := range w {
+// 			o.HdlrWrappers = append(o.HdlrWrappers, wrap)
+// 		}
+// 	}
+// }
 
 // WrapHttpHandler adds a http handler Wrapper to a list of options passed into the server
 //func WrapHttpHandler(w ...HttpHandlerWrapper) Option {

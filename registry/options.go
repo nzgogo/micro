@@ -13,9 +13,9 @@ type Options struct {
 	TLSConfig *tls.Config
 
 	//consul agent check options
-	CheckArgs []string
-	CheckInterval string	//todo
-	CheckTimeout string		//todo
+	CheckArgs     []string
+	CheckInterval string //todo
+	CheckTimeout  string //todo
 }
 
 // Addrs is the registry addresses to use

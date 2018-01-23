@@ -1,9 +1,8 @@
 package selector
 
 import (
+	"github.com/nzgogo/micro/registry"
 	"testing"
-	"micro/registry"
-	//"github.com/nzgogo/micro/registry"
 )
 
 func TestFilterVersion(t *testing.T) {
