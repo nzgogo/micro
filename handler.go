@@ -1,11 +1,12 @@
 package gogo
 
 import (
+	"fmt"
+
 	"github.com/nats-io/go-nats"
 	"github.com/nzgogo/micro/api"
 	"github.com/nzgogo/micro/codec"
 	"github.com/nzgogo/micro/context"
-	"fmt"
 )
 
 func (s *service) ServerHandler(nMsg *nats.Msg) {
@@ -13,7 +14,7 @@ func (s *service) ServerHandler(nMsg *nats.Msg) {
 	message := &codec.Message{}
 	codec.Unmarshal(nMsg.Data, message)
 
-	sub :=  s.opts.Transport.Options().Subject
+	sub := s.opts.Transport.Options().Subject
 
 	//check message type, response or request
 	if message.Type == "request" {

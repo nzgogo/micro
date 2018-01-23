@@ -7,11 +7,11 @@ import (
 	"strings"
 	"syscall"
 
+	"github.com/nzgogo/micro/codec"
 	"github.com/nzgogo/micro/registry"
 	"github.com/nzgogo/micro/router"
 	"github.com/nzgogo/micro/selector"
 	"github.com/nzgogo/micro/transport"
-	"github.com/nzgogo/micro/codec"
 	"github.com/satori/go.uuid"
 )
 

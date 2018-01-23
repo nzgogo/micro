@@ -1,36 +1,35 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"time"
-	"errors"
 
+	"github.com/jinzhu/gorm"
 	"github.com/nzgogo/micro"
 	"github.com/nzgogo/micro/codec"
-	"github.com/nzgogo/micro/router"
 	"github.com/nzgogo/micro/db"
-	"github.com/jinzhu/gorm"
-
+	"github.com/nzgogo/micro/router"
 )
 
-var(
+var (
 	SrvCastCastHandler = "/movie_cast"
-	SrvCast = "gogo-core-crew"
-	ErrQueryFailure = errors.New("query field is empty")
+	SrvCast            = "gogo-core-crew"
+	ErrQueryFailure    = errors.New("query field is empty")
 )
 
 type Movies struct {
 	gorm.Model
-	Name string
-	Director string
-	Budget   int
-	Producer string
+	Name        string
+	Director    string
+	Budget      int
+	Producer    string
 	InitRelease time.Time
 }
 
 type server struct {
-	srv gogo.Service
+	srv     gogo.Service
 	movieDB db.DB
 }
 
@@ -102,8 +101,8 @@ func (s *server) Cast(req *codec.Message, reply string) error {
 
 func main() {
 	server := server{}
-	server.movieDB = db.NewDB("kai","gogo1234","mydb")
-	if err := server.movieDB.Connect(); err!=nil {
+	server.movieDB = db.NewDB("kai", "gogo1234", "mydb")
+	if err := server.movieDB.Connect(); err != nil {
 		log.Fatal(err)
 	}
 	defer server.movieDB.Close()

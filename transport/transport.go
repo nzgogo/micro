@@ -21,9 +21,9 @@ type Transport interface {
 }
 
 type transport struct {
-	conn *nats.Conn
-	sub  *nats.Subscription
-	opts Options
+	conn    *nats.Conn
+	sub     *nats.Subscription
+	opts    Options
 	handler nats.MsgHandler
 }
 
