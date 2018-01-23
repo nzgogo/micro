@@ -2,8 +2,9 @@ package selector
 
 import (
 	"errors"
-	"micro/registry"
-	//"github.com/nzgogo/micro/registry"
+	"strings"
+
+	"github.com/nzgogo/micro/registry"
 )
 
 type Selector interface {
@@ -33,6 +34,7 @@ type Filter func([]*registry.Service) []*registry.Service
 type Strategy func([]*registry.Service) Next
 
 var (
+	ErrNoRegistry    = errors.New("Registry option can not be empty")
 	ErrNotFound      = errors.New("not found")
 	ErrNoneAvailable = errors.New("none available")
 )
@@ -54,7 +56,7 @@ func (r *selector) Init() error {
 		r.opts.Strategy = Random
 	}
 	if r.opts.Registry == nil {
-		r.opts.Registry = registry.NewRegistry()
+		return ErrNoRegistry
 	}
 
 	return nil
@@ -75,7 +77,7 @@ func (r *selector) Select(service, version string) (string, error) {
 	//for _, filter := range r.opts.Filters {
 	//	services = filter(services)
 	//}
-	filterVersion(services,version)
+	filterVersion(services, version)
 
 	// if there's nothing left, return
 	if len(services) == 0 {
@@ -83,12 +85,12 @@ func (r *selector) Select(service, version string) (string, error) {
 	}
 
 	next := r.opts.Strategy(services)
-	node, err:= next()
+	node, err := next()
 	if err != nil {
 		return "", err
 	}
 
-	return service+"."+version+"."+node.Id,nil
+	return strings.Replace(service, "-", ".", -1) + "." + version + "." + node.ID, nil
 }
 
 func (r *selector) Mark(service string, node *registry.Node, err error) {

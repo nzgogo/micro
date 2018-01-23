@@ -26,3 +26,11 @@
 
 vendor/*/
 test/
+
+examples/greater/api/api
+
+examples/greater/srv/srv
+
+*.txt
+
+examples/greater/api/gogox

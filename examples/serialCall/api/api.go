@@ -25,7 +25,6 @@ func (h *MyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	ctxId := config.Context.Add(&context.Conversation{
 		Response: w,
 	})
-
 	// map the HTTP request to internal transport request message struct.
 	request, err := gogoapi.HTTPReqToIntrlSReq(r, config.Transport.Options().Subject, ctxId)
 	if err != nil {
@@ -44,6 +43,7 @@ func (h *MyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Dispatch to server: " + srvName)
 
 	//service discovery
+
 	subj, err := config.Selector.Select(srvName, "v1")
 	if err != nil {
 		fmt.Printf("Selector failed. error: %v", err)
@@ -56,12 +56,12 @@ func (h *MyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	bytes, _ := codec.Marshal(request)
 	fmt.Println("send to service: " + subj)
 	respErr := config.Transport.Publish(subj, bytes)
+
 	if respErr != nil {
 		fmt.Printf("failed to send message . error: %v", err)
 		http.Error(w, "No response", http.StatusInternalServerError)
 		return
 	}
-
 	config.Context.Wait(ctxId)
 }
 

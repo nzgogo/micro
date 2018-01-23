@@ -14,7 +14,7 @@ var (
 func URLToIntnlTrans(host string, path string) string {
 	//subURI := strings.Replace(path, "/", ".", -1)
 	//subHost:=strings.Replace(host, "/", ".", -1)
-	str := strings.Split(path,"/")
+	str := strings.Split(path, "/")
 
-	return str[1]+".core."+str[3]
+	return "gogo-" + str[2] + "-" + str[3]
 }
