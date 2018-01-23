@@ -27,7 +27,7 @@ func (h *MyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	})
 
 	// map the HTTP request to internal transport request message struct.
-	request, err := gogoapi.HTTPReqToIntrlSReq(r,config.Transport.Options().Subject,ctxId)
+	request, err := gogoapi.HTTPReqToIntrlSReq(r, config.Transport.Options().Subject, ctxId)
 	if err != nil {
 		http.Error(w, "Cannot process request", http.StatusInternalServerError)
 		return

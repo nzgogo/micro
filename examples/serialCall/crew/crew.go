@@ -5,23 +5,23 @@ import (
 	"log"
 	"strconv"
 
-	"github.com/nzgogo/micro"
-	"github.com/nzgogo/micro/codec"
-	"github.com/nzgogo/micro/router"
-	"github.com/nzgogo/micro/db"
 	"github.com/jinzhu/gorm"
+	"github.com/nzgogo/micro"
 	"github.com/nzgogo/micro/api"
+	"github.com/nzgogo/micro/codec"
+	"github.com/nzgogo/micro/db"
+	"github.com/nzgogo/micro/router"
 )
 
 type server struct {
-	srv gogo.Service
+	srv    gogo.Service
 	castDB db.DB
 }
 
 type Casts struct {
 	gorm.Model
-	Name string
-	Role string
+	Name    string
+	Role    string
 	MovieId uint
 }
 
@@ -35,7 +35,7 @@ func (s *server) Cast(req *codec.Message, reply string) error {
 	fmt.Println(casts)
 
 	castlist := ""
-	for _,cast:=range casts {
+	for _, cast := range casts {
 		castlist = castlist + cast.Name + ". "
 	}
 
@@ -46,8 +46,8 @@ func (s *server) Cast(req *codec.Message, reply string) error {
 
 func main() {
 	server := server{}
-	server.castDB = db.NewDB("kai","gogo1234","mydb")
-	if err := server.castDB.Connect(); err!=nil {
+	server.castDB = db.NewDB("kai", "gogo1234", "mydb")
+	if err := server.castDB.Connect(); err != nil {
 		log.Fatal(err)
 	}
 	defer server.castDB.Close()
