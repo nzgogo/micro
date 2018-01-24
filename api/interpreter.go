@@ -47,17 +47,6 @@ func HTTPReqToIntrlSReq(req *http.Request, rplSub, ctxid string) (*codec.Message
 	return request, nil
 }
 
-//NewResponse creates Response Message object.
-func NewResponse(statusCode int, contextID string, body *string, header map[string][]string) *codec.Message {
-	return &codec.Message{
-		Type:       "response",
-		StatusCode: statusCode,
-		Header:     header,
-		ContextID:  contextID,
-		Body:       *body,
-	}
-}
-
 func WriteResponse(rw http.ResponseWriter, response *codec.Message) {
 	// Copy headers
 	// from NATS response.

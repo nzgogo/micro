@@ -62,3 +62,14 @@ func Marshal(v interface{}) ([]byte, error) {
 func Unmarshal(d []byte, v interface{}) error {
 	return json.Unmarshal(d, v)
 }
+
+//NewResponse creates Response Message object.
+func NewResponse(statusCode int, contextID string, body *string, header map[string][]string) *Message {
+	return &Message{
+		Type:       "response",
+		StatusCode: statusCode,
+		Header:     header,
+		ContextID:  contextID,
+		Body:       *body,
+	}
+}

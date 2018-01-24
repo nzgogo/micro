@@ -7,7 +7,6 @@ import (
 
 	"github.com/jinzhu/gorm"
 	"github.com/nzgogo/micro"
-	"github.com/nzgogo/micro/api"
 	"github.com/nzgogo/micro/codec"
 	"github.com/nzgogo/micro/db"
 	"github.com/nzgogo/micro/router"
@@ -39,7 +38,7 @@ func (s *server) Cast(req *codec.Message, reply string) error {
 		castlist = castlist + cast.Name + ". "
 	}
 
-	response := gogoapi.NewResponse(200, req.ContextID, &castlist, req.Header)
+	response := codec.NewResponse(200, req.ContextID, &castlist, req.Header)
 
 	return s.srv.Respond(response, reply)
 }
