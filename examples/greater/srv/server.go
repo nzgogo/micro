@@ -19,13 +19,13 @@ var (
 )
 
 func (s *server) ChangHenGe(req *codec.Message, reply string) error {
-	fmt.Println("Message received: " + req.Body)
+	fmt.Println("Message received: " + string(req.Body))
 	response := codec.NewResponse(200, req.ContextID, &changhenge, req.Header)
 	return s.srv.Respond(response, reply)
 }
 
 func (s *server) Hello(req *codec.Message, reply string) error {
-	fmt.Println("Message received: " + req.Body)
+	fmt.Println("Message received: " + string(req.Body))
 	response := codec.NewResponse(200, req.ContextID, &responsecode, req.Header)
 	return s.srv.Respond(response, reply)
 }

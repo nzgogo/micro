@@ -52,7 +52,7 @@ type Message struct {
 	Type      string              `json:"type"`
 	ContextID string              `json:"contextId"`
 	Header    map[string][]string `json:"header"`
-	Body      string              `json:"body"`
+	Body      []byte              `json:"body"`
 }
 
 func Marshal(v interface{}) ([]byte, error) {
@@ -65,11 +65,19 @@ func Unmarshal(d []byte, v interface{}) error {
 
 //NewResponse creates Response Message object.
 func NewResponse(statusCode int, contextID string, body *string, header map[string][]string) *Message {
+	var b =make([]byte,0)
+	if body != nil {
+		b = []byte(*body)
+	} else {
+		b = nil
+	}
+
+
 	return &Message{
 		Type:       "response",
 		StatusCode: statusCode,
 		Header:     header,
 		ContextID:  contextID,
-		Body:       *body,
+		Body:       b,
 	}
 }
