@@ -53,7 +53,8 @@ func (s *service) ApiHandler(nMsg *nats.Msg) {
 	ctx := s.opts.Context
 
 	r := ctx.Get(message.ContextID).Response
-
+	//fmt.Printf("status: %d\n" , message.StatusCode)
+	//fmt.Println("body: "+string(message.Body))
 	gogoapi.WriteResponse(r, message)
 
 	ctx.Done(message.ContextID)

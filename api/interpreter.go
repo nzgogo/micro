@@ -33,7 +33,7 @@ func HTTPReqToIntrlSReq(req *http.Request, rplSub, ctxid string) (*codec.Message
 		Type:      "request",
 		ContextID: ctxid,
 		Header:    req.Header,
-		Body:      string(buf.Bytes()),
+		Body:      buf.Bytes(),
 
 		Method: req.Method,
 		Path:   req.URL.Path,
@@ -57,7 +57,7 @@ func WriteResponse(rw http.ResponseWriter, response *codec.Message) {
 
 	// Write the bytes of response to a response writer.
 	// TODO benchmark
-	bytes.NewBuffer([]byte(response.Body)).WriteTo(rw)
+	bytes.NewBuffer(response.Body).WriteTo(rw)
 }
 
 func copyHeader(src, dst http.Header) {

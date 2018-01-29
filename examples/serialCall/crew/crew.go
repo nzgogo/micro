@@ -25,10 +25,10 @@ type Casts struct {
 }
 
 func (s *server) Cast(req *codec.Message, reply string) error {
-	fmt.Println("Message received: " + req.Body)
+	fmt.Println("Message received: " + string(req.Body))
 
 	db := s.castDB.DB()
-	movieid, _ := strconv.ParseUint(req.Body, 10, 32)
+	movieid, _ := strconv.ParseUint(string(req.Body), 10, 32)
 	casts := []Casts{}
 	db.Where(&Casts{MovieId: uint(movieid)}).Find(&casts)
 	fmt.Println(casts)
