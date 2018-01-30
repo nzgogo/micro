@@ -1,9 +1,10 @@
 package codec
 
 import (
-	"github.com/json-iterator/go"
-	"net/url"
 	"net/http"
+	"net/url"
+
+	"github.com/json-iterator/go"
 )
 
 var json = jsoniter.ConfigCompatibleWithStandardLibrary
@@ -21,20 +22,20 @@ type Message struct {
 	Host   string `json:"host,omitempty"`
 
 	//request fields
-	ReplyTo string              `json:"replyTo,omitempty"`
-	Node    string              `json:"node,omitempty"`
-	Query   url.Values		    `json:"get,omitempty"`
-	Post    map[string]*Pair    `json:"post,omitempty"`
-	Scheme  string              `json:"scheme"`
+	ReplyTo string           `json:"replyTo,omitempty"`
+	Node    string           `json:"node,omitempty"`
+	Query   url.Values       `json:"get,omitempty"`
+	Post    map[string]*Pair `json:"post,omitempty"`
+	Scheme  string           `json:"scheme"`
 
 	//response fields
 	StatusCode int `json:"statusCode"`
 
 	//common fields
-	Type      string              `json:"type"`
-	ContextID string              `json:"contextId"`
-	Header    http.Header 		  `json:"header"`
-	Body      []byte              `json:"body"`
+	Type      string      `json:"type"`
+	ContextID string      `json:"contextId"`
+	Header    http.Header `json:"header"`
+	Body      []byte      `json:"body"`
 }
 
 func Marshal(v interface{}) ([]byte, error) {
@@ -47,7 +48,7 @@ func Unmarshal(d []byte, v interface{}) error {
 
 //NewResponse creates Response Message object.
 func NewResponse(statusCode int, contextID string, body *string, header http.Header) *Message {
-	var b =make([]byte,0)
+	var b = make([]byte, 0)
 	if body != nil {
 		b = []byte(*body)
 	} else {
@@ -63,16 +64,16 @@ func NewResponse(statusCode int, contextID string, body *string, header http.Hea
 	}
 }
 
-func (msg *Message) Get(key string) string{
-	jsonStrings := make(map [string]string)
+func (msg *Message) Get(key string) string {
+	jsonStrings := make(map[string]string)
 	if err := Unmarshal(msg.Body, &jsonStrings); err == nil {
 		return jsonStrings[key]
 	}
 	return ""
 }
 
-func (msg *Message) GetAll(key string) map[string]string{
-	jsonStrings := make(map[string]string,0)
+func (msg *Message) GetAll(key string) map[string]string {
+	jsonStrings := make(map[string]string, 0)
 	err := Unmarshal(msg.Body, &jsonStrings)
 	if err == nil {
 		return jsonStrings
