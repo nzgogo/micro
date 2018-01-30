@@ -31,7 +31,7 @@ func (s *service) ServerHandler(nMsg *nats.Msg) {
 
 		handler, routerErr := s.opts.Router.Dispatch(message)
 		if routerErr != nil {
-			errResp := codec.NewResponse(404, message.ContextID, nil, message.Header)
+			errResp := codec.NewResponse(message.ContextID, 404, nil, &message.Header)
 			resp, _ := codec.Marshal(errResp)
 			s.opts.Transport.Publish(message.ReplyTo, resp)
 		}
