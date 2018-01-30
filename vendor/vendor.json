@@ -210,6 +210,11 @@
 			"path": "google.golang.org/appengine/cloudsql",
 			"revision": "5bee14b453b4c71be47ec1781b0fa61c2ea182db",
 			"revisionTime": "2017-12-12T22:30:47Z"
+		},
+		{
+			"checksumSHA1": "BIZpjEcRC0FJEmZoAVTXaxdLTHs=",
+			"path": "testing",
+			"revision": ""
 		}
 	],
 	"rootPath": "micro"
