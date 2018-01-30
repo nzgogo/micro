@@ -7,6 +7,13 @@
 			"revision": ""
 		},
 		{
+			"checksumSHA1": "0et4hA6AYqZCgYiY+c6Z17t3k3k=",
+			"origin": "github.com/hashicorp/consul/vendor/github.com/armon/go-metrics",
+			"path": "github.com/armon/go-metrics",
+			"revision": "842ae5a248a48a7216998ee8d7c5f271356c9fcf",
+			"revisionTime": "2018-01-26T16:45:13Z"
+		},
+		{
 			"checksumSHA1": "178ebwKMX/plldM2EKeT7pj3vs8=",
 			"path": "github.com/go-sql-driver/mysql",
 			"revision": "2cc627ac8defc45d65066ae98f898166f580f9a4",
@@ -26,11 +33,25 @@
 			"revisionTime": "2017-12-18T14:54:08Z"
 		},
 		{
+			"checksumSHA1": "Cas2nprG6pWzf05A2F/OlnjUu2Y=",
+			"origin": "github.com/hashicorp/consul/vendor/github.com/hashicorp/go-immutable-radix",
+			"path": "github.com/hashicorp/go-immutable-radix",
+			"revision": "842ae5a248a48a7216998ee8d7c5f271356c9fcf",
+			"revisionTime": "2018-01-26T16:45:13Z"
+		},
+		{
 			"checksumSHA1": "A1PcINvF3UiwHRKn8UcgARgvGRs=",
 			"origin": "github.com/hashicorp/consul/vendor/github.com/hashicorp/go-rootcerts",
 			"path": "github.com/hashicorp/go-rootcerts",
 			"revision": "6bb64b370b90e7ef1fa532be9e591a81c3493e00",
 			"revisionTime": "2016-05-03T14:34:40Z"
+		},
+		{
+			"checksumSHA1": "2nOpYjx8Sn57bqlZq17yM4YJuM4=",
+			"origin": "github.com/hashicorp/consul/vendor/github.com/hashicorp/golang-lru/simplelru",
+			"path": "github.com/hashicorp/golang-lru/simplelru",
+			"revision": "842ae5a248a48a7216998ee8d7c5f271356c9fcf",
+			"revisionTime": "2018-01-26T16:45:13Z"
 		},
 		{
 			"checksumSHA1": "mS15CkImPzXYsgNwl3Mt9Gh3Vb0=",
