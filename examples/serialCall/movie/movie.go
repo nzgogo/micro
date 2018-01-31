@@ -45,7 +45,8 @@ func (s *server) GetMovieInfo(req *codec.Message, reply string) error {
 	//search in database
 	db.Where(&Movies{Name: req.Query["movie"][0]}).Find(&movie)
 	fmt.Println(movie)
-	req.Body = fmt.Sprint(movie.ID)
+	body := fmt.Sprint(movie.ID)
+	req.Body = []byte(body)
 
 	//service discovery
 	subj, err := config.Selector.Select(SrvCast, "v1")
@@ -64,7 +65,8 @@ func (s *server) GetMovieInfo(req *codec.Message, reply string) error {
 	return config.Transport.Request(subj, resp, func(bytes []byte) error {
 		message := &codec.Message{}
 		codec.Unmarshal(bytes, message)
-		message.Body = "The cast of movie " + movie.Name + " includes " + message.Body
+		body := "The cast of movie " + movie.Name + " includes " + string(message.Body)
+		message.Body = []byte(body)
 		return s.srv.Respond(message, reply)
 	})
 }
@@ -81,7 +83,8 @@ func (s *server) Cast(req *codec.Message, reply string) error {
 	//search in database
 	db.Where(&Movies{Name: req.Query["movie"][0]}).Find(&movie)
 	fmt.Println(movie)
-	req.Body = fmt.Sprint(movie.ID)
+	body := fmt.Sprint(movie.ID)
+	req.Body = []byte(body)
 
 	//service discovery
 	subj, err := config.Selector.Select(SrvCast, "v1")

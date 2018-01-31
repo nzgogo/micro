@@ -17,9 +17,8 @@ type Options struct {
 	Selector  selector.Selector
 
 	//wrappers
-	//HdlrWrappers []HandlerWrapper
-	//HttpHdlrWrappers []HttpHandlerWrapper
-	wrappers wrapper
+	HdlrWrappers []HandlerWrapper
+	HttpRespWrappers []HttpResponseWrapper
 }
 
 type Option func(*Options)
@@ -74,20 +73,20 @@ func Selector(s selector.Selector) Option {
 	}
 }
 
-// WrapHandler adds a service handler Wrapper to a list of options passed into the server
-// func WrapHandler(w ...HandlerWrapper) Option {
-// 	return func(o *Options) {
-// 		for _, wrap := range w {
-// 			o.HdlrWrappers = append(o.HdlrWrappers, wrap)
-// 		}
-// 	}
-// }
+ //WrapHandler adds a service handler Wrapper to a list of options passed into the server
+ func WrapHandler(w ...HandlerWrapper) Option {
+ 	return func(o *Options) {
+ 		for _, wrap := range w {
+ 			o.HdlrWrappers = append(o.HdlrWrappers, wrap)
+ 		}
+ 	}
+ }
 
-// WrapHttpHandler adds a http handler Wrapper to a list of options passed into the server
-//func WrapHttpHandler(w ...HttpHandlerWrapper) Option {
-//	return func(o *Options) {
-//		for _, wrap := range w {
-//			o.HttpHdlrWrappers = append(o.HttpHdlrWrappers, wrap)
-//		}
-//	}
-//}
+//WrapHandler adds a service handler Wrapper to a list of options passed into the server
+func WrapRepsWriter(w ...HttpResponseWrapper) Option {
+	return func(o *Options) {
+		for _, wrap := range w {
+			o.HttpRespWrappers = append(o.HttpRespWrappers, wrap)
+		}
+	}
+}
