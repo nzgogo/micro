@@ -64,11 +64,11 @@ func (msg *Message) GetAll(key string) map[string]string {
 }
 
 //NewResponse creates Response Message object.
-func NewResponse(contextID string, statusCode int, body []byte, header *http.Header) *Message {
+func NewResponse(contextID string, statusCode int, body []byte, header http.Header) *Message {
 	return &Message{
 		Type:       "response",
 		StatusCode: statusCode,
-		Header:     *header,
+		Header:     header,
 		ContextID:  contextID,
 		Body:       body,
 	}

@@ -38,7 +38,7 @@ func (s *server) Cast(req *codec.Message, reply string) error {
 		castlist = castlist + cast.Name + ". "
 	}
 
-	response := codec.NewResponse(200, req.ContextID, &castlist, req.Header)
+	response := codec.NewResponse(req.ContextID, 200,  []byte(castlist), req.Header)
 
 	return s.srv.Respond(response, reply)
 }

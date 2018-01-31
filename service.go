@@ -147,7 +147,6 @@ func (s *service) deregister() error {
 		Nodes:   []*registry.Node{node},
 	}
 
-	fmt.Printf("Deregistering node: %s\n", node.ID)
 	if err := config.Registry.Deregister(service); err != nil {
 		return err
 	}

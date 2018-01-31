@@ -1,8 +1,6 @@
 package gogo
 
 import (
-	"fmt"
-
 	"github.com/nats-io/go-nats"
 	"github.com/nzgogo/micro/api"
 	"github.com/nzgogo/micro/codec"
@@ -19,7 +17,6 @@ func (s *service) ServerHandler(nMsg *nats.Msg) {
 	//check message type, response or request
 	if message.Type == "request" {
 		//check if the message is a Request or Publish.
-		fmt.Println("nMsg.reply : " + nMsg.Reply)
 		if nMsg.Reply != "" {
 			message.ReplyTo = nMsg.Reply
 		}
@@ -31,14 +28,19 @@ func (s *service) ServerHandler(nMsg *nats.Msg) {
 
 		handler, routerErr := s.opts.Router.Dispatch(message)
 		if routerErr != nil {
-			errResp := codec.NewResponse(message.ContextID, 404, nil, &message.Header)
+			errResp := codec.NewResponse(message.ContextID, 404, nil, message.Header)
 			resp, _ := codec.Marshal(errResp)
 			s.opts.Transport.Publish(message.ReplyTo, resp)
 		}
 		reply := message.ReplyTo
 		message.ReplyTo = sub
 		//TODO: error handle
-		go handler(message, reply)
+		go func() {
+			for i := len(s.opts.HdlrWrappers); i > 0; i-- {
+				handler = s.opts.HdlrWrappers[i-1](handler)
+			}
+			handler(message, reply)
+		}()
 	} else {
 		rpl := s.opts.Context.Get(message.ContextID).Request
 		s.opts.Transport.Publish(rpl, nMsg.Data)
@@ -53,9 +55,12 @@ func (s *service) ApiHandler(nMsg *nats.Msg) {
 	ctx := s.opts.Context
 
 	r := ctx.Get(message.ContextID).Response
-	//fmt.Printf("status: %d\n" , message.StatusCode)
-	//fmt.Println("body: "+string(message.Body))
-	gogoapi.WriteResponse(r, message)
+
+	fn := gogoapi.WriteResponse
+	for i := len(s.opts.HttpRespWrappers); i > 0; i-- {
+		fn = s.opts.HttpRespWrappers[i-1](fn)
+	}
+	fn(r, message)
 
 	ctx.Done(message.ContextID)
 	ctx.Delete(message.ContextID)
