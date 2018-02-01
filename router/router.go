@@ -40,7 +40,7 @@ type Node struct {
 var (
 	ErrInvalidPath      = errors.New("invalid path cannot process")
 	ErrNotFound         = errors.New("service not found")
-	ErrmethodNotAllowed = errors.New("method not allowed")
+	ErrMethodNotAllowed = errors.New("method not allowed")
 )
 
 func (r *router) Init(opts ...Option) error {
@@ -137,14 +137,11 @@ func (r *router) HttpMatch(req *codec.Message) error {
 		return ErrNotFound
 	}
 
-	for _, node := range routes {
-		if node.Path == subPath {
-			if node.Method == req.Method {
-				req.Node = node.ID
-				return nil
-			} else {
-				return ErrmethodNotAllowed
-			}
+	if paths := r.pathMatch(subPath); len(paths) > 0 {
+		if node := r.methodMatch(paths, req.Method); node != nil {
+			req.Node = node.ID
+		} else {
+			return ErrMethodNotAllowed
 		}
 	}
 
@@ -164,6 +161,25 @@ func (r *router) Dispatch(req *codec.Message) (Handler, error) {
 	}
 
 	return nil, ErrNotFound
+}
+
+func (r *router) pathMatch(path string) (matched []*Node) {
+	matched = make([]*Node, 0)
+	for _, node := range r.routes {
+		if node.Path == path {
+			matched = append(matched, node)
+		}
+	}
+	return
+}
+
+func (r *router) methodMatch(paths []*Node, method string) (matched *Node) {
+	for _, node := range paths {
+		if node.Method == method {
+			matched = node
+		}
+	}
+	return
 }
 
 func (r *router) splitPath(path string) (srvPath, subPath string, err error) {
