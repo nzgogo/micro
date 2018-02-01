@@ -9,7 +9,12 @@ import (
 	"github.com/nzgogo/micro/codec"
 )
 
-type Handler func(*codec.Message, string) error
+type Handler func(*codec.Message, string) Error
+
+type Error struct {
+	StatusCode int
+	Message    string
+}
 
 type Router interface {
 	Init(opts ...Option) error
