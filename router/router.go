@@ -9,7 +9,7 @@ import (
 	"github.com/nzgogo/micro/codec"
 )
 
-type Handler func(*codec.Message, string) Error
+type Handler func(*codec.Message, string) *Error
 
 type Error struct {
 	StatusCode int
