@@ -137,19 +137,7 @@ func (r *router) HttpMatch(req *codec.Message) error {
 		return ErrNotFound
 	}
 
-	// for _, node := range routes {
-	// 	if node.Path == subPath {
-	// 		if node.Method == req.Method {
-	// 			req.Node = node.ID
-	// 			return nil
-	// 		} else {
-	// 			return ErrMethodNotAllowed
-	// 		}
-	// 	}
-	// }
-
-	if paths := r.pathMatch(subPath); len(paths) > 0 {
-		log.Printf("%d path(s) matched!\n", len(paths))
+	if paths := r.pathMatch(routes, subPath); len(paths) > 0 {
 		if node := r.methodMatch(paths, req.Method); node != nil {
 			req.Node = node.ID
 		} else {
@@ -175,12 +163,11 @@ func (r *router) Dispatch(req *codec.Message) (Handler, error) {
 	return nil, ErrNotFound
 }
 
-func (r *router) pathMatch(path string) (matched []*Node) {
+func (r *router) pathMatch(routes []*Node, path string) (matched []*Node) {
 	matched = make([]*Node, 0)
-	for _, node := range r.routes {
+	for _, node := range routes {
 		if node.Path == path {
 			matched = append(matched, node)
-			log.Printf("%v\n", node)
 		}
 	}
 	return
