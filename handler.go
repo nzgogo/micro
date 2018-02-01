@@ -34,7 +34,7 @@ func (s *service) ServerHandler(nMsg *nats.Msg) {
 		}
 		reply := message.ReplyTo
 		message.ReplyTo = sub
-		//TODO: error handle
+
 		go func() {
 			for i := len(s.opts.HdlrWrappers); i > 0; i-- {
 				handler = s.opts.HdlrWrappers[i-1](handler)
