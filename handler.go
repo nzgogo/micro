@@ -39,7 +39,17 @@ func (s *service) ServerHandler(nMsg *nats.Msg) {
 			for i := len(s.opts.HdlrWrappers); i > 0; i-- {
 				handler = s.opts.HdlrWrappers[i-1](handler)
 			}
-			handler(message, reply)
+			err := handler(message, reply)
+			if err != nil {
+				s.Respond(
+					codec.NewJsonResponse(
+						message.ContextID,
+						err.StatusCode,
+						err.Message,
+					),
+					reply,
+				)
+			}
 		}()
 	} else {
 		rpl := s.opts.Context.Get(message.ContextID).Request
