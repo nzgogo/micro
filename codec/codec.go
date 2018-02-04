@@ -54,7 +54,7 @@ func (msg *Message) Get(key string) string {
 	return ""
 }
 
-func (msg *Message) GetAll(key string) map[string]string {
+func (msg *Message) GetAll() map[string]string {
 	jsonStrings := make(map[string]string, 0)
 	err := Unmarshal(msg.Body, &jsonStrings)
 	if err == nil {
