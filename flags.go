@@ -2,15 +2,13 @@ package gogo
 
 import "flag"
 
-var registryFlags map[string]*string
-var transportFlags map[string]*string
+func parseFlags(s *service) {
+	if s.config["nats_addr"] == "" {
+		s.config["nats_addr"] = "nats://127.0.0.1:4222"
+	}
 
-func parseFlags() {
-	registryFlags = make(map[string]*string)
-	transportFlags = make(map[string]*string)
-
-	registryFlags["consul_addr"] = flag.String("consul", "", "Consul server address")
-	transportFlags["nats_addr"] = flag.String("nats", "nats://127.0.0.1:4222", "Nats server address")
+	s.config["consul_addr"] = *flag.String("consul", s.config["consul_addr"], "Consul server address")
+	s.config["nats_addr"] = *flag.String("nats", s.config["nats_addr"], "Nats server address")
 
 	flag.Parse()
 }
