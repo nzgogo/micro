@@ -16,8 +16,8 @@ func parseFlags(s *service) {
 	a := flag.String("consul", s.config["consul_addr"], "Consul server address")
 	b := flag.String("nats", s.config["nats_addr"], "Nats server address")
 
-	fmt.Println(a)
-	fmt.Println(b)
+	fmt.Printf("%v\n", a)
+	fmt.Printf("%v\n", b)
 
 	flag.Parse()
 }
