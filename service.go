@@ -24,6 +24,7 @@ type Service interface {
 
 type service struct {
 	opts    Options
+	config  map[string]string
 	name    string
 	version string
 	id      string
@@ -31,6 +32,10 @@ type service struct {
 
 func (s *service) Options() Options {
 	return s.opts
+}
+
+func (s *service) Config() map[string]string {
+	return s.config
 }
 
 func (s *service) Init(opts ...Option) error {
@@ -176,15 +181,17 @@ func NewService(n string, v string) *service {
 	fmt.Printf("[Service][Version] %s\n", s.version)
 	fmt.Printf("[Service][ID] %s\n", s.id)
 
-	parseFlags()
+	s.config = readConfigFile()
+
+	parseFlags(s)
 
 	trans := transport.NewTransport(
 		transport.Subject(strings.Replace(s.name, "-", ".", -1)+"."+s.version+"."+s.id),
-		transport.Addrs(*transportFlags["nats_addr"]),
+		transport.Addrs(s.config["nats_addr"]),
 	)
 
 	reg := registry.NewRegistry(
-		registry.Addrs(*registryFlags["consul_addr"]),
+		registry.Addrs(s.config["consul_addr"]),
 	)
 
 	sel := selector.NewSelector(

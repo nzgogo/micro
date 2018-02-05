@@ -1,6 +1,9 @@
 package gogo
 
 import (
+	"io/ioutil"
+	"micro/codec"
+	"os"
 	"regexp"
 	"strings"
 )
@@ -17,4 +20,18 @@ func URLToIntnlTrans(host string, path string) string {
 	str := strings.Split(path, "/")
 
 	return "gogo-" + str[2] + "-" + str[3]
+}
+
+func readConfigFile() map[string]string {
+	filename := "./config.json"
+
+	if _, err := os.Stat(filename); os.IsNotExist(err) {
+		return nil
+	}
+
+	fileBytes, _ := ioutil.ReadFile(filename)
+	configMap := make(map[string]string, 0)
+	codec.Unmarshal(fileBytes, &configMap)
+
+	return configMap
 }
