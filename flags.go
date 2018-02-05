@@ -13,8 +13,8 @@ func parseFlags(s *service) {
 	// s.config["consul_addr"] = *flag.String("consul", s.config["consul_addr"], "Consul server address")
 	// s.config["nats_addr"] = *flag.String("nats", s.config["nats_addr"], "Nats server address")
 
-	a := *flag.String("consul", s.config["consul_addr"], "Consul server address")
-	b := *flag.String("nats", s.config["nats_addr"], "Nats server address")
+	a := flag.String("consul", s.config["consul_addr"], "Consul server address")
+	b := flag.String("nats", s.config["nats_addr"], "Nats server address")
 
 	fmt.Println(a)
 	fmt.Println(b)
