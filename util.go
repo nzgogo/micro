@@ -26,12 +26,16 @@ func readConfigFile() map[string]string {
 	filename := "./config.json"
 
 	if _, err := os.Stat(filename); os.IsNotExist(err) {
-		return nil
+		return make(map[string]string)
 	}
 
 	fileBytes, _ := ioutil.ReadFile(filename)
-	configMap := make(map[string]string, 0)
-	codec.Unmarshal(fileBytes, &configMap)
+	configMap := make(map[string]string)
+	err := codec.Unmarshal(fileBytes, &configMap)
+
+	if err != nil {
+		return make(map[string]string)
+	}
 
 	return configMap
 }
