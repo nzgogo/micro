@@ -2,11 +2,12 @@ package gogo
 
 import (
 	"flag"
+	"github.com/nats-io/go-nats"
 )
 
 func parseFlags(s *service) {
 	if s.config["nats_addr"] == "" {
-		s.config["nats_addr"] = "nats://127.0.0.1:4222"
+		s.config["nats_addr"] = nats.DefaultURL
 	}
 
 	consul_addr := flag.String("consul", s.config["consul_addr"], "Consul server address")

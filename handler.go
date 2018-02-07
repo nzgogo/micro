@@ -7,6 +7,11 @@ import (
 	"github.com/nzgogo/micro/context"
 )
 
+var(
+	REQUEST = "request"
+	HEALTHCHECK = "healthCheck"
+)
+
 func (s *service) ServerHandler(nMsg *nats.Msg) {
 	//decode message
 	message := &codec.Message{}
@@ -15,7 +20,7 @@ func (s *service) ServerHandler(nMsg *nats.Msg) {
 	sub := s.opts.Transport.Options().Subject
 
 	//check message type, response or request
-	if message.Type == "request" {
+	if message.Type == REQUEST{
 		//check if the message is a Request or Publish.
 		if nMsg.Reply != "" {
 			message.ReplyTo = nMsg.Reply
@@ -51,6 +56,14 @@ func (s *service) ServerHandler(nMsg *nats.Msg) {
 				)
 			}
 		}()
+	} else if message.Type == HEALTHCHECK{
+		go func() {
+			msg := codec.NewResponse("", healthCheck(s.config), nil, nil)
+			replyBody,_ :=codec.Marshal(msg)
+			s.opts.Transport.Publish(nMsg.Reply,replyBody)
+
+		}()
+
 	} else {
 		rpl := s.opts.Context.Get(message.ContextID).Request
 		s.opts.Transport.Publish(rpl, nMsg.Data)

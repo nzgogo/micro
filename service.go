@@ -12,8 +12,15 @@ import (
 	"github.com/nzgogo/micro/router"
 	"github.com/nzgogo/micro/selector"
 	"github.com/nzgogo/micro/transport"
+	consul "github.com/hashicorp/consul/api"
 	"github.com/satori/go.uuid"
 )
+
+//var checkLoads = &consul.AgentServiceCheck{
+//	Notes: "check-ping: warning limit 10ms RTA or 2% packet-loss, critical limit is 20ms or 5% packet loss",
+//	Script: "/usr/local/Cellar/nagios-plugins/2.2.1/libexec/sbin/check_ping -4 -H 192.168.1.1 -w 10,2% -c 20,5%",
+//	Interval: "1m",
+//}
 
 type Service interface {
 	Options() Options
@@ -190,8 +197,15 @@ func NewService(n string, v string) *service {
 		transport.Addrs(s.config["nats_addr"]),
 	)
 
+	var check = &consul.AgentServiceCheck{
+		//Notes: "health check",
+		Args: []string{s.config["health_check_script"]," -subj="+trans.Options().Subject},
+		Interval: "1m",
+	}
+
 	reg := registry.NewRegistry(
 		registry.Addrs(s.config["consul_addr"]),
+		registry.Checks(check),
 	)
 
 	sel := selector.NewSelector(
