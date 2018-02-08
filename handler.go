@@ -9,6 +9,7 @@ import (
 
 var(
 	REQUEST = "request"
+	RESPONSE = "response"
 	HEALTHCHECK = "healthCheck"
 )
 
@@ -16,7 +17,6 @@ func (s *service) ServerHandler(nMsg *nats.Msg) {
 	//decode message
 	message := &codec.Message{}
 	codec.Unmarshal(nMsg.Data, message)
-
 	sub := s.opts.Transport.Options().Subject
 
 	//check message type, response or request
@@ -64,8 +64,13 @@ func (s *service) ServerHandler(nMsg *nats.Msg) {
 
 		}()
 
-	} else {
-		rpl := s.opts.Context.Get(message.ContextID).Request
+	} else if message.Type == RESPONSE {
+		conversation := s.opts.Context.Get(message.ContextID)
+		if conversation == nil {
+			return
+		}
+
+		rpl := conversation.Request
 		s.opts.Transport.Publish(rpl, nMsg.Data)
 		s.opts.Context.Delete(message.ContextID)
 	}
@@ -76,16 +81,27 @@ func (s *service) ApiHandler(nMsg *nats.Msg) {
 	message := &codec.Message{}
 	codec.Unmarshal(nMsg.Data, message)
 	ctx := s.opts.Context
+	if message.Type == HEALTHCHECK{
+		go func() {
+			msg := codec.NewResponse("", healthCheck(s.config), nil, nil)
+			replyBody,_ :=codec.Marshal(msg)
+			s.opts.Transport.Publish(nMsg.Reply,replyBody)
 
-	r := ctx.Get(message.ContextID).Response
+		}()
 
-	fn := gogoapi.WriteResponse
-	for i := len(s.opts.HttpRespWrappers); i > 0; i-- {
-		fn = s.opts.HttpRespWrappers[i-1](fn)
+	} else if message.Type == RESPONSE {
+		conversation := ctx.Get(message.ContextID)
+		if conversation == nil {
+			return
+		}
+		r := conversation.Response
+
+		fn := gogoapi.WriteResponse
+		for i := len(s.opts.HttpRespWrappers); i > 0; i-- {
+			fn = s.opts.HttpRespWrappers[i-1](fn)
+		}
+		fn(r, message)
+		ctx.Done(message.ContextID)
+		ctx.Delete(message.ContextID)
 	}
-	fn(r, message)
-
-	ctx.Done(message.ContextID)
-	ctx.Delete(message.ContextID)
-
 }

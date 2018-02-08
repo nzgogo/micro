@@ -50,6 +50,9 @@ func (ctx *context) Get(id string) *Conversation {
 	//
 	// return ctx.pool[id]
 	conv, _ := ctx.pool.Load(id)
+	if conv == nil {
+		return nil
+	}
 	return conv.(*Conversation)
 }
 
