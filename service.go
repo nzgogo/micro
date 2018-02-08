@@ -191,15 +191,16 @@ func NewService(n string, v string) *service {
 	s.config = readConfigFile()
 
 	parseFlags(s)
-
 	trans := transport.NewTransport(
 		transport.Subject(strings.Replace(s.name, "-", ".", -1)+"."+s.version+"."+s.id),
 		transport.Addrs(s.config["nats_addr"]),
 	)
 
+	command:=s.config["health_check_script"]
+	arg:= "-subj="+trans.Options().Subject
 	var check = &consul.AgentServiceCheck{
 		//Notes: "health check",
-		Args: []string{s.config["health_check_script"]," -subj="+trans.Options().Subject},
+		Args: []string{command,arg},
 		Interval: "1m",
 	}
 
