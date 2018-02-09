@@ -42,75 +42,115 @@ func readConfigFile() map[string]string {
 	return configMap
 }
 
-func healthCheck(configs map[string]string) int {
+func healthCheck(configs map[string]string) (int, []byte) {
+	var retMsg = ""
+	var status = OK
+
 	//check cpu
-	cpuPercent,err:=cpu.Percent(0,false)
-	if err!=nil{
-		log.Println("Failed get CPU information.")
-		return Critical
-	}
-	cpuCriticalThreshold,_:=strconv.ParseFloat(configs["cpu_critical_threshold"], 64)
-	cpuWarningThreshold,_:=strconv.ParseFloat(configs["cpu_warning_threshold"], 64)
-	if 100-cpuPercent[0] < cpuCriticalThreshold {
-		log.Println("CPU is Critical: ")
-		if c,err:=cpu.Percent(0,true); err==nil{
-			log.Println(c)
+	cpuCriticalThreshold,err1 := strconv.ParseFloat(configs["hc_cpu_critical_threshold"], 64)
+	cpuWarningThreshold, err2 := strconv.ParseFloat(configs["hc_cpu_warning_threshold"], 64)
+	if err1 == nil || err2 == nil {
+		cpuPercent, err := cpu.Percent(0,false)
+		if err != nil{
+			log.Println("Failed get CPU information.")
+			retMsg += " Failed get CPU information. "
+			status |= Warning
+		} else {
+			isCritical := false
+			cpstr := strconv.FormatFloat(cpuPercent[0], 'f', -1,64)
+			if err1 == nil {
+				if 100-cpuPercent[0] < cpuCriticalThreshold {
+					msg := " CPU is critical. Percentage of CPU used: " + cpstr
+					log.Println(msg)
+					retMsg += msg
+					status |= Critical
+					isCritical = true
+				}
+			}
+			if err2 == nil {
+				if 100-cpuPercent[0] < cpuWarningThreshold {
+					msg := " CPU is warning. Percentage of CPU used: " + cpstr
+					log.Println(msg)
+					if !isCritical {
+						retMsg += msg
+					}
+					status |= Warning
+				}
+			}
 		}
-		return Critical
-	}
-	if 100-cpuPercent[0] < cpuWarningThreshold {
-		log.Println("CPU is Warning: ")
-		if c,err:=cpu.Percent(0,true); err==nil{
-			log.Println(c)
-		}
-		return Warning
 	}
 
 	//check memory usage
-	v , err := mem.VirtualMemory()
-	if err!=nil{
-		log.Println("Failed get memory information.")
-		return Critical
-	}
+	memoryCriticalThreshold, err1 := strconv.ParseFloat(configs["hc_memory_critical_threshold"], 64)
+	memoryWarningThreshold, err2 := strconv.ParseFloat(configs["hc_memory_warning_threshold"], 64)
+	if err1 == nil || err2 == nil {
+		v , err := mem.VirtualMemory()
+		if err != nil{
+			log.Println("Failed get memory information.")
+			retMsg += " Failed get CPU information. "
+			status |= Warning
+		} else {
+			memoryPercent := v.UsedPercent
+			mpstr := strconv.FormatFloat(memoryPercent, 'f', -1,64)
+			isCritical := false
+			if err1 == nil {
+				if 100-memoryPercent < memoryCriticalThreshold {
+					msg := " Memory is critical. Percentage of Memory used: " + mpstr
+					log.Println(msg)
+					retMsg += msg
+					status |= Critical
+					isCritical = true
+				}
+			}
+			if err2 == nil {
+				if 100-memoryPercent < memoryWarningThreshold {
+					msg := " Memory is warning. Percentage of Memory used: " + mpstr
+					log.Println(msg)
+					if !isCritical {
+						retMsg += msg
+					}
+					status |= Warning
 
-	memoryPercent := v.UsedPercent
-	memoryCriticalThreshold,_:=strconv.ParseFloat(configs["memory_critical_threshold"], 64)
-	memoryWarningThreshold,_:=strconv.ParseFloat(configs["memory_warning_threshold"], 64)
-	if 100-memoryPercent < memoryCriticalThreshold {
-		log.Println("Memory is Critical: ")
-		log.Println(v)
-		return Critical
-	}
-	if 100-memoryPercent < memoryWarningThreshold {
-		log.Println("Memory is Warning: ")
-		log.Println(v)
-		return Warning
+				}
+			}
+		}
 	}
 
 	//check load
-	l, err := load.Avg()
-	if err!=nil{
-		log.Println("Failed get load information.")
-		return Critical
-	}
-	loads := l.Load5
-	loadCriticalThreshold,_:=strconv.ParseFloat(configs["load_critical_threshold"], 64)
-	loadWarningThreshold,_:=strconv.ParseFloat(configs["load_warning_threshold"], 64)
-	if loads > loadCriticalThreshold {
-		log.Println("Load Critical")
-		log.Println(l)
-		if m,err:=load.Misc(); err==nil {
-			log.Println(m)
+	loadCriticalThreshold, err1 := strconv.ParseFloat(configs["hc_load_critical_threshold"], 64)
+	loadWarningThreshold, err2 := strconv.ParseFloat(configs["hc_load_warning_threshold"], 64)
+	if err1 == nil || err2 == nil {
+		l, err := load.Avg()
+		if err!=nil{
+			log.Println("Failed get load information.")
+			retMsg += " Failed get load information. "
+			status |= Warning
+		} else {
+			load := l.Load5
+			lstr := strconv.FormatFloat(load, 'f', -1,64)
+			isCritical := false
+			if err1 == nil {
+				if load > loadCriticalThreshold {
+					msg := " Overload critical. System loads: " + lstr
+					log.Println(msg)
+					retMsg += msg
+					status |= Critical
+					isCritical = true
+				}
+			}
+			if err2 == nil {
+				if load > loadWarningThreshold {
+					msg := " Overload warning. System loads: " + lstr
+					log.Println(msg)
+					if !isCritical {
+						retMsg += msg
+					}
+					status |= Warning
+				}
+			}
 		}
-		return Critical
+
 	}
-	if loads > loadWarningThreshold {
-		log.Printf("Load Warning")
-		log.Println(l)
-		if m,err:=load.Misc(); err==nil {
-			log.Println(m)
-		}
-		return Warning
-	}
-	return OK
+
+	return status, []byte(retMsg)
 }
