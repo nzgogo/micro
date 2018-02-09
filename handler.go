@@ -58,7 +58,8 @@ func (s *service) ServerHandler(nMsg *nats.Msg) {
 		}()
 	} else if message.Type == HEALTHCHECK{
 		go func() {
-			msg := codec.NewResponse("", healthCheck(s.config), nil, nil)
+			checkStatus, feedback := healthCheck(s.config)
+			msg := codec.NewResponse("",checkStatus, feedback, nil)
 			replyBody,_ :=codec.Marshal(msg)
 			s.opts.Transport.Publish(nMsg.Reply,replyBody)
 
@@ -83,7 +84,8 @@ func (s *service) ApiHandler(nMsg *nats.Msg) {
 	ctx := s.opts.Context
 	if message.Type == HEALTHCHECK{
 		go func() {
-			msg := codec.NewResponse("", healthCheck(s.config), nil, nil)
+			checkStatus, feedback := healthCheck(s.config)
+			msg := codec.NewResponse("",checkStatus, feedback, nil)
 			replyBody,_ :=codec.Marshal(msg)
 			s.opts.Transport.Publish(nMsg.Reply,replyBody)
 

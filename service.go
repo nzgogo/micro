@@ -202,6 +202,7 @@ func NewService(n string, v string) *service {
 		//Notes: "health check",
 		Args: []string{command,arg},
 		Interval: "1m",
+		DeregisterCriticalServiceAfter: s.config["DeregisterCriticalServiceAfter"],
 	}
 
 	reg := registry.NewRegistry(
