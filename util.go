@@ -57,10 +57,10 @@ func healthCheck(configs map[string]string) (int, []byte) {
 			status |= Warning
 		} else {
 			isCritical := false
-			cpstr := strconv.FormatFloat(cpuPercent[0], 'f', -1,64)
+			cpstr := strconv.FormatFloat(cpuPercent[0], 'f', 2,64)
 			if err1 == nil {
 				if 100-cpuPercent[0] < cpuCriticalThreshold {
-					msg := " CPU is critical. Percentage of CPU used: " + cpstr
+					msg := " CPU is critical. Percentage of CPU used: " + cpstr + "%"
 					log.Println(msg)
 					retMsg += msg
 					status |= Critical
@@ -69,9 +69,9 @@ func healthCheck(configs map[string]string) (int, []byte) {
 			}
 			if err2 == nil {
 				if 100-cpuPercent[0] < cpuWarningThreshold {
-					msg := " CPU is warning. Percentage of CPU used: " + cpstr
-					log.Println(msg)
+					msg := " CPU is warning. Percentage of CPU used: " + cpstr + "%"
 					if !isCritical {
+						log.Println(msg)
 						retMsg += msg
 					}
 					status |= Warning
@@ -91,11 +91,11 @@ func healthCheck(configs map[string]string) (int, []byte) {
 			status |= Warning
 		} else {
 			memoryPercent := v.UsedPercent
-			mpstr := strconv.FormatFloat(memoryPercent, 'f', -1,64)
+			mpstr := strconv.FormatFloat(memoryPercent, 'f', 2,64)
 			isCritical := false
 			if err1 == nil {
 				if 100-memoryPercent < memoryCriticalThreshold {
-					msg := " Memory is critical. Percentage of Memory used: " + mpstr
+					msg := " Memory is critical. Percentage of Memory used: " + mpstr + "%"
 					log.Println(msg)
 					retMsg += msg
 					status |= Critical
@@ -104,9 +104,9 @@ func healthCheck(configs map[string]string) (int, []byte) {
 			}
 			if err2 == nil {
 				if 100-memoryPercent < memoryWarningThreshold {
-					msg := " Memory is warning. Percentage of Memory used: " + mpstr
-					log.Println(msg)
+					msg := " Memory is warning. Percentage of Memory used: " + mpstr + "%"
 					if !isCritical {
+						log.Println(msg)
 						retMsg += msg
 					}
 					status |= Warning
@@ -127,7 +127,7 @@ func healthCheck(configs map[string]string) (int, []byte) {
 			status |= Warning
 		} else {
 			load := l.Load5
-			lstr := strconv.FormatFloat(load, 'f', -1,64)
+			lstr := strconv.FormatFloat(load, 'f', 2,64)
 			isCritical := false
 			if err1 == nil {
 				if load > loadCriticalThreshold {
@@ -141,8 +141,8 @@ func healthCheck(configs map[string]string) (int, []byte) {
 			if err2 == nil {
 				if load > loadWarningThreshold {
 					msg := " Overload warning. System loads: " + lstr
-					log.Println(msg)
 					if !isCritical {
+						log.Println(msg)
 						retMsg += msg
 					}
 					status |= Warning

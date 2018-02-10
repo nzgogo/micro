@@ -16,11 +16,9 @@ import (
 	"github.com/satori/go.uuid"
 )
 
-//var checkLoads = &consul.AgentServiceCheck{
-//	Notes: "check-ping: warning limit 10ms RTA or 2% packet-loss, critical limit is 20ms or 5% packet loss",
-//	Script: "/usr/local/Cellar/nagios-plugins/2.2.1/libexec/sbin/check_ping -4 -H 192.168.1.1 -w 10,2% -c 20,5%",
-//	Interval: "1m",
-//}
+var (
+	hc_interval_default = "5m"
+)
 
 type Service interface {
 	Options() Options
@@ -196,13 +194,17 @@ func NewService(n string, v string) *service {
 		transport.Addrs(s.config["nats_addr"]),
 	)
 
-	command:=s.config["health_check_script"]
+	command:=s.config["hc_script"]
 	arg:= "-subj="+trans.Options().Subject
+	hc_interval := s.config["hc_interval"]
+	if len(hc_interval) <=0 {
+		hc_interval = hc_interval_default
+	}
 	var check = &consul.AgentServiceCheck{
 		//Notes: "health check",
 		Args: []string{command,arg},
-		Interval: "1m",
-		DeregisterCriticalServiceAfter: s.config["DeregisterCriticalServiceAfter"],
+		Interval: hc_interval,
+		DeregisterCriticalServiceAfter: s.config["hc_deregister_critical_service_after"],
 	}
 
 	reg := registry.NewRegistry(
