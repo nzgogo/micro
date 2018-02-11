@@ -12,7 +12,12 @@ import (
 	"github.com/nzgogo/micro/router"
 	"github.com/nzgogo/micro/selector"
 	"github.com/nzgogo/micro/transport"
+	consul "github.com/hashicorp/consul/api"
 	"github.com/satori/go.uuid"
+)
+
+var (
+	hc_interval_default = "5m"
 )
 
 type Service interface {
@@ -184,14 +189,27 @@ func NewService(n string, v string) *service {
 	s.config = readConfigFile()
 
 	parseFlags(s)
-
 	trans := transport.NewTransport(
 		transport.Subject(strings.Replace(s.name, "-", ".", -1)+"."+s.version+"."+s.id),
 		transport.Addrs(s.config["nats_addr"]),
 	)
 
+	command:=s.config["hc_script"]
+	arg:= "-subj="+trans.Options().Subject
+	hc_interval := s.config["hc_interval"]
+	if len(hc_interval) <=0 {
+		hc_interval = hc_interval_default
+	}
+	var check = &consul.AgentServiceCheck{
+		//Notes: "health check",
+		Args: []string{command,arg},
+		Interval: hc_interval,
+		DeregisterCriticalServiceAfter: s.config["hc_deregister_critical_service_after"],
+	}
+
 	reg := registry.NewRegistry(
 		registry.Addrs(s.config["consul_addr"]),
+		registry.Checks(check),
 	)
 
 	sel := selector.NewSelector(
