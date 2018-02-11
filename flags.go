@@ -2,6 +2,7 @@ package gogo
 
 import (
 	"flag"
+
 	"github.com/nats-io/go-nats"
 )
 
