@@ -127,14 +127,6 @@ func (r *registry) Register(s *Service) error {
 	// encode the tags
 	tags := []string{s.Version}
 
-	var check *consul.AgentServiceCheck
-
-	if len(r.opts.CheckArgs) > 0 {
-		check = &consul.AgentServiceCheck{
-			Args: r.opts.CheckArgs,
-		}
-	}
-
 	// register the service
 	if err := r.Conn.Agent().ServiceRegister(&consul.AgentServiceRegistration{
 		ID:   node.ID,
@@ -142,7 +134,7 @@ func (r *registry) Register(s *Service) error {
 		Tags: tags,
 		//Port:    node.Port,
 		//Address: node.Address,
-		Check: check,
+		Checks: r.opts.Checks,
 	}); err != nil {
 		return err
 	}

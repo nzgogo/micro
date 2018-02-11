@@ -3,6 +3,7 @@ package registry
 import (
 	"crypto/tls"
 	"time"
+	consul "github.com/hashicorp/consul/api"
 )
 
 type Options struct {
@@ -13,9 +14,8 @@ type Options struct {
 	TLSConfig *tls.Config
 
 	//consul agent check options
-	CheckArgs     []string
-	CheckInterval string //todo
-	CheckTimeout  string //todo
+	//CheckArgs     []string
+	Checks consul.AgentServiceChecks
 }
 
 // Addrs is the registry addresses to use
@@ -46,8 +46,10 @@ func TLSConfig(t *tls.Config) Option {
 }
 
 //specify consul Agent check args
-func Args(a []string) Option {
+func Checks(checks ...*consul.AgentServiceCheck) Option {
 	return func(o *Options) {
-		o.CheckArgs = a
+		for _, c := range checks{
+			o.Checks = append(o.Checks, c)
+		}
 	}
 }
