@@ -7,9 +7,9 @@ import (
 	"github.com/nzgogo/micro/context"
 )
 
-var(
-	REQUEST = "request"
-	RESPONSE = "response"
+const (
+	REQUEST     = "request"
+	RESPONSE    = "response"
 	HEALTHCHECK = "healthCheck"
 )
 
@@ -20,7 +20,7 @@ func (s *service) ServerHandler(nMsg *nats.Msg) {
 	sub := s.opts.Transport.Options().Subject
 
 	//check message type, response or request
-	if message.Type == REQUEST{
+	if message.Type == REQUEST {
 		//check if the message is a Request or Publish.
 		if nMsg.Reply != "" {
 			message.ReplyTo = nMsg.Reply
@@ -56,12 +56,12 @@ func (s *service) ServerHandler(nMsg *nats.Msg) {
 				)
 			}
 		}()
-	} else if message.Type == HEALTHCHECK{
+	} else if message.Type == HEALTHCHECK {
 		go func() {
 			checkStatus, feedback := healthCheck(s.config)
-			msg := codec.NewResponse("",checkStatus, feedback, nil)
-			replyBody,_ :=codec.Marshal(msg)
-			s.opts.Transport.Publish(nMsg.Reply,replyBody)
+			msg := codec.NewResponse("", checkStatus, feedback, nil)
+			replyBody, _ := codec.Marshal(msg)
+			s.opts.Transport.Publish(nMsg.Reply, replyBody)
 
 		}()
 
@@ -82,12 +82,12 @@ func (s *service) ApiHandler(nMsg *nats.Msg) {
 	message := &codec.Message{}
 	codec.Unmarshal(nMsg.Data, message)
 	ctx := s.opts.Context
-	if message.Type == HEALTHCHECK{
+	if message.Type == HEALTHCHECK {
 		go func() {
 			checkStatus, feedback := healthCheck(s.config)
-			msg := codec.NewResponse("",checkStatus, feedback, nil)
-			replyBody,_ :=codec.Marshal(msg)
-			s.opts.Transport.Publish(nMsg.Reply,replyBody)
+			msg := codec.NewResponse("", checkStatus, feedback, nil)
+			replyBody, _ := codec.Marshal(msg)
+			s.opts.Transport.Publish(nMsg.Reply, replyBody)
 
 		}()
 

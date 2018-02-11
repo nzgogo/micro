@@ -2,19 +2,20 @@ package gogo
 
 import (
 	"io/ioutil"
+	"log"
+	"os"
+	"strconv"
+	"strings"
+
 	"github.com/nzgogo/micro/codec"
 	"github.com/shirou/gopsutil/cpu"
 	"github.com/shirou/gopsutil/load"
 	"github.com/shirou/gopsutil/mem"
-	"os"
-	"strings"
-	"strconv"
-	"log"
 )
 
-var (
-	OK = 0
-	Warning = 1
+const (
+	OK       = 0
+	Warning  = 1
 	Critical = 2
 )
 
@@ -47,17 +48,17 @@ func healthCheck(configs map[string]string) (int, []byte) {
 	var status = OK
 
 	//check cpu
-	cpuCriticalThreshold,err1 := strconv.ParseFloat(configs["hc_cpu_critical_threshold"], 64)
+	cpuCriticalThreshold, err1 := strconv.ParseFloat(configs["hc_cpu_critical_threshold"], 64)
 	cpuWarningThreshold, err2 := strconv.ParseFloat(configs["hc_cpu_warning_threshold"], 64)
 	if err1 == nil || err2 == nil {
-		cpuPercent, err := cpu.Percent(0,false)
-		if err != nil{
+		cpuPercent, err := cpu.Percent(0, false)
+		if err != nil {
 			log.Println("Failed get CPU information.")
 			retMsg += " Failed get CPU information. "
 			status |= Warning
 		} else {
 			isCritical := false
-			cpstr := strconv.FormatFloat(cpuPercent[0], 'f', 2,64)
+			cpstr := strconv.FormatFloat(cpuPercent[0], 'f', 2, 64)
 			if err1 == nil {
 				if 100-cpuPercent[0] < cpuCriticalThreshold {
 					msg := " CPU is critical. Percentage of CPU used: " + cpstr + "%"
@@ -84,14 +85,14 @@ func healthCheck(configs map[string]string) (int, []byte) {
 	memoryCriticalThreshold, err1 := strconv.ParseFloat(configs["hc_memory_critical_threshold"], 64)
 	memoryWarningThreshold, err2 := strconv.ParseFloat(configs["hc_memory_warning_threshold"], 64)
 	if err1 == nil || err2 == nil {
-		v , err := mem.VirtualMemory()
-		if err != nil{
+		v, err := mem.VirtualMemory()
+		if err != nil {
 			log.Println("Failed get memory information.")
 			retMsg += " Failed get CPU information. "
 			status |= Warning
 		} else {
 			memoryPercent := v.UsedPercent
-			mpstr := strconv.FormatFloat(memoryPercent, 'f', 2,64)
+			mpstr := strconv.FormatFloat(memoryPercent, 'f', 2, 64)
 			isCritical := false
 			if err1 == nil {
 				if 100-memoryPercent < memoryCriticalThreshold {
@@ -121,13 +122,13 @@ func healthCheck(configs map[string]string) (int, []byte) {
 	loadWarningThreshold, err2 := strconv.ParseFloat(configs["hc_load_warning_threshold"], 64)
 	if err1 == nil || err2 == nil {
 		l, err := load.Avg()
-		if err!=nil{
+		if err != nil {
 			log.Println("Failed get load information.")
 			retMsg += " Failed get load information. "
 			status |= Warning
 		} else {
 			load := l.Load5
-			lstr := strconv.FormatFloat(load, 'f', 2,64)
+			lstr := strconv.FormatFloat(load, 'f', 2, 64)
 			isCritical := false
 			if err1 == nil {
 				if load > loadCriticalThreshold {

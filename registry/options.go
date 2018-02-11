@@ -3,6 +3,7 @@ package registry
 import (
 	"crypto/tls"
 	"time"
+
 	consul "github.com/hashicorp/consul/api"
 )
 
@@ -48,7 +49,7 @@ func TLSConfig(t *tls.Config) Option {
 //specify consul Agent check args
 func Checks(checks ...*consul.AgentServiceCheck) Option {
 	return func(o *Options) {
-		for _, c := range checks{
+		for _, c := range checks {
 			o.Checks = append(o.Checks, c)
 		}
 	}

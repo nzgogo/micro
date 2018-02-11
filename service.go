@@ -7,17 +7,17 @@ import (
 	"strings"
 	"syscall"
 
+	consul "github.com/hashicorp/consul/api"
 	"github.com/nzgogo/micro/codec"
 	"github.com/nzgogo/micro/registry"
 	"github.com/nzgogo/micro/router"
 	"github.com/nzgogo/micro/selector"
 	"github.com/nzgogo/micro/transport"
-	consul "github.com/hashicorp/consul/api"
 	"github.com/satori/go.uuid"
 )
 
-var (
-	hc_interval_default = "5m"
+const (
+	HC_INTERVAL_DEFAULT = "1m"
 )
 
 type Service interface {
@@ -194,16 +194,16 @@ func NewService(n string, v string) *service {
 		transport.Addrs(s.config["nats_addr"]),
 	)
 
-	command:=s.config["hc_script"]
-	arg:= "-subj="+trans.Options().Subject
+	command := s.config["hc_script"]
+	arg := "-subj=" + trans.Options().Subject
 	hc_interval := s.config["hc_interval"]
-	if len(hc_interval) <=0 {
-		hc_interval = hc_interval_default
+	if len(hc_interval) <= 0 {
+		hc_interval = HC_INTERVAL_DEFAULT
 	}
 	var check = &consul.AgentServiceCheck{
 		//Notes: "health check",
-		Args: []string{command,arg},
-		Interval: hc_interval,
+		Args:                           []string{command, arg},
+		Interval:                       hc_interval,
 		DeregisterCriticalServiceAfter: s.config["hc_deregister_critical_service_after"],
 	}
 
