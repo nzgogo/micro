@@ -186,7 +186,7 @@ func NewService(n string, v string) *service {
 	fmt.Printf("[Service][Version] %s\n", s.version)
 	fmt.Printf("[Service][ID] %s\n", s.id)
 
-	s.config = readConfigFile()
+	s.config = readConfigFile(strings.Replace(s.name, "-", ".", -1) + "." + s.version)
 
 	parseFlags(s)
 	trans := transport.NewTransport(

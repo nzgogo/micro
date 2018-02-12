@@ -25,11 +25,19 @@ func URLToIntnlTrans(host string, path string) string {
 	return "gogo-" + str[2] + "-" + str[3]
 }
 
-func readConfigFile() map[string]string {
-	filename := "./config.json"
+func readConfigFile(srvName string) map[string]string {
+	filename := srvName + ".config.json"
+	currentFolder := "./"
+	etcFolder := "/etc/gogo/"
 
-	if _, err := os.Stat(filename); os.IsNotExist(err) {
-		return make(map[string]string)
+	if _, err := os.Stat(currentFolder + filename); os.IsNotExist(err) {
+		if _, err := os.Stat(etcFolder + filename); os.IsNotExist(err) {
+			return make(map[string]string)
+		} else {
+			filename = etcFolder + filename
+		}
+	} else {
+		filename = etcFolder + filename
 	}
 
 	fileBytes, _ := ioutil.ReadFile(filename)
