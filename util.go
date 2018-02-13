@@ -37,7 +37,7 @@ func readConfigFile(srvName string) map[string]string {
 			filename = etcFolder + filename
 		}
 	} else {
-		filename = etcFolder + filename
+		filename = currentFolder + filename
 	}
 
 	fileBytes, _ := ioutil.ReadFile(filename)
