@@ -43,6 +43,18 @@ func (s *service) Config() map[string]string {
 	return s.config
 }
 
+func (s *service) Name() string {
+	return s.name
+}
+
+func (s *service) Version() string {
+	return s.version
+}
+
+func (s *service) ID() string {
+	return s.id
+}
+
 func (s *service) Init(opts ...Option) error {
 	for _, o := range opts {
 		o(&s.opts)
