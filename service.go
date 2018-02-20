@@ -1,23 +1,46 @@
 package gogo
 
 import (
-	"fmt"
 	"os"
 	"os/signal"
 	"strings"
 	"syscall"
 
-	consul "github.com/hashicorp/consul/api"
 	"github.com/nzgogo/micro/codec"
 	"github.com/nzgogo/micro/registry"
 	"github.com/nzgogo/micro/router"
 	"github.com/nzgogo/micro/selector"
 	"github.com/nzgogo/micro/transport"
 	"github.com/satori/go.uuid"
+	"log"
 )
 
 const (
-	HC_INTERVAL_DEFAULT = "1m"
+	ORGANIZATION = "gogo"
+
+	// Service configs
+	CONFIG_NATS_ADDRESS                         = "nats_addr"
+	CONFIG_CONSUL_ADDRRESS                      = "consul_addr"
+	CONFIG_HC_SCRIPT                            = "hc_script"
+	CONFIG_HC_INTERVAL                          = "hc_interval"
+	CONFIG_HC_DEREGISTER_CRITICAL_SERVICE_AFTER = "hc_deregister_critical_service_after"
+	CONFIG_HC_LOAD_CRITICAL_THRESHOLD           = "hc_load_critical_threshold"
+	CONFIG_HC_LOAD_WARNING_THRESHOLD            = "hc_load_warning_threshold"
+	CONFIG_HC_MEMORY_CRITICAL_THRESHOLD         = "hc_memory_critical_threshold"
+	CONFIG_HC_MEMORY_WARNING_THRESHOLD          = "hc_memory_warning_threshold"
+	CONFIG_HC_CPU_CRITICAL_THRESHOLD            = "hc_cpu_critical_threshold"
+	CONFIG_HC_CPU_WARNING_THRESHOLD             = "hc_cpu_warning_threshold"
+
+
+	// Default value for health checks
+	DEFAULT_HC_INTERVAL                         = "2m"
+	DEFALT_HC_DEREGISTER_CRITICAL_SERVICE_AFTER = "10m"
+	DEFALT_HC_LOAD_CRITICAL_THRESHOLD           = "10"
+	DEFALT_HC_LOAD_WARNING_THRESHOLD            = "5"
+	DEFALT_HC_MEMORY_CRITICAL_THRESHOLD         = "5"
+	DEFALT_HC_MEMORY_WARNING_THRESHOLD          = "15"
+	DEFALT_HC_CPU_CRITICAL_THRESHOLD            = "5"
+	DEFALT_HC_CPU_WARNING_THRESHOLD             = "15"
 )
 
 type Service interface {
@@ -194,36 +217,31 @@ func NewService(n string, v string) *service {
 		id:      id,
 	}
 
-	fmt.Printf("[Service][Name] %s\n", s.name)
-	fmt.Printf("[Service][Version] %s\n", s.version)
-	fmt.Printf("[Service][ID] %s\n", s.id)
+	log.Printf("[Service][Name] %s\n", s.name)
+	log.Printf("[Service][Version] %s\n", s.version)
+	log.Printf("[Service][ID] %s\n", s.id)
 
 	s.config = readConfigFile(strings.Replace(s.name, "-", ".", -1) + "." + s.version)
 
 	parseFlags(s)
 	trans := transport.NewTransport(
 		transport.Subject(strings.Replace(s.name, "-", ".", -1)+"."+s.version+"."+s.id),
-		transport.Addrs(s.config["nats_addr"]),
+		transport.Addrs(s.config[CONFIG_NATS_ADDRESS]),
 	)
-
-	command := s.config["hc_script"]
-	arg := "-subj=" + trans.Options().Subject
-	hc_interval := s.config["hc_interval"]
-	if len(hc_interval) <= 0 {
-		hc_interval = HC_INTERVAL_DEFAULT
+	var reg registry.Registry
+	check := packHealthCheck(s.config, trans.Options().Subject)
+	if check == nil {
+		log.Println("NO HEALTH CHECK REGISTERED !!!")
+		reg = registry.NewRegistry(
+			registry.Addrs(s.config[CONFIG_CONSUL_ADDRRESS]),
+		)
+	} else {
+		reg = registry.NewRegistry(
+			registry.Addrs(s.config[CONFIG_CONSUL_ADDRRESS]),
+			registry.Checks(check),
+		)
 	}
-	var check = &consul.AgentServiceCheck{
-		//Notes: "health check",
-		Args:                           []string{command, arg},
-		Interval:                       hc_interval,
-		DeregisterCriticalServiceAfter: s.config["hc_deregister_critical_service_after"],
-	}
-
-	reg := registry.NewRegistry(
-		registry.Addrs(s.config["consul_addr"]),
-		registry.Checks(check),
-	)
-
+	log.Println(s.config)
 	sel := selector.NewSelector(
 		selector.Registry(reg),
 		selector.SetStrategy(selector.RoundRobin),
