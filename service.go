@@ -241,7 +241,6 @@ func NewService(n string, v string) *service {
 			registry.Checks(check),
 		)
 	}
-	log.Println(s.config)
 	sel := selector.NewSelector(
 		selector.Registry(reg),
 		selector.SetStrategy(selector.RoundRobin),
