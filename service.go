@@ -6,13 +6,14 @@ import (
 	"strings"
 	"syscall"
 
+	"log"
+
 	"github.com/nzgogo/micro/codec"
 	"github.com/nzgogo/micro/registry"
 	"github.com/nzgogo/micro/router"
 	"github.com/nzgogo/micro/selector"
 	"github.com/nzgogo/micro/transport"
 	"github.com/satori/go.uuid"
-	"log"
 )
 
 const (
@@ -31,9 +32,8 @@ const (
 	CONFIG_HC_CPU_CRITICAL_THRESHOLD            = "hc_cpu_critical_threshold"
 	CONFIG_HC_CPU_WARNING_THRESHOLD             = "hc_cpu_warning_threshold"
 
-
 	// Default value for health checks
-	DEFAULT_HC_SCRITP							= "gghc"
+	DEFAULT_HC_SCRITP                           = "gghc"
 	DEFAULT_HC_INTERVAL                         = "1m"
 	DEFALT_HC_DEREGISTER_CRITICAL_SERVICE_AFTER = "5m"
 	DEFALT_HC_LOAD_CRITICAL_THRESHOLD           = "0.9"

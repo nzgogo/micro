@@ -46,7 +46,7 @@ func (s *service) ServerHandler(nMsg *nats.Msg) {
 			}
 			err := handler(message, reply)
 			if err != nil {
-				body := map[string]string {"message":err.Message}
+				body := map[string]string{"message": err.Message}
 				s.Respond(
 					codec.NewJsonResponse(
 						message.ContextID,
