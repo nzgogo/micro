@@ -7,11 +7,11 @@ import (
 	"strconv"
 	"strings"
 
+	consul "github.com/hashicorp/consul/api"
 	"github.com/nzgogo/micro/codec"
 	"github.com/shirou/gopsutil/cpu"
 	"github.com/shirou/gopsutil/load"
 	"github.com/shirou/gopsutil/mem"
-	consul "github.com/hashicorp/consul/api"
 )
 
 const (
@@ -28,7 +28,7 @@ const (
 // URLToIntnlTrans builds the channel name for a internal transport use from an URL
 func URLToIntnlTrans(host string, path string) string {
 	str := strings.Split(path, "/")
-	return ORGANIZATION+ "-" + str[2] + "-" + str[3]
+	return ORGANIZATION + "-" + str[2] + "-" + str[3]
 }
 
 func readConfigFile(srvName string) map[string]string {
@@ -57,16 +57,34 @@ func readConfigFile(srvName string) map[string]string {
 	return configMap
 }
 
-func packHealthCheck(config map[string]string, srvSubject string) (*consul.AgentServiceCheck) {
-	if config[CONFIG_HC_SCRIPT] == "" {config[CONFIG_HC_SCRIPT] = DEFAULT_HC_SCRITP}
-	if config[CONFIG_HC_INTERVAL] == "" {config[CONFIG_HC_INTERVAL] = DEFAULT_HC_INTERVAL}
-	if config[CONFIG_HC_DEREGISTER_CRITICAL_SERVICE_AFTER] == "" {config[CONFIG_HC_DEREGISTER_CRITICAL_SERVICE_AFTER] = DEFALT_HC_DEREGISTER_CRITICAL_SERVICE_AFTER}
-	if config[CONFIG_HC_LOAD_CRITICAL_THRESHOLD] == "" {config[CONFIG_HC_LOAD_CRITICAL_THRESHOLD] = DEFALT_HC_LOAD_CRITICAL_THRESHOLD}
-	if config[CONFIG_HC_LOAD_WARNING_THRESHOLD] == "" {config[CONFIG_HC_LOAD_WARNING_THRESHOLD] = DEFALT_HC_LOAD_WARNING_THRESHOLD}
-	if config[CONFIG_HC_MEMORY_CRITICAL_THRESHOLD] == "" {config[CONFIG_HC_MEMORY_CRITICAL_THRESHOLD] = DEFALT_HC_MEMORY_CRITICAL_THRESHOLD}
-	if config[CONFIG_HC_MEMORY_WARNING_THRESHOLD] == "" {config[CONFIG_HC_MEMORY_WARNING_THRESHOLD] = DEFALT_HC_MEMORY_WARNING_THRESHOLD}
-	if config[CONFIG_HC_CPU_CRITICAL_THRESHOLD] == "" {config[CONFIG_HC_CPU_CRITICAL_THRESHOLD] = DEFALT_HC_CPU_CRITICAL_THRESHOLD}
-	if config[CONFIG_HC_CPU_WARNING_THRESHOLD] == "" {config[CONFIG_HC_CPU_WARNING_THRESHOLD] = DEFALT_HC_CPU_WARNING_THRESHOLD}
+func packHealthCheck(config map[string]string, srvSubject string) *consul.AgentServiceCheck {
+	if config[CONFIG_HC_SCRIPT] == "" {
+		config[CONFIG_HC_SCRIPT] = DEFAULT_HC_SCRITP
+	}
+	if config[CONFIG_HC_INTERVAL] == "" {
+		config[CONFIG_HC_INTERVAL] = DEFAULT_HC_INTERVAL
+	}
+	if config[CONFIG_HC_DEREGISTER_CRITICAL_SERVICE_AFTER] == "" {
+		config[CONFIG_HC_DEREGISTER_CRITICAL_SERVICE_AFTER] = DEFALT_HC_DEREGISTER_CRITICAL_SERVICE_AFTER
+	}
+	if config[CONFIG_HC_LOAD_CRITICAL_THRESHOLD] == "" {
+		config[CONFIG_HC_LOAD_CRITICAL_THRESHOLD] = DEFALT_HC_LOAD_CRITICAL_THRESHOLD
+	}
+	if config[CONFIG_HC_LOAD_WARNING_THRESHOLD] == "" {
+		config[CONFIG_HC_LOAD_WARNING_THRESHOLD] = DEFALT_HC_LOAD_WARNING_THRESHOLD
+	}
+	if config[CONFIG_HC_MEMORY_CRITICAL_THRESHOLD] == "" {
+		config[CONFIG_HC_MEMORY_CRITICAL_THRESHOLD] = DEFALT_HC_MEMORY_CRITICAL_THRESHOLD
+	}
+	if config[CONFIG_HC_MEMORY_WARNING_THRESHOLD] == "" {
+		config[CONFIG_HC_MEMORY_WARNING_THRESHOLD] = DEFALT_HC_MEMORY_WARNING_THRESHOLD
+	}
+	if config[CONFIG_HC_CPU_CRITICAL_THRESHOLD] == "" {
+		config[CONFIG_HC_CPU_CRITICAL_THRESHOLD] = DEFALT_HC_CPU_CRITICAL_THRESHOLD
+	}
+	if config[CONFIG_HC_CPU_WARNING_THRESHOLD] == "" {
+		config[CONFIG_HC_CPU_WARNING_THRESHOLD] = DEFALT_HC_CPU_WARNING_THRESHOLD
+	}
 
 	arg := "-subj=" + srvSubject
 
@@ -169,7 +187,7 @@ func healthCheck(configs map[string]string) (int, []byte) {
 				status |= Warning
 			} else {
 				coreCnt := int32(0)
-				for _,p := range cpuInfo {
+				for _, p := range cpuInfo {
 					coreCnt += p.Cores
 				}
 
