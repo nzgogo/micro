@@ -58,7 +58,7 @@ func readConfigFile(srvName string) map[string]string {
 }
 
 func packHealthCheck(config map[string]string, srvSubject string) (*consul.AgentServiceCheck) {
-	if config[CONFIG_HC_SCRIPT] == "" {return nil}
+	if config[CONFIG_HC_SCRIPT] == "" {config[CONFIG_HC_SCRIPT] = DEFAULT_HC_SCRITP}
 	if config[CONFIG_HC_INTERVAL] == "" {config[CONFIG_HC_INTERVAL] = DEFAULT_HC_INTERVAL}
 	if config[CONFIG_HC_DEREGISTER_CRITICAL_SERVICE_AFTER] == "" {config[CONFIG_HC_DEREGISTER_CRITICAL_SERVICE_AFTER] = DEFALT_HC_DEREGISTER_CRITICAL_SERVICE_AFTER}
 	if config[CONFIG_HC_LOAD_CRITICAL_THRESHOLD] == "" {config[CONFIG_HC_LOAD_CRITICAL_THRESHOLD] = DEFALT_HC_LOAD_CRITICAL_THRESHOLD}
@@ -83,38 +83,38 @@ func healthCheck(configs map[string]string) (int, []byte) {
 	var status = OK
 
 	//check cpu
-	cpuCriticalThreshold, err1 := strconv.ParseFloat(configs[CONFIG_HC_CPU_CRITICAL_THRESHOLD], 64)
-	cpuWarningThreshold, err2 := strconv.ParseFloat(configs[CONFIG_HC_CPU_WARNING_THRESHOLD], 64)
-	if err1 == nil || err2 == nil {
-		cpuPercent, err := cpu.Percent(0, false)
-		if err != nil {
-			log.Println("Failed to get CPU information.")
-			retMsg += " Failed get CPU information. "
-			status |= Warning
-		} else {
-			isCritical := false
-			cpstr := strconv.FormatFloat(cpuPercent[0], 'f', 2, 64)
-			if err1 == nil {
-				if 100-cpuPercent[0] < cpuCriticalThreshold {
-					msg := " CPU is critical. Percentage of CPU used: " + cpstr + "%"
-					log.Println(msg)
-					retMsg += msg
-					status |= Critical
-					isCritical = true
-				}
-			}
-			if err2 == nil {
-				if 100-cpuPercent[0] < cpuWarningThreshold {
-					msg := " CPU is warning. Percentage of CPU used: " + cpstr + "%"
-					if !isCritical {
-						log.Println(msg)
-						retMsg += msg
-					}
-					status |= Warning
-				}
-			}
-		}
-	}
+	//cpuCriticalThreshold, err1 := strconv.ParseFloat(configs[CONFIG_HC_CPU_CRITICAL_THRESHOLD], 64)
+	//cpuWarningThreshold, err2 := strconv.ParseFloat(configs[CONFIG_HC_CPU_WARNING_THRESHOLD], 64)
+	//if err1 == nil || err2 == nil {
+	//	cpuPercent, err := cpu.Percent(0, false)
+	//	if err != nil {
+	//		log.Println("Failed to get CPU information.")
+	//		retMsg += " Failed get CPU information. "
+	//		status |= Warning
+	//	} else {
+	//		isCritical := false
+	//		cpstr := strconv.FormatFloat(cpuPercent[0], 'f', 2, 64)
+	//		if err1 == nil {
+	//			if 100-cpuPercent[0] < cpuCriticalThreshold {
+	//				msg := " CPU is critical. Percentage of CPU used: " + cpstr + "%"
+	//				log.Println(msg)
+	//				retMsg += msg
+	//				status |= Critical
+	//				isCritical = true
+	//			}
+	//		}
+	//		if err2 == nil {
+	//			if 100-cpuPercent[0] < cpuWarningThreshold {
+	//				msg := " CPU is warning. Percentage of CPU used: " + cpstr + "%"
+	//				if !isCritical {
+	//					log.Println(msg)
+	//					retMsg += msg
+	//				}
+	//				status |= Warning
+	//			}
+	//		}
+	//	}
+	//}
 
 	//check memory usage
 	memoryCriticalThreshold, err1 := strconv.ParseFloat(configs[CONFIG_HC_MEMORY_CRITICAL_THRESHOLD], 64)
@@ -162,30 +162,41 @@ func healthCheck(configs map[string]string) (int, []byte) {
 			retMsg += " Failed to get load information. "
 			status |= Warning
 		} else {
-			load := l.Load5
-			lstr := strconv.FormatFloat(load, 'f', 2, 64)
-			isCritical := false
-			if err1 == nil {
-				if load > loadCriticalThreshold {
-					msg := " Overload critical. System loads: " + lstr
-					log.Println(msg)
-					retMsg += msg
-					status |= Critical
-					isCritical = true
+			cpuInfo, err := cpu.Info()
+			if err != nil {
+				log.Println("Failed to get CPU information.")
+				retMsg += " Failed get CPU information. "
+				status |= Warning
+			} else {
+				coreCnt := int32(0)
+				for _,p := range cpuInfo {
+					coreCnt += p.Cores
 				}
-			}
-			if err2 == nil {
-				if load > loadWarningThreshold {
-					msg := " Overload warning. System loads: " + lstr
-					if !isCritical {
+
+				load := l.Load5 / float64(coreCnt)
+				lstr := strconv.FormatFloat(load, 'f', 2, 64)
+				isCritical := false
+				if err1 == nil {
+					if load > loadCriticalThreshold {
+						msg := " Overload critical. System loads: " + lstr
 						log.Println(msg)
 						retMsg += msg
+						status |= Critical
+						isCritical = true
 					}
-					status |= Warning
+				}
+				if err2 == nil {
+					if load > loadWarningThreshold {
+						msg := " Overload warning. System loads: " + lstr
+						if !isCritical {
+							log.Println(msg)
+							retMsg += msg
+						}
+						status |= Warning
+					}
 				}
 			}
 		}
-
 	}
 
 	return status, []byte(retMsg)
