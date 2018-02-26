@@ -75,9 +75,15 @@ func NewResponse(contextID string, statusCode int, body []byte, header http.Head
 }
 
 func NewJsonResponse(contextID string, statusCode int, body interface{}) *Message {
-	b, err := Marshal(body)
-	if err != nil {
-		b = nil
+	var b []byte
+	if v, ok := body.([]byte); ok {
+		b = v
+	} else {
+		if v, err := Marshal(body); err != nil {
+			b = nil
+		} else {
+			b = v
+		}
 	}
 
 	h := http.Header{}
