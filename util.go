@@ -23,6 +23,11 @@ const (
 const (
 	GOGO_CONFIG_PATH = "/etc/gogo/"
 	CONFIG_FILE_NAME = ".config.json"
+
+	MEMORY_WARNING = "MW"
+	MEMORY_CRITICAL = "MC"
+	LOAD_WARNING = "LW"
+	LOAD_CRITICAL = "LC"
 )
 
 // URLToIntnlTrans builds the channel name for a internal transport use from an URL
@@ -96,10 +101,9 @@ func packHealthCheck(config map[string]string, srvSubject string) *consul.AgentS
 	}
 }
 
-func healthCheck(configs map[string]string) (int, []byte) {
-	var retMsg = ""
+func healthCheck(configs map[string]string) (int, map[string]string) {
 	var status = OK
-
+	feedback := make(map[string]string)
 	//check cpu
 	//cpuCriticalThreshold, err1 := strconv.ParseFloat(configs[CONFIG_HC_CPU_CRITICAL_THRESHOLD], 64)
 	//cpuWarningThreshold, err2 := strconv.ParseFloat(configs[CONFIG_HC_CPU_WARNING_THRESHOLD], 64)
@@ -141,7 +145,7 @@ func healthCheck(configs map[string]string) (int, []byte) {
 		v, err := mem.VirtualMemory()
 		if err != nil {
 			log.Println("Failed to get memory information.")
-			retMsg += " Failed to get CPU information. "
+			feedback[MEMORY_WARNING] = "Failed to get CPU information. "
 			status |= Warning
 		} else {
 			memoryPercent := v.UsedPercent
@@ -149,19 +153,19 @@ func healthCheck(configs map[string]string) (int, []byte) {
 			isCritical := false
 			if err1 == nil {
 				if 100-memoryPercent < memoryCriticalThreshold {
-					msg := " Memory is critical. Percentage of Memory used: " + mpstr + "%"
+					msg := "Memory is critical. Percentage of Memory used: " + mpstr + "%"
 					log.Println(msg)
-					retMsg += msg
+					feedback[MEMORY_CRITICAL] = msg
 					status |= Critical
 					isCritical = true
 				}
 			}
 			if err2 == nil {
 				if 100-memoryPercent < memoryWarningThreshold {
-					msg := " Memory is warning. Percentage of Memory used: " + mpstr + "%"
+					msg := "Memory is warning. Percentage of Memory used: " + mpstr + "%"
 					if !isCritical {
 						log.Println(msg)
-						retMsg += msg
+						feedback[MEMORY_WARNING] = msg
 					}
 					status |= Warning
 
@@ -177,13 +181,13 @@ func healthCheck(configs map[string]string) (int, []byte) {
 		l, err := load.Avg()
 		if err != nil {
 			log.Println("Failed to get load information.")
-			retMsg += " Failed to get load information. "
+			feedback[LOAD_WARNING] =  "Failed to get load information. "
 			status |= Warning
 		} else {
 			cpuInfo, err := cpu.Info()
 			if err != nil {
 				log.Println("Failed to get CPU information.")
-				retMsg += " Failed get CPU information. "
+				feedback[LOAD_WARNING] = "Failed get CPU information. "
 				status |= Warning
 			} else {
 				coreCnt := int32(0)
@@ -196,19 +200,19 @@ func healthCheck(configs map[string]string) (int, []byte) {
 				isCritical := false
 				if err1 == nil {
 					if load > loadCriticalThreshold {
-						msg := " Overload critical. System loads: " + lstr
+						msg := "Overload critical. System loads: " + lstr
 						log.Println(msg)
-						retMsg += msg
+						feedback[LOAD_CRITICAL] =  msg
 						status |= Critical
 						isCritical = true
 					}
 				}
 				if err2 == nil {
 					if load > loadWarningThreshold {
-						msg := " Overload warning. System loads: " + lstr
+						msg := "Overload warning. System loads: " + lstr
 						if !isCritical {
 							log.Println(msg)
-							retMsg += msg
+							feedback[LOAD_WARNING] =  msg
 						}
 						status |= Warning
 					}
@@ -216,6 +220,6 @@ func healthCheck(configs map[string]string) (int, []byte) {
 			}
 		}
 	}
-
-	return status, []byte(retMsg)
+	if status > Critical {status = Critical}
+	return status, feedback
 }
