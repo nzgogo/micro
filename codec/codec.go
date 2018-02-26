@@ -88,6 +88,7 @@ func NewJsonResponse(contextID string, statusCode int, body interface{}) *Messag
 
 	h := http.Header{}
 	h.Add("Content-Type", "application/json")
+
 	return &Message{
 		Type:       "response",
 		StatusCode: statusCode,
