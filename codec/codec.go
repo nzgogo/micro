@@ -33,7 +33,7 @@ type Message struct {
 
 	//common fields
 	Type      string      `json:"type"`
-	ContextID string      `json:"contextId"`
+	ContextID string      `json:"contextID"`
 	Header    http.Header `json:"header"`
 	Body      []byte      `json:"body"`
 }
@@ -46,16 +46,16 @@ func Unmarshal(d []byte, v interface{}) error {
 	return json.Unmarshal(d, v)
 }
 
-func (msg *Message) Get(key string) string {
-	jsonStrings := make(map[string]string)
+func (msg *Message) Get(key string) interface{} {
+	jsonStrings := make(map[string]interface{})
 	if err := Unmarshal(msg.Body, &jsonStrings); err == nil {
 		return jsonStrings[key]
 	}
-	return ""
+	return nil
 }
 
-func (msg *Message) GetAll() map[string]string {
-	jsonStrings := make(map[string]string, 0)
+func (msg *Message) GetAll() map[string]interface{} {
+	jsonStrings := make(map[string]interface{}, 0)
 	err := Unmarshal(msg.Body, &jsonStrings)
 	if err == nil {
 		return jsonStrings
