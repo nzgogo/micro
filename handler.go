@@ -5,6 +5,7 @@ import (
 	"github.com/nzgogo/micro/api"
 	"github.com/nzgogo/micro/codec"
 	"github.com/nzgogo/micro/context"
+	"log"
 )
 
 const (
@@ -14,14 +15,23 @@ const (
 )
 
 func (s *service) ServerHandler(nMsg *nats.Msg) {
+	if nMsg == nil {
+		log.Println("Nats body empty")
+		return
+	}
 	//decode message
 	message := &codec.Message{}
-	codec.Unmarshal(nMsg.Data, message)
+	uerr := codec.Unmarshal(nMsg.Data, message)
+	if uerr != nil {
+		log.Println("ServerHandler respond error: Unmarshal failed")
+		return
+	}
 	sub := s.opts.Transport.Options().Subject
 
 	//check message type, response or request
 	if message.Type == REQUEST {
-		//check if the message is a Request or Publish.
+		// check the message type: Request or Publish.
+		// If it is a Request, the reply subject should be extracted from nats.Msg struct.
 		if nMsg.Reply != "" {
 			message.ReplyTo = nMsg.Reply
 		}
@@ -34,8 +44,11 @@ func (s *service) ServerHandler(nMsg *nats.Msg) {
 		handler, routerErr := s.opts.Router.Dispatch(message)
 		if routerErr != nil {
 			errResp := codec.NewResponse(message.ContextID, 404, nil, message.Header)
-			resp, _ := codec.Marshal(errResp)
-			s.opts.Transport.Publish(message.ReplyTo, resp)
+			err := s.Respond(errResp, message.ReplyTo)
+			if err != nil {
+				log.Println("ServerHandler respond error: " + err.Error())
+			}
+			return
 		}
 		reply := message.ReplyTo
 		message.ReplyTo = sub
@@ -47,7 +60,7 @@ func (s *service) ServerHandler(nMsg *nats.Msg) {
 			err := handler(message, reply)
 			if err != nil {
 				body := map[string]string{"message": err.Message}
-				s.Respond(
+				err1 := s.Respond(
 					codec.NewJsonResponse(
 						message.ContextID,
 						err.StatusCode,
@@ -55,6 +68,9 @@ func (s *service) ServerHandler(nMsg *nats.Msg) {
 					),
 					reply,
 				)
+				if err1 != nil {
+					log.Println("ServerHandler respond error: " + err1.Error())
+				}
 			}
 		}()
 	} else if message.Type == HEALTHCHECK {
@@ -62,39 +78,50 @@ func (s *service) ServerHandler(nMsg *nats.Msg) {
 			checkStatus, feedback := healthCheck(s.config)
 			msg := codec.NewJsonResponse("", checkStatus, feedback)
 			replyBody, _ := codec.Marshal(msg)
-			s.opts.Transport.Publish(nMsg.Reply, replyBody)
-
+			err := s.opts.Transport.Publish(nMsg.Reply, replyBody)
+			if err != nil {
+				log.Println("ServerHandler respond error: " + err.Error())
+			}
 		}()
-
 	} else if message.Type == RESPONSE {
 		conversation := s.opts.Context.Get(message.ContextID)
 		if conversation == nil {
+			log.Println("ServerHandler respond error: conversation lost")
 			return
 		}
-
 		rpl := conversation.Request
 		s.opts.Transport.Publish(rpl, nMsg.Data)
 		s.opts.Context.Delete(message.ContextID)
 	}
 }
 
-//Example MsgHandler
 func (s *service) ApiHandler(nMsg *nats.Msg) {
+	if nMsg == nil {
+		log.Println("Nats body empty")
+		return
+	}
 	message := &codec.Message{}
-	codec.Unmarshal(nMsg.Data, message)
+	uerr := codec.Unmarshal(nMsg.Data, message)
+	if uerr != nil {
+		log.Println("ApiHandler respond error: Unmarshal failed")
+		return
+	}
 	ctx := s.opts.Context
 	if message.Type == HEALTHCHECK {
 		go func() {
 			checkStatus, feedback := healthCheck(s.config)
 			msg := codec.NewJsonResponse("", checkStatus, feedback)
 			replyBody, _ := codec.Marshal(msg)
-			s.opts.Transport.Publish(nMsg.Reply, replyBody)
-
+			err := s.opts.Transport.Publish(nMsg.Reply, replyBody)
+			if err != nil {
+				log.Println("ServerHandler respond error: " + err.Error())
+			}
 		}()
 
 	} else if message.Type == RESPONSE {
 		conversation := ctx.Get(message.ContextID)
 		if conversation == nil {
+			log.Println("ApiHandler respond error: conversation lost")
 			return
 		}
 		r := conversation.Response

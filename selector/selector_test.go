@@ -145,7 +145,7 @@ func TestSelector(t *testing.T) {
 
 	//selector test
 	{
-		slt := NewSelector(Registry(client), SetStrategy(RoundRobin))
+		slt := NewSelector(client, SetStrategy(RoundRobin))
 		err := slt.Init()
 		if err != nil {
 			t.Fatalf("NewSelector init failed. error: %v", err)
