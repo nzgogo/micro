@@ -16,7 +16,7 @@ type Options struct {
 type Option func(*Options)
 type RejectHandler func(*codec.Message) error
 
-//config consul client
+// config consul client
 func Client(c *api.Client) Option {
 	return func(options *Options) {
 		options.Client = c

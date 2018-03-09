@@ -1,7 +1,6 @@
 package registry
 
 import (
-	"crypto/tls"
 	"time"
 
 	consul "github.com/hashicorp/consul/api"
@@ -9,13 +8,10 @@ import (
 
 type Options struct {
 	//registry options
-	Addrs     []string
-	Timeout   time.Duration
-	Secure    bool
-	TLSConfig *tls.Config
+	Addrs   []string
+	Timeout time.Duration
 
 	//consul agent check options
-	//CheckArgs     []string
 	Checks consul.AgentServiceChecks
 }
 
@@ -29,20 +25,6 @@ func Addrs(addrs ...string) Option {
 func Timeout(t time.Duration) Option {
 	return func(o *Options) {
 		o.Timeout = t
-	}
-}
-
-// Secure communication with the registry
-func Secure(b bool) Option {
-	return func(o *Options) {
-		o.Secure = b
-	}
-}
-
-// Specify TLS Config
-func TLSConfig(t *tls.Config) Option {
-	return func(o *Options) {
-		o.TLSConfig = t
 	}
 }
 

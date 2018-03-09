@@ -1,5 +1,4 @@
-// Transport is an interface which is used for communication between
-// services. It uses NATS implementations
+// Transport is an interface which is used for communication between services.
 
 package transport
 
@@ -30,18 +29,19 @@ type transport struct {
 type ResponseHandler func([]byte) error
 
 var (
-	DefaultTransport   = NewTransport()
-	DefaultTimeout     = time.Second * 15
-	DefaultDialTimeout = time.Second * 5
+	DefaultTransport = NewTransport()
+)
+
+const (
+	DefaultRequestTimeout = time.Second * 15
 )
 
 func (n *transport) Options() Options {
 	return n.opts
 }
 
-func (n *transport) Request(sub string, req []byte, handler ResponseHandler) error {
-
-	rsp, respErr := n.conn.Request(sub, req, n.opts.Timeout)
+func (n *transport) Request(subject string, req []byte, handler ResponseHandler) error {
+	rsp, respErr := n.conn.Request(subject, req, n.opts.Timeout)
 	if respErr != nil {
 		return respErr
 	}
@@ -53,14 +53,8 @@ func (n *transport) Request(sub string, req []byte, handler ResponseHandler) err
 	return nil
 }
 
-func (n *transport) Publish(sub string, b []byte) error {
-
-	// no deadline
-	if n.opts.Timeout == time.Duration(0) {
-		return n.conn.Publish(sub, b)
-	}
-
-	return n.conn.Publish(sub, b)
+func (n *transport) Publish(subject string, data []byte) error {
+	return n.conn.Publish(subject, data)
 }
 
 func (n *transport) Subscribe() error {
@@ -74,14 +68,12 @@ func (n *transport) SetHandler(handler nats.MsgHandler) {
 }
 
 func (n *transport) Close() error {
-	//n.sub.Unsubscribe()
 	n.conn.Close()
 	return nil
 }
 
 func (n *transport) Init() error {
 	options := n.opts
-
 	var cAddrs []string
 
 	for _, addr := range options.Addrs {
@@ -98,31 +90,26 @@ func (n *transport) Init() error {
 		cAddrs = []string{nats.DefaultURL}
 	}
 
-	client_opts := nats.GetDefaultOptions()
-	client_opts.Servers = cAddrs
-	client_opts.Timeout = options.Timeout
+	clientOpts := nats.GetDefaultOptions()
+	clientOpts.Servers = cAddrs
+	if options.Timeout != 0 {
+		clientOpts.Timeout = options.Timeout
+	}
 
-	c, err := client_opts.Connect()
+	conn, err := clientOpts.Connect()
 	if err != nil {
 		return err
 	}
 
-	options.Timeout = DefaultDialTimeout
-
-	if err != nil {
-		return err
-	}
-
-	n.conn = c
+	n.conn = conn
 	n.opts = options
-	//n.sub = sub
 
 	return nil
 }
 
 func NewTransport(opts ...Option) *transport {
 	options := Options{
-		Timeout: DefaultTimeout,
+		Timeout: DefaultRequestTimeout,
 	}
 
 	for _, o := range opts {

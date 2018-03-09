@@ -5,10 +5,9 @@ import (
 )
 
 type Options struct {
-	Subject string   //  Message destination address
-	Addrs   []string // A configured set of nats servers which this client will use when attempting to connect.
-	// Timeout sets the timeout for Send/Recv
-	Timeout time.Duration
+	Subject string        // Message destination address
+	Addrs   []string      // A configured set of nats servers which this client will use when attempting to connect.
+	Timeout time.Duration // Dialer timeout
 }
 
 type Option func(*Options)
