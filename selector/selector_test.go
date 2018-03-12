@@ -1,7 +1,6 @@
 package selector
 
 import (
-	"github.com/nzgogo/micro/registry"
 	"net"
 	"net/http"
 	"os"
@@ -9,6 +8,8 @@ import (
 	"strconv"
 	"testing"
 	"time"
+
+	"github.com/nzgogo/micro/registry"
 )
 
 type mockRegistry struct {
@@ -145,7 +146,7 @@ func TestSelector(t *testing.T) {
 
 	//selector test
 	{
-		slt := NewSelector(Registry(client), SetStrategy(RoundRobin))
+		slt := NewSelector(client, SetStrategy(RoundRobin))
 		err := slt.Init()
 		if err != nil {
 			t.Fatalf("NewSelector init failed. error: %v", err)

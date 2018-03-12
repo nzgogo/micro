@@ -1,12 +1,12 @@
 package router
 
 import (
-	"errors"
 	"log"
 	"strings"
 
 	"github.com/hashicorp/consul/api"
 	"github.com/nzgogo/micro/codec"
+	"github.com/nzgogo/micro/constant"
 )
 
 type Handler func(*codec.Message, string) *Error
@@ -36,12 +36,6 @@ type Node struct {
 	ID      string  `json:"ID"`
 	Handler Handler `json:"-"`
 }
-
-var (
-	ErrInvalidPath      = errors.New("invalid path cannot process")
-	ErrNotFound         = errors.New("service not found")
-	ErrMethodNotAllowed = errors.New("method not allowed")
-)
 
 func (r *router) Init(opts ...Option) error {
 	for _, o := range opts {
@@ -119,10 +113,13 @@ func (r *router) Deregister() error {
 	return nil
 }
 
-// Based on reqeust.path  and method (e.g GET /gogox/v1/greeter/hello),
+// Based on reqeust.path and method (e.g GET /gogox/v1/greeter/hello),
 // this method will download all relavent nodes from consul KV store
 // according to parsed key (/gogox/v1/greeter) and find matching service (/hello)
 func (r *router) HttpMatch(req *codec.Message) error {
+	if req == nil {
+		return constant.ErrEmptyMsg
+	}
 	srvPath, subPath, err := r.splitPath(req.Path)
 	if err != nil {
 		return err
@@ -134,7 +131,7 @@ func (r *router) HttpMatch(req *codec.Message) error {
 	}
 
 	if len(routes) == 0 || routes == nil {
-		return ErrNotFound
+		return constant.ErrResourceNotFound
 	}
 
 	if paths := r.pathMatch(routes, subPath); len(paths) > 0 {
@@ -142,17 +139,20 @@ func (r *router) HttpMatch(req *codec.Message) error {
 			req.Node = node.ID
 			return nil
 		} else {
-			return ErrMethodNotAllowed
+			return constant.ErrMethodNotAllowed
 		}
 	}
 
-	return ErrNotFound
+	return constant.ErrResourceNotFound
 }
 
-//Once server decoded a request, it can use this method to dispatch tasks to relevant handlers
+// dispatch to route handler
 func (r *router) Dispatch(req *codec.Message) (Handler, error) {
+	if req == nil {
+		return nil, constant.ErrEmptyMsg
+	}
 	if req.Node == "" {
-		return nil, ErrNotFound
+		return nil, constant.ErrResourceNotFound
 	}
 
 	for _, node := range r.routes {
@@ -161,7 +161,7 @@ func (r *router) Dispatch(req *codec.Message) (Handler, error) {
 		}
 	}
 
-	return nil, ErrNotFound
+	return nil, constant.ErrResourceNotFound
 }
 
 func (r *router) pathMatch(routes []*Node, path string) (matched []*Node) {
@@ -193,16 +193,14 @@ func (r *router) splitPath(path string) (srvPath, subPath string, err error) {
 	}
 
 	if len(results) <= 3 {
-		err = ErrInvalidPath
+		err = constant.ErrRouterInvalidPath
 		return
 	}
 
-	srvPath = "gogo/" + results[1] + "/" + results[2] + "/" + results[0]
-	//fmt.Println("srvpath: " + srvPath)
+	srvPath = constant.ORGANIZATION + "/" + results[1] + "/" + results[2] + "/" + results[0]
 	for i := 3; i < len(results); i++ {
 		subPath += "/" + results[i]
 	}
-	//fmt.Println("subpath: " + subPath)
 	return
 }
 

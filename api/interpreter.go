@@ -4,22 +4,19 @@ package gogoapi
 
 import (
 	"bytes"
-	"errors"
 	"net/http"
 
 	"github.com/nzgogo/micro/codec"
+	"github.com/nzgogo/micro/constant"
 )
 
 // HTTPReqToIntrlSReq creates the Request struct from regular *http.Request by serialization of main parts of it.
 func HTTPReqToIntrlSReq(req *http.Request, rplSub, ctxid string) (*codec.Message, error) {
 	if req == nil {
-		return nil, errors.New("natsproxy: Request cannot be nil")
+		return nil, constant.ErrHttpEmptyRequest
 	}
 	var buf bytes.Buffer
 	if req.Body != nil {
-		//if err := req.ParseForm(); err != nil {
-		//	return nil, err
-		//}
 		if _, err := buf.ReadFrom(req.Body); err != nil {
 			return nil, err
 		}
@@ -48,19 +45,24 @@ func HTTPReqToIntrlSReq(req *http.Request, rplSub, ctxid string) (*codec.Message
 }
 
 func WriteResponse(rw http.ResponseWriter, response *codec.Message) {
-	// Copy headers
-	// from NATS response.
+	// Copy headers from NATS response.
+	if response == nil {
+		rw.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 	copyHeader(response.Header, rw.Header())
 	statusCode := response.StatusCode
 	// Write the response code
 	rw.WriteHeader(statusCode)
 
 	// Write the bytes of response to a response writer.
-	// TODO benchmark
 	bytes.NewBuffer(response.Body).WriteTo(rw)
 }
 
 func copyHeader(src, dst http.Header) {
+	if src == nil {
+		return
+	}
 	for k, v := range src {
 		for _, val := range v {
 			dst.Add(k, val)
