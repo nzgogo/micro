@@ -7,6 +7,7 @@ import (
 	"strings"
 	"syscall"
 
+	"github.com/nats-io/nats"
 	"github.com/nzgogo/micro/codec"
 	"github.com/nzgogo/micro/constant"
 	"github.com/nzgogo/micro/registry"
@@ -17,7 +18,13 @@ import (
 )
 
 type Service interface {
+	Name() string
+	Version() string
+	ID() string
 	Options() Options
+	Config() map[string]string
+	ServerHandler(*nats.Msg)
+	ApiHandler(*nats.Msg)
 	Init(...Option) error
 	Run() error
 	Respond(message *codec.Message, subject string) error
