@@ -1,13 +1,13 @@
 package registry
 
 import (
-	"errors"
 	"fmt"
 	"net"
 	"sync"
 
 	consul "github.com/hashicorp/consul/api"
 	hash "github.com/mitchellh/hashstructure"
+	"github.com/nzgogo/micro/constant"
 )
 
 type Registry interface {
@@ -18,16 +18,14 @@ type Registry interface {
 	ListServices() ([]*Service, error)
 	Options() Options
 	Client() *consul.Client
-	//Watch() (Watcher, error)
 }
 
 type Option func(*Options)
 
 // Registry service
 type registry struct {
-	Conn *consul.Client
+	conn *consul.Client
 	opts Options
-
 	sync.Mutex
 	register map[string]uint64
 }
@@ -41,28 +39,11 @@ type Service struct {
 
 type Node struct {
 	ID string `json:"id"`
-	//Address  string            `json:"address"`
-	//Port     int               `json:"port"`
 }
 
 var (
 	DefaultRegistry = NewRegistry()
-
-	ErrNotFound = errors.New("not found")
 )
-
-// NewRegistry function
-func NewRegistry(opts ...Option) *registry {
-	var options Options
-
-	for _, o := range opts {
-		o(&options)
-	}
-
-	return &registry{
-		opts: options,
-	}
-}
 
 func (r *registry) Init() error {
 	config := consul.DefaultConfig()
@@ -89,7 +70,7 @@ func (r *registry) Init() error {
 		config.HttpClient.Timeout = r.opts.Timeout
 	}
 
-	r.Conn = client
+	r.conn = client
 	r.register = make(map[string]uint64)
 
 	return nil
@@ -98,7 +79,7 @@ func (r *registry) Init() error {
 // Register a service
 func (r *registry) Register(s *Service) error {
 	if len(s.Nodes) == 0 {
-		return errors.New("Require at least one node")
+		return constant.ErrRegistryEmptyNode
 	}
 
 	// create hash of service; uint64
@@ -115,20 +96,15 @@ func (r *registry) Register(s *Service) error {
 	v, ok := r.register[s.Nodes[0].ID]
 	r.Unlock()
 
-	// if it's already registered and matches then just pass the check
 	if ok && v == h {
-		//// if the err is nil we're all good, bail out
-		//// if not, we don't know what the state is, so full re-register
-		//if err := r.Client.Agent().PassTTL("service:"+node.ID, ""); err == nil {
 		return nil
-		//}
 	}
 
 	// encode the tags
 	tags := []string{s.Version}
 
 	// register the service
-	if err := r.Conn.Agent().ServiceRegister(&consul.AgentServiceRegistration{
+	if err := r.conn.Agent().ServiceRegister(&consul.AgentServiceRegistration{
 		ID:   node.ID,
 		Name: s.Name,
 		Tags: tags,
@@ -150,7 +126,7 @@ func (r *registry) Register(s *Service) error {
 // Deregister a service
 func (r *registry) Deregister(s *Service) error {
 	if len(s.Nodes) == 0 {
-		return errors.New("Service ID is required")
+		return constant.ErrRegistryEmptyNode
 	}
 
 	// delete our hash of the service
@@ -159,11 +135,12 @@ func (r *registry) Deregister(s *Service) error {
 	r.Unlock()
 
 	node := s.Nodes[0]
-	return r.Conn.Agent().ServiceDeregister(node.ID)
+	return r.conn.Agent().ServiceDeregister(node.ID)
 }
 
 func (r *registry) GetService(name string) ([]*Service, error) {
-	rsp, _, err := r.Conn.Health().Service(name, "", false, nil)
+	// todo make passingOnly configurable
+	rsp, _, err := r.conn.Health().Service(name, "", false, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -178,14 +155,10 @@ func (r *registry) GetService(name string) ([]*Service, error) {
 		if len(s.Service.Tags) <= 0 {
 			continue
 		}
-		// version is now a tag
 		version := s.Service.Tags[0]
-		// service ID is now the node id
 		id := s.Service.ID
 		// key is always the version
 		key := version
-		// address is service address
-		//address := s.Service.Address
 
 		svc, ok := serviceMap[key]
 		if !ok {
@@ -212,8 +185,6 @@ func (r *registry) GetService(name string) ([]*Service, error) {
 
 		svc.Nodes = append(svc.Nodes, &Node{
 			ID: id,
-			//Address:  address,
-			//Port:     s.Service.Port,
 		})
 	}
 
@@ -225,7 +196,7 @@ func (r *registry) GetService(name string) ([]*Service, error) {
 }
 
 func (r *registry) ListServices() ([]*Service, error) {
-	rsp, _, err := r.Conn.Catalog().Services(nil)
+	rsp, _, err := r.conn.Catalog().Services(nil)
 	if err != nil {
 		return nil, err
 	}
@@ -244,5 +215,18 @@ func (r *registry) Options() Options {
 }
 
 func (r *registry) Client() *consul.Client {
-	return r.Conn
+	return r.conn
+}
+
+// NewRegistry function
+func NewRegistry(opts ...Option) *registry {
+	var options Options
+
+	for _, o := range opts {
+		o(&options)
+	}
+
+	return &registry{
+		opts: options,
+	}
 }

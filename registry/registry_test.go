@@ -269,7 +269,7 @@ func newConsulTestRegistry(r *mockRegistry) (*registry, func()) {
 	go newMockServer(r, l)
 
 	return &registry{
-			Conn:     cl,
+			conn:     cl,
 			register: make(map[string]uint64),
 		}, func() {
 			l.Close()

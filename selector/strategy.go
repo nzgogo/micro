@@ -5,6 +5,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/nzgogo/micro/constant"
 	"github.com/nzgogo/micro/registry"
 )
 
@@ -22,7 +23,7 @@ func Random(services []*registry.Service) Next {
 
 	return func() (*registry.Node, error) {
 		if len(nodes) == 0 {
-			return nil, ErrNoneAvailable
+			return nil, constant.ErrSelectNoneAvailable
 		}
 
 		i := rand.Int() % len(nodes)
@@ -43,7 +44,7 @@ func RoundRobin(services []*registry.Service) Next {
 
 	return func() (*registry.Node, error) {
 		if len(nodes) == 0 {
-			return nil, ErrNoneAvailable
+			return nil, constant.ErrSelectNoneAvailable
 		}
 
 		mtx.Lock()

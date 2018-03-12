@@ -9,37 +9,25 @@ import (
 
 	consul "github.com/hashicorp/consul/api"
 	"github.com/nzgogo/micro/codec"
+	"github.com/nzgogo/micro/constant"
 	"github.com/shirou/gopsutil/cpu"
 	"github.com/shirou/gopsutil/load"
 	"github.com/shirou/gopsutil/mem"
 )
 
-const (
-	OK       = 0
-	Warning  = 1
-	Critical = 2
-)
-
-const (
-	GOGO_CONFIG_PATH = "/etc/gogo/"
-	CONFIG_FILE_NAME = ".config.json"
-
-	MEMORY_WARNING = "MW"
-	MEMORY_CRITICAL = "MC"
-	LOAD_WARNING = "LW"
-	LOAD_CRITICAL = "LC"
-)
-
 // URLToIntnlTrans builds the channel name for a internal transport use from an URL
 func URLToIntnlTrans(host string, path string) string {
 	str := strings.Split(path, "/")
-	return ORGANIZATION + "-" + str[2] + "-" + str[3]
+	if len(str) < 4 {
+		return ""
+	}
+	return constant.ORGANIZATION + "-" + str[2] + "-" + str[3]
 }
 
 func readConfigFile(srvName string) map[string]string {
-	filename := srvName + CONFIG_FILE_NAME
+	filename := srvName + constant.CONFIG_FILE_NAME
 	currentFolder := "./"
-	etcFolder := GOGO_CONFIG_PATH
+	etcFolder := constant.GOGO_CONFIG_PATH
 
 	if _, err := os.Stat(currentFolder + filename); os.IsNotExist(err) {
 		if _, err := os.Stat(etcFolder + filename); os.IsNotExist(err) {
@@ -51,58 +39,62 @@ func readConfigFile(srvName string) map[string]string {
 		filename = currentFolder + filename
 	}
 
-	fileBytes, _ := ioutil.ReadFile(filename)
-	configMap := make(map[string]string)
-	err := codec.Unmarshal(fileBytes, &configMap)
-
+	fileBytes, err := ioutil.ReadFile(filename)
 	if err != nil {
 		return make(map[string]string)
 	}
-
+	configMap := make(map[string]string)
+	err = codec.Unmarshal(fileBytes, &configMap)
+	if err != nil {
+		return make(map[string]string)
+	}
 	return configMap
 }
 
 func packHealthCheck(config map[string]string, srvSubject string) *consul.AgentServiceCheck {
-	if config[CONFIG_HC_SCRIPT] == "" {
-		config[CONFIG_HC_SCRIPT] = DEFAULT_HC_SCRITP
+	if config[constant.CONFIG_HC_SCRIPT] == "" {
+		config[constant.CONFIG_HC_SCRIPT] = constant.DEFAULT_HC_SCRITP
 	}
-	if config[CONFIG_HC_INTERVAL] == "" {
-		config[CONFIG_HC_INTERVAL] = DEFAULT_HC_INTERVAL
+	if config[constant.CONFIG_HC_INTERVAL] == "" {
+		config[constant.CONFIG_HC_INTERVAL] = constant.DEFAULT_HC_INTERVAL
 	}
-	if config[CONFIG_HC_DEREGISTER_CRITICAL_SERVICE_AFTER] == "" {
-		config[CONFIG_HC_DEREGISTER_CRITICAL_SERVICE_AFTER] = DEFALT_HC_DEREGISTER_CRITICAL_SERVICE_AFTER
+	if config[constant.CONFIG_HC_DEREGISTER_CRITICAL_SERVICE_AFTER] == "" {
+		config[constant.CONFIG_HC_DEREGISTER_CRITICAL_SERVICE_AFTER] = constant.DEFALT_HC_DEREGISTER_CRITICAL_SERVICE_AFTER
 	}
-	if config[CONFIG_HC_LOAD_CRITICAL_THRESHOLD] == "" {
-		config[CONFIG_HC_LOAD_CRITICAL_THRESHOLD] = DEFALT_HC_LOAD_CRITICAL_THRESHOLD
+	if config[constant.CONFIG_HC_LOAD_CRITICAL_THRESHOLD] == "" {
+		config[constant.CONFIG_HC_LOAD_CRITICAL_THRESHOLD] = constant.DEFALT_HC_LOAD_CRITICAL_THRESHOLD
 	}
-	if config[CONFIG_HC_LOAD_WARNING_THRESHOLD] == "" {
-		config[CONFIG_HC_LOAD_WARNING_THRESHOLD] = DEFALT_HC_LOAD_WARNING_THRESHOLD
+	if config[constant.CONFIG_HC_LOAD_WARNING_THRESHOLD] == "" {
+		config[constant.CONFIG_HC_LOAD_WARNING_THRESHOLD] = constant.DEFALT_HC_LOAD_WARNING_THRESHOLD
 	}
-	if config[CONFIG_HC_MEMORY_CRITICAL_THRESHOLD] == "" {
-		config[CONFIG_HC_MEMORY_CRITICAL_THRESHOLD] = DEFALT_HC_MEMORY_CRITICAL_THRESHOLD
+	if config[constant.CONFIG_HC_MEMORY_CRITICAL_THRESHOLD] == "" {
+		config[constant.CONFIG_HC_MEMORY_CRITICAL_THRESHOLD] = constant.DEFALT_HC_MEMORY_CRITICAL_THRESHOLD
 	}
-	if config[CONFIG_HC_MEMORY_WARNING_THRESHOLD] == "" {
-		config[CONFIG_HC_MEMORY_WARNING_THRESHOLD] = DEFALT_HC_MEMORY_WARNING_THRESHOLD
+	if config[constant.CONFIG_HC_MEMORY_WARNING_THRESHOLD] == "" {
+		config[constant.CONFIG_HC_MEMORY_WARNING_THRESHOLD] = constant.DEFALT_HC_MEMORY_WARNING_THRESHOLD
 	}
-	if config[CONFIG_HC_CPU_CRITICAL_THRESHOLD] == "" {
-		config[CONFIG_HC_CPU_CRITICAL_THRESHOLD] = DEFALT_HC_CPU_CRITICAL_THRESHOLD
+	if config[constant.CONFIG_HC_CPU_CRITICAL_THRESHOLD] == "" {
+		config[constant.CONFIG_HC_CPU_CRITICAL_THRESHOLD] = constant.DEFALT_HC_CPU_CRITICAL_THRESHOLD
 	}
-	if config[CONFIG_HC_CPU_WARNING_THRESHOLD] == "" {
-		config[CONFIG_HC_CPU_WARNING_THRESHOLD] = DEFALT_HC_CPU_WARNING_THRESHOLD
+	if config[constant.CONFIG_HC_CPU_WARNING_THRESHOLD] == "" {
+		config[constant.CONFIG_HC_CPU_WARNING_THRESHOLD] = constant.DEFALT_HC_CPU_WARNING_THRESHOLD
 	}
 
-	arg := "-subj=" + srvSubject
+	arg := constant.HC_SCRIPT_ARGS + srvSubject
 
 	return &consul.AgentServiceCheck{
-		//Notes: "health check",
-		Args:                           []string{config[CONFIG_HC_SCRIPT], arg},
-		Interval:                       config[CONFIG_HC_INTERVAL],
-		DeregisterCriticalServiceAfter: config[CONFIG_HC_DEREGISTER_CRITICAL_SERVICE_AFTER],
+		Args:                           []string{config[constant.CONFIG_HC_SCRIPT], arg},
+		Interval:                       config[constant.CONFIG_HC_INTERVAL],
+		DeregisterCriticalServiceAfter: config[constant.CONFIG_HC_DEREGISTER_CRITICAL_SERVICE_AFTER],
 	}
 }
 
 func healthCheck(configs map[string]string) (int, map[string]string) {
-	var status = OK
+	if configs == nil {
+		log.Println("Missing service configurations")
+		return constant.Warning, nil
+	}
+	var status = constant.OK
 	feedback := make(map[string]string)
 	//check cpu
 	//cpuCriticalThreshold, err1 := strconv.ParseFloat(configs[CONFIG_HC_CPU_CRITICAL_THRESHOLD], 64)
@@ -139,14 +131,14 @@ func healthCheck(configs map[string]string) (int, map[string]string) {
 	//}
 
 	//check memory usage
-	memoryCriticalThreshold, err1 := strconv.ParseFloat(configs[CONFIG_HC_MEMORY_CRITICAL_THRESHOLD], 64)
-	memoryWarningThreshold, err2 := strconv.ParseFloat(configs[CONFIG_HC_MEMORY_WARNING_THRESHOLD], 64)
+	memoryCriticalThreshold, err1 := strconv.ParseFloat(configs[constant.CONFIG_HC_MEMORY_CRITICAL_THRESHOLD], 64)
+	memoryWarningThreshold, err2 := strconv.ParseFloat(configs[constant.CONFIG_HC_MEMORY_WARNING_THRESHOLD], 64)
 	if err1 == nil || err2 == nil {
 		v, err := mem.VirtualMemory()
 		if err != nil {
 			log.Println("Failed to get memory information.")
-			feedback[MEMORY_WARNING] = "Failed to get CPU information. "
-			status |= Warning
+			feedback[constant.MEMORY_WARNING] = "Failed to get CPU information. "
+			status |= constant.Warning
 		} else {
 			memoryPercent := v.UsedPercent
 			mpstr := strconv.FormatFloat(memoryPercent, 'f', 2, 64)
@@ -155,8 +147,8 @@ func healthCheck(configs map[string]string) (int, map[string]string) {
 				if 100-memoryPercent < memoryCriticalThreshold {
 					msg := "Memory is critical. Percentage of Memory used: " + mpstr + "%"
 					log.Println(msg)
-					feedback[MEMORY_CRITICAL] = msg
-					status |= Critical
+					feedback[constant.MEMORY_CRITICAL] = msg
+					status |= constant.Critical
 					isCritical = true
 				}
 			}
@@ -165,9 +157,9 @@ func healthCheck(configs map[string]string) (int, map[string]string) {
 					msg := "Memory is warning. Percentage of Memory used: " + mpstr + "%"
 					if !isCritical {
 						log.Println(msg)
-						feedback[MEMORY_WARNING] = msg
+						feedback[constant.MEMORY_WARNING] = msg
 					}
-					status |= Warning
+					status |= constant.Warning
 
 				}
 			}
@@ -175,20 +167,20 @@ func healthCheck(configs map[string]string) (int, map[string]string) {
 	}
 
 	//check load
-	loadCriticalThreshold, err1 := strconv.ParseFloat(configs[CONFIG_HC_LOAD_CRITICAL_THRESHOLD], 64)
-	loadWarningThreshold, err2 := strconv.ParseFloat(configs[CONFIG_HC_LOAD_WARNING_THRESHOLD], 64)
+	loadCriticalThreshold, err1 := strconv.ParseFloat(configs[constant.CONFIG_HC_LOAD_CRITICAL_THRESHOLD], 64)
+	loadWarningThreshold, err2 := strconv.ParseFloat(configs[constant.CONFIG_HC_LOAD_WARNING_THRESHOLD], 64)
 	if err1 == nil || err2 == nil {
 		l, err := load.Avg()
 		if err != nil {
 			log.Println("Failed to get load information.")
-			feedback[LOAD_WARNING] =  "Failed to get load information. "
-			status |= Warning
+			feedback[constant.LOAD_WARNING] = "Failed to get load information. "
+			status |= constant.Warning
 		} else {
 			cpuInfo, err := cpu.Info()
 			if err != nil {
 				log.Println("Failed to get CPU information.")
-				feedback[LOAD_WARNING] = "Failed get CPU information. "
-				status |= Warning
+				feedback[constant.LOAD_WARNING] = "Failed get CPU information. "
+				status |= constant.Warning
 			} else {
 				coreCnt := int32(0)
 				for _, p := range cpuInfo {
@@ -202,8 +194,8 @@ func healthCheck(configs map[string]string) (int, map[string]string) {
 					if load > loadCriticalThreshold {
 						msg := "Overload critical. System loads: " + lstr
 						log.Println(msg)
-						feedback[LOAD_CRITICAL] =  msg
-						status |= Critical
+						feedback[constant.LOAD_CRITICAL] = msg
+						status |= constant.Critical
 						isCritical = true
 					}
 				}
@@ -212,14 +204,16 @@ func healthCheck(configs map[string]string) (int, map[string]string) {
 						msg := "Overload warning. System loads: " + lstr
 						if !isCritical {
 							log.Println(msg)
-							feedback[LOAD_WARNING] =  msg
+							feedback[constant.LOAD_WARNING] = msg
 						}
-						status |= Warning
+						status |= constant.Warning
 					}
 				}
 			}
 		}
 	}
-	if status > Critical {status = Critical}
+	if status > constant.Critical {
+		status = constant.Critical
+	}
 	return status, feedback
 }
