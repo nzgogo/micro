@@ -1,11 +1,12 @@
 package gogo
 
 import (
+	"log"
+
 	"github.com/nats-io/go-nats"
 	"github.com/nzgogo/micro/api"
 	"github.com/nzgogo/micro/codec"
 	"github.com/nzgogo/micro/context"
-	"log"
 )
 
 const (

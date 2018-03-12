@@ -1,9 +1,10 @@
 package codec
 
 import (
-	"github.com/json-iterator/go"
 	"net/http"
 	"net/url"
+
+	"github.com/json-iterator/go"
 )
 
 var json = jsoniter.ConfigCompatibleWithStandardLibrary
