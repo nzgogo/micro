@@ -27,8 +27,11 @@ type Service interface {
 	ApiHandler(*nats.Msg)
 	Init(...Option) error
 	Run() error
+	Stop() error
 	Respond(message *codec.Message, subject string) error
 }
+
+var shutdownChannel = make(chan os.Signal, 1)
 
 type service struct {
 	opts    Options
@@ -88,15 +91,14 @@ func (s *service) Run() error {
 		return err
 	}
 
-	ch := make(chan os.Signal, 1)
-	signal.Notify(ch, syscall.SIGTERM, syscall.SIGINT, syscall.SIGKILL)
+	signal.Notify(shutdownChannel, syscall.SIGTERM, syscall.SIGINT, syscall.SIGKILL)
 
 	select {
 	// wait on kill signal
-	case <-ch:
+	case <-shutdownChannel:
 	}
 
-	if err := s.stop(); err != nil {
+	if err := s.Stop(); err != nil {
 		return err
 	}
 
@@ -125,7 +127,7 @@ func (s *service) start() error {
 	return nil
 }
 
-func (s *service) stop() error {
+func (s *service) Stop() error {
 	if err := s.deregister(); err != nil {
 		return err
 	}
