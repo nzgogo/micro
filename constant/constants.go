@@ -27,6 +27,8 @@ const (
 
 	ORGANIZATION = "gogo"
 
+	SLACKCHANNELADDR = "https://hooks.slack.com/services/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"
+
 	// Service configs
 	CONFIG_NATS_ADDRESS                         = "nats_addr"
 	CONFIG_CONSUL_ADDRRESS                      = "consul_addr"

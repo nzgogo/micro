@@ -5,6 +5,7 @@ import (
 	"github.com/nzgogo/micro/api"
 	"github.com/nzgogo/micro/codec"
 	"github.com/nzgogo/micro/context"
+	"github.com/nzgogo/micro/recover"
 	"log"
 )
 
@@ -15,6 +16,7 @@ const (
 )
 
 func (s *service) ServerHandler(nMsg *nats.Msg) {
+	defer recover.Recover(s.name, "ServerHandler")
 	if nMsg == nil {
 		log.Println("Nats body empty")
 		return
@@ -96,6 +98,7 @@ func (s *service) ServerHandler(nMsg *nats.Msg) {
 }
 
 func (s *service) ApiHandler(nMsg *nats.Msg) {
+	defer recover.Recover(s.name, "ApiHandler")
 	if nMsg == nil {
 		log.Println("Nats body empty")
 		return
