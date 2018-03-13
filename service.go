@@ -28,7 +28,8 @@ type Service interface {
 	Init(...Option) error
 	Run() error
 	Stop() error
-	Respond(message *codec.Message, subject string) error
+	Respond(*codec.Message, string) error
+	Pub(string, string, []byte) error
 }
 
 var shutdownChannel = make(chan os.Signal, 1)
@@ -112,6 +113,14 @@ func (s *service) Respond(message *codec.Message, subject string) error {
 		return err
 	}
 	return s.opts.Transport.Publish(subject, resp)
+}
+
+func (s *service) Pub(srv string, version string, msg []byte) error {
+	sub, err := s.Options().Selector.Select(srv, version)
+	if err != nil {
+		return err
+	}
+	return s.Options().Transport.Publish(sub, msg)
 }
 
 func (s *service) start() error {
