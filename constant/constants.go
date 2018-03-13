@@ -27,6 +27,11 @@ const (
 
 	ORGANIZATION = "gogo"
 
+	// Message types
+	REQUEST     = "request"
+	RESPONSE    = "response"
+	HEALTHCHECK = "healthCheck"
+
 	// Service configs
 	CONFIG_NATS_ADDRESS                         = "nats_addr"
 	CONFIG_CONSUL_ADDRRESS                      = "consul_addr"

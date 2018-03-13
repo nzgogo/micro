@@ -2,17 +2,12 @@ package gogo
 
 import (
 	"log"
+	"micro/constant"
 
 	"github.com/nats-io/go-nats"
 	"github.com/nzgogo/micro/api"
 	"github.com/nzgogo/micro/codec"
 	"github.com/nzgogo/micro/context"
-)
-
-const (
-	REQUEST     = "request"
-	RESPONSE    = "response"
-	HEALTHCHECK = "healthCheck"
 )
 
 func (s *service) ServerHandler(nMsg *nats.Msg) {
@@ -30,7 +25,7 @@ func (s *service) ServerHandler(nMsg *nats.Msg) {
 	sub := s.opts.Transport.Options().Subject
 
 	//check message type, response or request
-	if message.Type == REQUEST {
+	if message.Type == constant.REQUEST {
 		// check the message type: Request or Publish.
 		// If it is a Request, the reply subject should be extracted from nats.Msg struct.
 		if nMsg.Reply != "" {
@@ -74,7 +69,7 @@ func (s *service) ServerHandler(nMsg *nats.Msg) {
 				}
 			}
 		}()
-	} else if message.Type == HEALTHCHECK {
+	} else if message.Type == constant.HEALTHCHECK {
 		go func() {
 			checkStatus, feedback := healthCheck(s.config)
 			msg := codec.NewJsonResponse("", checkStatus, feedback)
@@ -84,7 +79,7 @@ func (s *service) ServerHandler(nMsg *nats.Msg) {
 				log.Println("ServerHandler respond error: " + err.Error())
 			}
 		}()
-	} else if message.Type == RESPONSE {
+	} else if message.Type == constant.RESPONSE {
 		conversation := s.opts.Context.Get(message.ContextID)
 		if conversation == nil {
 			log.Println("ServerHandler respond error: conversation lost")
@@ -108,7 +103,7 @@ func (s *service) ApiHandler(nMsg *nats.Msg) {
 		return
 	}
 	ctx := s.opts.Context
-	if message.Type == HEALTHCHECK {
+	if message.Type == constant.HEALTHCHECK {
 		go func() {
 			checkStatus, feedback := healthCheck(s.config)
 			msg := codec.NewJsonResponse("", checkStatus, feedback)
@@ -119,7 +114,7 @@ func (s *service) ApiHandler(nMsg *nats.Msg) {
 			}
 		}()
 
-	} else if message.Type == RESPONSE {
+	} else if message.Type == constant.RESPONSE {
 		conversation := ctx.Get(message.ContextID)
 		if conversation == nil {
 			log.Println("ApiHandler respond error: conversation lost")
