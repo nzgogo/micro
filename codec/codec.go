@@ -63,6 +63,16 @@ func (msg *Message) GetAll() map[string]interface{} {
 	return nil
 }
 
+func (msg *Message) Set(key string, value interface{}) {
+	body := make(map[string]interface{}, 0)
+	Unmarshal(msg.Body, &body)
+	body[key] = value
+	newMsg, err := Marshal(body)
+	if err == nil {
+		msg.Body = newMsg
+	}
+}
+
 //NewResponse creates Response Message object.
 func NewResponse(contextID string, statusCode int, body []byte, header http.Header) *Message {
 	return &Message{
