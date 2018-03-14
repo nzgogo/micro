@@ -30,6 +30,7 @@ type Service interface {
 	Stop() error
 	Respond(*codec.Message, string) error
 	Pub(string, string, []byte) error
+	Req(string, string, []byte, transport.ResponseHandler) error
 }
 
 type service struct {
@@ -121,6 +122,14 @@ func (s *service) Pub(srv string, version string, msg []byte) error {
 		return err
 	}
 	return s.Options().Transport.Publish(sub, msg)
+}
+
+func (s *service) Req(srv string, version string, msg []byte, handler transport.ResponseHandler) error {
+	sub, err := s.Options().Selector.Select(srv, version)
+	if err != nil {
+		return err
+	}
+	return s.Options().Transport.Request(sub, msg, handler)
 }
 
 func (s *service) start() error {
