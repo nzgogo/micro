@@ -7,6 +7,7 @@ import (
 	"strings"
 	"syscall"
 
+	"github.com/nats-io/go-nats"
 	"github.com/nzgogo/micro/codec"
 	"github.com/nzgogo/micro/constant"
 	"github.com/nzgogo/micro/registry"
@@ -17,11 +18,18 @@ import (
 )
 
 type Service interface {
+	Name() string
+	Version() string
+	ID() string
 	Options() Options
+	Config() map[string]string
+	ServerHandler(*nats.Msg)
+	ApiHandler(*nats.Msg)
 	Init(...Option) error
 	Run() error
 	Stop() error
-	Respond(message *codec.Message, subject string) error
+	Respond(*codec.Message, string) error
+	Pub(string, string, []byte) error
 }
 
 type service struct {
@@ -105,6 +113,14 @@ func (s *service) Respond(message *codec.Message, subject string) error {
 		return err
 	}
 	return s.opts.Transport.Publish(subject, resp)
+}
+
+func (s *service) Pub(srv string, version string, msg []byte) error {
+	sub, err := s.Options().Selector.Select(srv, version)
+	if err != nil {
+		return err
+	}
+	return s.Options().Transport.Publish(sub, msg)
 }
 
 func (s *service) start() error {

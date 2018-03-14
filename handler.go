@@ -1,17 +1,14 @@
 package gogo
 
 import (
+	"log"
+
 	"github.com/nats-io/go-nats"
 	"github.com/nzgogo/micro/api"
 	"github.com/nzgogo/micro/codec"
+	"github.com/nzgogo/micro/constant"
 	"github.com/nzgogo/micro/context"
 	recpro "github.com/nzgogo/micro/recover"
-)
-
-const (
-	REQUEST     = "request"
-	RESPONSE    = "response"
-	HEALTHCHECK = "healthCheck"
 )
 
 func (s *service) ServerHandler(nMsg *nats.Msg) {
@@ -31,11 +28,11 @@ func (s *service) ServerHandler(nMsg *nats.Msg) {
 	}
 
 	//check message type, response or request
-	if message.Type == REQUEST {
+	if message.Type == constant.REQUEST {
 		s.ServerHandlerRequest(message, nMsg.Reply)
-	} else if message.Type == HEALTHCHECK {
+	} else if message.Type == constant.HEALTHCHECK {
 		s.healthCheckHandler(message, nMsg.Reply)
-	} else if message.Type == RESPONSE {
+	} else if message.Type == constant.RESPONSE {
 		s.ServerHandlerResponse(message, nMsg.Data)
 	}
 }
@@ -57,9 +54,9 @@ func (s *service) ApiHandler(nMsg *nats.Msg) {
 		panic("ApiHandler respond error: Unmarshal failed")
 	}
 
-	if message.Type == HEALTHCHECK {
+	if message.Type == constant.HEALTHCHECK {
 		s.healthCheckHandler(message, nMsg.Reply)
-	} else if message.Type == RESPONSE {
+	} else if message.Type == constant.RESPONSE {
 		s.apiHandlerResponse(message)
 	}
 }
