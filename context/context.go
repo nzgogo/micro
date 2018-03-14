@@ -4,8 +4,9 @@ import (
 	"net/http"
 	"sync"
 
-	"github.com/satori/go.uuid"
 	"log"
+
+	"github.com/satori/go.uuid"
 )
 
 type Context interface {

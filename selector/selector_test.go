@@ -1,7 +1,6 @@
 package selector
 
 import (
-	"github.com/nzgogo/micro/registry"
 	"net"
 	"net/http"
 	"os"
@@ -9,6 +8,8 @@ import (
 	"strconv"
 	"testing"
 	"time"
+
+	"github.com/nzgogo/micro/registry"
 )
 
 type mockRegistry struct {
