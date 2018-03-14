@@ -2,11 +2,11 @@ package gogo
 
 import (
 	"log"
-	"micro/constant"
 
 	"github.com/nats-io/go-nats"
 	"github.com/nzgogo/micro/api"
 	"github.com/nzgogo/micro/codec"
+	"github.com/nzgogo/micro/constant"
 	"github.com/nzgogo/micro/context"
 )
 
