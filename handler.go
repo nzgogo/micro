@@ -1,8 +1,6 @@
 package gogo
 
 import (
-	"log"
-
 	"github.com/nats-io/go-nats"
 	"github.com/nzgogo/micro/api"
 	"github.com/nzgogo/micro/codec"
@@ -29,11 +27,11 @@ func (s *service) ServerHandler(nMsg *nats.Msg) {
 
 	//check message type, response or request
 	if message.Type == constant.REQUEST {
-		s.ServerHandlerRequest(message, nMsg.Reply)
+		s.serverHandlerRequest(message, nMsg.Reply)
 	} else if message.Type == constant.HEALTHCHECK {
 		s.healthCheckHandler(message, nMsg.Reply)
 	} else if message.Type == constant.RESPONSE {
-		s.ServerHandlerResponse(message, nMsg.Data)
+		s.serverHandlerResponse(message, nMsg.Data)
 	}
 }
 
@@ -65,13 +63,13 @@ func (s *service) healthCheckHandler(message *codec.Message, Reply string) {
 	go func() {
 		defer func() {
 			if rMsg := recover(); rMsg != nil {
-				recpro.Recover(s.Options().Transport.Options().Subject,"Micro->HealthCheckHandler", rMsg, message)
+				recpro.Recover(s.Options().Transport.Options().Subject, "Micro->HealthCheckHandler", rMsg, message)
 			}
 		}()
 		checkStatus, feedback := healthCheck(s.config)
 		msg := codec.NewJsonResponse("", checkStatus, feedback)
 		replyBody, _ := codec.Marshal(msg)
-		err := s.opts.Transport.Publish(Reply ,replyBody)
+		err := s.opts.Transport.Publish(Reply, replyBody)
 		if err != nil {
 			panic("ServerHandler respond error: " + err.Error())
 		}
@@ -88,7 +86,6 @@ func (s *service) apiHandlerResponse(message *codec.Message) {
 	conversation := ctx.Get(message.ContextID)
 	if conversation == nil {
 		panic("ApiHandler respond error: conversation lost")
-		return
 	}
 	r := conversation.Response
 
@@ -101,7 +98,7 @@ func (s *service) apiHandlerResponse(message *codec.Message) {
 	ctx.Delete(message.ContextID)
 }
 
-func (s *service) ServerHandlerRequest(message *codec.Message, Reply string) {
+func (s *service) serverHandlerRequest(message *codec.Message, Reply string) {
 	defer func() {
 		if rMsg := recover(); rMsg != nil {
 			recpro.Recover(s.Options().Transport.Options().Subject, "Micro->ServerHandlerRequest", rMsg, message)
@@ -166,7 +163,7 @@ func (s *service) ServerHandlerRequest(message *codec.Message, Reply string) {
 	}()
 }
 
-func (s *service) ServerHandlerResponse(message *codec.Message, data []byte)  {
+func (s *service) serverHandlerResponse(message *codec.Message, data []byte) {
 	defer func() {
 		if rMsg := recover(); rMsg != nil {
 			recpro.Recover(s.Options().Transport.Options().Subject, "Micro->ServerHandlerResponse", rMsg, message)
