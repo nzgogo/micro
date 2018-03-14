@@ -32,8 +32,6 @@ type Service interface {
 	Pub(string, string, []byte) error
 }
 
-var shutdownChannel = make(chan os.Signal, 1)
-
 type service struct {
 	opts    Options
 	config  map[string]string
@@ -91,6 +89,8 @@ func (s *service) Run() error {
 	if err := s.start(); err != nil {
 		return err
 	}
+
+	shutdownChannel := make(chan os.Signal, 1)
 
 	signal.Notify(shutdownChannel, syscall.SIGTERM, syscall.SIGINT, syscall.SIGKILL)
 
