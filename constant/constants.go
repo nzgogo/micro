@@ -25,7 +25,7 @@ const (
 	GOGO_CONFIG_PATH = "/etc/gogo/"
 	CONFIG_FILE_NAME = ".config.json"
 
-	ORGANIZATION = "gogo"
+	ORGANIZATION     = "gogo"
 	SLACKCHANNELADDR = "https://hooks.slack.com/services/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"
 
 	// Message types
