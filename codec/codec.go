@@ -5,6 +5,7 @@ import (
 	"net/url"
 
 	"github.com/json-iterator/go"
+	"github.com/nzgogo/micro/constant"
 )
 
 var json = jsoniter.ConfigCompatibleWithStandardLibrary
@@ -76,7 +77,7 @@ func (msg *Message) Set(key string, value interface{}) {
 //NewResponse creates Response Message object.
 func NewResponse(contextID string, statusCode int, body []byte, header http.Header) *Message {
 	return &Message{
-		Type:       "response",
+		Type:       constant.RESPONSE,
 		StatusCode: statusCode,
 		Header:     header,
 		ContextID:  contextID,
@@ -100,7 +101,7 @@ func NewJsonResponse(contextID string, statusCode int, body interface{}) *Messag
 	h.Add("Content-Type", "application/json")
 
 	return &Message{
-		Type:       "response",
+		Type:       constant.RESPONSE,
 		StatusCode: statusCode,
 		Header:     h,
 		ContextID:  contextID,

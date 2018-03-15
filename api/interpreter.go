@@ -27,7 +27,7 @@ func HTTPReqToIntrlSReq(req *http.Request, rplSub, ctxid string) (*codec.Message
 
 	//TODO May need extract more data from http request
 	request := &codec.Message{
-		Type:      "request",
+		Type:      constant.REQUEST,
 		ContextID: ctxid,
 		Header:    req.Header,
 		Body:      buf.Bytes(),
