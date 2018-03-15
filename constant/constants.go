@@ -28,10 +28,8 @@ const (
 	ORGANIZATION     = "gogo"
 	SLACKCHANNELADDR = "https://hooks.slack.com/services/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"
 
-	// Message types
-	REQUEST     = "request"
-	RESPONSE    = "response"
-	HEALTHCHECK = "healthCheck"
+	// max file chunck size 8mb
+	MAX_FILE_CHUNK_SIZE = 8 * 1024 * 1024
 
 	// Service configs
 	CONFIG_NATS_ADDRESS                         = "nats_addr"
@@ -71,4 +69,11 @@ const (
 	OK       = 0
 	Warning  = 1
 	Critical = 2
+)
+
+// message type
+const (
+	REQUEST     = "request"
+	RESPONSE    = "response"
+	HEALTHCHECK = "healthCheck"
 )
