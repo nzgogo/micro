@@ -26,7 +26,7 @@ func (n *transport) SendFile(ctxID string, sub string, file []byte) (err error) 
 		msgBody := make(map[string]interface{})
 		msgBody["size"] = total
 		msgBody["index"] = counter
-		msgBody["filechunk"] = chunk
+		msgBody["fileChunk"] = chunk
 
 		msgBodyBytes, err := codec.Marshal(msgBody)
 		if err != nil {
