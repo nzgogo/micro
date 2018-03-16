@@ -3,9 +3,11 @@ package gogo
 import (
 	"io/ioutil"
 	"log"
+	"math/rand"
 	"os"
 	"strconv"
 	"strings"
+	"time"
 
 	consul "github.com/hashicorp/consul/api"
 	"github.com/nzgogo/micro/codec"
@@ -43,12 +45,36 @@ func readConfigFile(srvName string) map[string]string {
 	if err != nil {
 		return make(map[string]string)
 	}
-	configMap := make(map[string]string)
+	configMap := make(map[string]interface{})
 	err = codec.Unmarshal(fileBytes, &configMap)
 	if err != nil {
 		return make(map[string]string)
 	}
-	return configMap
+	return parseConfigFile(configMap)
+}
+
+func parseConfigFile(raw map[string]interface{}) map[string]string {
+	configs := make(map[string]string)
+
+	for k, v := range raw {
+		switch vv := v.(type) {
+		case string:
+			configs[k] = vv
+		case []interface{}:
+			configs[k] = selectOneOption(vv)
+		}
+	}
+
+	return configs
+}
+
+func selectOneOption(options []interface{}) string {
+	rand.Seed(time.Now().UnixNano())
+
+	if v, ok := options[rand.Intn(len(options))].(string); ok {
+		return v
+	}
+	return ""
 }
 
 func packHealthCheck(config map[string]string, srvSubject string) *consul.AgentServiceCheck {
