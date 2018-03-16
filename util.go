@@ -17,13 +17,22 @@ import (
 	"github.com/shirou/gopsutil/mem"
 )
 
-// URLToIntnlTrans builds the channel name for a internal transport use from an URL
-func URLToIntnlTrans(host string, path string) string {
+// URLToServiceName builds the service name for a internal transport use from an URL
+func URLToServiceName(host string, path string) string {
 	str := strings.Split(path, "/")
 	if len(str) < 4 {
 		return ""
 	}
 	return constant.ORGANIZATION + "-" + str[2] + "-" + str[3]
+}
+
+// URLToServiceVersion builds the service version for a internal transport use from an URL
+func URLToServiceVersion(path string) string {
+	str := strings.Split(path, "/")
+	if len(str) < 4 {
+		return ""
+	}
+	return str[1]
 }
 
 func readConfigFile(srvName string) map[string]string {
