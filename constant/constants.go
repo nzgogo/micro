@@ -28,8 +28,8 @@ const (
 	ORGANIZATION     = "gogo"
 	SLACKCHANNELADDR = "https://hooks.slack.com/services/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"
 
-	// max file chunck size 8mb
-	MAX_FILE_CHUNK_SIZE      = 8 * 1024 * 1024
+	// max file chunck size 2mb
+	MAX_FILE_CHUNK_SIZE      = 2 * 1024 * 1024
 	FILE_SERVICE_NAME        = "gogo-core-file"
 	FILE_SERVICE_VERSION     = "v1"
 	FILE_SERVICE_UPLOAD_NODE = "post_file_chunk"
