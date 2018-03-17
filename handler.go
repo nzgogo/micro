@@ -1,8 +1,6 @@
 package gogo
 
 import (
-	"runtime/debug"
-
 	"github.com/nats-io/go-nats"
 	"github.com/nzgogo/micro/api"
 	"github.com/nzgogo/micro/codec"
@@ -14,7 +12,7 @@ import (
 func (s *service) ServerHandler(nMsg *nats.Msg) {
 	defer func() {
 		if rMsg := recover(); rMsg != nil {
-			recpro.Recover(s.Options().Transport.Options().Subject, "ServerHandler\n"+string(debug.Stack()), rMsg, nMsg)
+			recpro.Recover(s.Options().Transport.Options().Subject, "ServerHandler", rMsg, nMsg)
 		}
 	}()
 	if nMsg == nil {
@@ -40,7 +38,7 @@ func (s *service) ServerHandler(nMsg *nats.Msg) {
 func (s *service) ApiHandler(nMsg *nats.Msg) {
 	defer func() {
 		if rMsg := recover(); rMsg != nil {
-			recpro.Recover(s.Options().Transport.Options().Subject, "ApiHandler\n"+string(debug.Stack()), rMsg, nMsg)
+			recpro.Recover(s.Options().Transport.Options().Subject, "ApiHandler", rMsg, nMsg)
 		}
 	}()
 
@@ -65,7 +63,7 @@ func (s *service) healthCheckHandler(message *codec.Message, Reply string) {
 	go func() {
 		defer func() {
 			if rMsg := recover(); rMsg != nil {
-				recpro.Recover(s.Options().Transport.Options().Subject, "Micro->HealthCheckHandler\n"+string(debug.Stack()), rMsg, message)
+				recpro.Recover(s.Options().Transport.Options().Subject, "Micro->HealthCheckHandler", rMsg, message)
 			}
 		}()
 		checkStatus, feedback := healthCheck(s.config)
@@ -81,7 +79,7 @@ func (s *service) healthCheckHandler(message *codec.Message, Reply string) {
 func (s *service) apiHandlerResponse(message *codec.Message) {
 	defer func() {
 		if rMsg := recover(); rMsg != nil {
-			recpro.Recover(s.Options().Transport.Options().Subject, "Micro->apiHandlerResponse\n"+string(debug.Stack()), rMsg, message)
+			recpro.Recover(s.Options().Transport.Options().Subject, "Micro->apiHandlerResponse", rMsg, message)
 		}
 	}()
 	ctx := s.opts.Context
@@ -103,7 +101,7 @@ func (s *service) apiHandlerResponse(message *codec.Message) {
 func (s *service) serverHandlerRequest(message *codec.Message, Reply string) {
 	defer func() {
 		if rMsg := recover(); rMsg != nil {
-			recpro.Recover(s.Options().Transport.Options().Subject, "Micro->ServerHandlerRequest\n"+string(debug.Stack()), rMsg, message)
+			recpro.Recover(s.Options().Transport.Options().Subject, "Micro->ServerHandlerRequest", rMsg, message)
 		}
 	}()
 	// check the message type: Request or Publish.
@@ -132,7 +130,7 @@ func (s *service) serverHandlerRequest(message *codec.Message, Reply string) {
 	go func() {
 		defer func() {
 			if rMsg := recover(); rMsg != nil {
-				recpro.Recover(s.Options().Transport.Options().Subject, "Micro->RoutesHandler\n"+string(debug.Stack()), rMsg, message)
+				recpro.Recover(s.Options().Transport.Options().Subject, "Micro->RoutesHandler", rMsg, message)
 				s.Respond(
 					codec.NewJsonResponse(
 						message.ContextID,
@@ -168,7 +166,7 @@ func (s *service) serverHandlerRequest(message *codec.Message, Reply string) {
 func (s *service) serverHandlerResponse(message *codec.Message, data []byte) {
 	defer func() {
 		if rMsg := recover(); rMsg != nil {
-			recpro.Recover(s.Options().Transport.Options().Subject, "Micro->ServerHandlerResponse\n"+string(debug.Stack()), rMsg, message)
+			recpro.Recover(s.Options().Transport.Options().Subject, "Micro->ServerHandlerResponse", rMsg, message)
 		}
 	}()
 	conversation := s.opts.Context.Get(message.ContextID)
