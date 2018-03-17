@@ -15,14 +15,33 @@ func HTTPReqToIntrlSReq(req *http.Request, rplSub, ctxid string) (*codec.Message
 	if req == nil {
 		return nil, constant.ErrHttpEmptyRequest
 	}
-	var buf bytes.Buffer
-	if req.Body != nil {
-		if _, err := buf.ReadFrom(req.Body); err != nil {
-			return nil, err
+
+	bodyBytes := make([]byte, 0)
+	if req.Header.Get("Content-Type") == "application/json" {
+		var buf bytes.Buffer
+		if req.Body != nil {
+			if _, err := buf.ReadFrom(req.Body); err != nil {
+				return nil, err
+			}
+			if err := req.Body.Close(); err != nil {
+				return nil, err
+			}
+			bodyBytes = append(bodyBytes, buf.Bytes()...)
 		}
-		if err := req.Body.Close(); err != nil {
-			return nil, err
+	} else if req.Header.Get("Content-Type") == "multipart/form-data" {
+		req.ParseMultipartForm(0)
+		postData := make(map[string]interface{})
+		postData["form"] = req.Form
+		file, fileHeader, err := req.FormFile("file")
+		if err == nil {
+			fileRaw := make([]byte, fileHeader.Size)
+			file.Read(fileRaw)
+			postData["file"] = fileRaw
 		}
+		body, _ := codec.Marshal(postData)
+		bodyBytes = body
+	} else {
+		return nil, constant.ErrHttpEmptyRequest
 	}
 
 	//TODO May need extract more data from http request
@@ -30,7 +49,7 @@ func HTTPReqToIntrlSReq(req *http.Request, rplSub, ctxid string) (*codec.Message
 		Type:      constant.REQUEST,
 		ContextID: ctxid,
 		Header:    req.Header,
-		Body:      buf.Bytes(),
+		Body:      bodyBytes,
 
 		Method: req.Method,
 		Path:   req.URL.Path,
