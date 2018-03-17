@@ -5,6 +5,7 @@ package gogoapi
 import (
 	"bytes"
 	"net/http"
+	"strings"
 
 	"github.com/nzgogo/micro/codec"
 	"github.com/nzgogo/micro/constant"
@@ -28,7 +29,7 @@ func HTTPReqToIntrlSReq(req *http.Request, rplSub, ctxid string) (*codec.Message
 			}
 			bodyBytes = append(bodyBytes, buf.Bytes()...)
 		}
-	} else if req.Header.Get("Content-Type") == "multipart/form-data" {
+	} else if strings.Contains(req.Header.Get("Content-Type"), "multipart/form-data") {
 		req.ParseMultipartForm(0)
 		postData := make(map[string]interface{})
 		postData["form"] = req.Form
