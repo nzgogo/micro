@@ -25,8 +25,13 @@ func (n *transport) SendFile(msg *codec.Message, sub string, file string) (err e
 	fileReader := bytes.NewReader(b)
 
 	for counter := 0; counter < total; counter++ {
-		chunk := make([]byte, 0)
-		fileReader.ReadAt(chunk, constant.MAX_FILE_CHUNK_SIZE)
+		var chunk []byte
+		if fileReader.Size() >= constant.MAX_FILE_CHUNK_SIZE {
+			chunk = make([]byte, constant.MAX_FILE_CHUNK_SIZE)
+		} else {
+			chunk = make([]byte, fileReader.Size())
+		}
+		fileReader.Read(chunk)
 
 		msgBody := make(map[string]interface{})
 		msgBody["size"] = total
