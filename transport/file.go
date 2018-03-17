@@ -51,6 +51,7 @@ func (n *transport) SendFile(msg *codec.Message, sub string, file string) (err e
 			Node:      constant.FILE_SERVICE_UPLOAD_NODE,
 			Body:      msgBodyBytes,
 		}
+		log.Println(msgChunk)
 
 		msgBytes, err := codec.Marshal(msgChunk)
 		if err != nil {
