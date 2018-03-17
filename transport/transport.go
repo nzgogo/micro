@@ -17,7 +17,7 @@ type Transport interface {
 	Publish(string, []byte) error
 	Subscribe() error
 	SetHandler(nats.MsgHandler)
-	SendFile(*codec.Message, string, []byte) error
+	SendFile(*codec.Message, string, string) error
 	Close() error
 }
 
