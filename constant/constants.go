@@ -29,7 +29,10 @@ const (
 	SLACKCHANNELADDR = "https://hooks.slack.com/services/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"
 
 	// max file chunck size 8mb
-	MAX_FILE_CHUNK_SIZE = 8 * 1024 * 1024
+	MAX_FILE_CHUNK_SIZE      = 8 * 1024 * 1024
+	FILE_SERVICE_NAME        = "gogo-core-file"
+	FILE_SERVICE_VERSION     = "v1"
+	FILE_SERVICE_UPLOAD_NODE = "post_file_chunk"
 
 	// Service configs
 	CONFIG_NATS_ADDRESS                         = "nats_addr"
