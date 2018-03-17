@@ -14,7 +14,7 @@ func chunkCount(a int, b int) int {
 	return int(a / b)
 }
 
-func (n *transport) SendFile(ctxID string, sub string, node string, file []byte) (err error) {
+func (n *transport) SendFile(msg *codec.Message, sub string, file []byte) (err error) {
 	fileSize := len(file)
 	total := chunkCount(fileSize, constant.MAX_FILE_CHUNK_SIZE)
 	fileReader := bytes.NewReader(file)
@@ -33,14 +33,10 @@ func (n *transport) SendFile(ctxID string, sub string, node string, file []byte)
 			return err
 		}
 
-		msg := &codec.Message{
-			ContextID: ctxID,
-			Type:      constant.REQUEST,
-			Node:      node,
-			Body:      msgBodyBytes,
-		}
+		msgChunk := *msg
+		msg.Body = msgBodyBytes
 
-		msgBytes, err := codec.Marshal(msg)
+		msgBytes, err := codec.Marshal(msgChunk)
 		if err != nil {
 			return err
 		}

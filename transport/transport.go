@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/nats-io/go-nats"
+	"github.com/nzgogo/micro/codec"
 )
 
 type Transport interface {
@@ -16,7 +17,7 @@ type Transport interface {
 	Publish(string, []byte) error
 	Subscribe() error
 	SetHandler(nats.MsgHandler)
-	SendFile(string, string, string, []byte) error
+	SendFile(*codec.Message, string, []byte) error
 	Close() error
 }
 
