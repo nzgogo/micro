@@ -39,6 +39,7 @@ func (n *transport) SendFile(msg *codec.Message, sub string, file string) (err e
 		}
 
 		msgChunk := *msg
+		msg.Node = constant.FILE_SERVICE_UPLOAD_NODE
 		msg.Body = msgBodyBytes
 
 		msgBytes, err := codec.Marshal(msgChunk)
