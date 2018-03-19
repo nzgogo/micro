@@ -33,6 +33,6 @@ $ vi /etc/gogo/config-healthcheck.json
 ```json
 {
   "nats_addr": "",
-  "https://hooks.slack.com/services/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"
+  "slack_webhook_url": ""
 }
 ```
