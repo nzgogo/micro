@@ -25,14 +25,4 @@ go get github.com/nats-io/gnatsd
 
 ## Health Check Script
 One of the primary roles of the Consul agent is management of system-level and application-level health checks. There are several different kinds of checks, see [Checks Definition](https://www.consul.io/docs/agent/checks.html).
-The checks we use is **Script + Interval**.  The health check script is on Gitlab.
-To get this script program working, a configuration file in json format is required:
-```shell
-$ vi /etc/gogo/config-healthcheck.json
-```
-```json
-{
-  "nats_addr": "",
-  "slack_webhook_url": ""
-}
-```
+The checks used in micro is **Script + Interval**. 
