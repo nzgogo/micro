@@ -1,4 +1,4 @@
-package recover
+package catch
 
 import (
 	"log"
@@ -6,18 +6,36 @@ import (
 	"github.com/multiplay/go-slack/chat"
 	"github.com/multiplay/go-slack/webhook"
 	"github.com/nzgogo/micro/codec"
-	"github.com/nzgogo/micro/constant"
 )
 
-var slackChannel = webhook.New(constant.SLACKCHANNELADDR)
-
-func Recover(srvName, funcName string, rMsg, nMsg interface{}) {
-	log.Println("Recovered in server: " + srvName + " func: " + funcName)
-	log.Println(rMsg)
-	sendSlackMessage(srvName, funcName, rMsg, nMsg)
+func Recover(slackurl, srvName, funcName string, nMsg interface{}) {
+	rMsg := recover()
+	if rMsg != nil {
+		log.Println("Recovered in server: " + srvName + " func: " + funcName)
+		log.Println(rMsg)
+		if nMsg != nil {
+			log.Println(nMsg)
+		}
+		sendSlackMessage(slackurl, srvName, funcName, rMsg, nMsg)
+	}
 }
 
-func sendSlackMessage(srvName, funcName string, rMsg, nMsg interface{}) {
+func PostProc(slackurl, srvName, funcName string, rMsg, nMsg interface{}) {
+	if rMsg != nil {
+		log.Println("Recovered in server: " + srvName + " func: " + funcName)
+		log.Println(rMsg)
+		if nMsg != nil {
+			log.Println(nMsg)
+		}
+		sendSlackMessage(slackurl, srvName, funcName, rMsg, nMsg)
+	}
+}
+
+func sendSlackMessage(slackurl, srvName, funcName string, rMsg, nMsg interface{}) {
+	if slackurl == "" {
+		return
+	}
+	var slackChannel = webhook.New(slackurl)
 	var sendMsg = ""
 	if rMsg != nil {
 		rMsgMal, err := codec.Marshal(rMsg)
@@ -38,7 +56,7 @@ func sendSlackMessage(srvName, funcName string, rMsg, nMsg interface{}) {
 		Text:  sendMsg,
 	}
 	attachments = append(attachments, msg)
-	slack_msg := "*Message from* \n> 👉" + srvName + " " + funcName
+	slack_msg := "*Message from 👉* \n> " + srvName + " " + funcName
 	m := &chat.Message{Text: slack_msg, Attachments: attachments}
 	m.Send(slackChannel)
 }

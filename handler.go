@@ -10,11 +10,8 @@ import (
 )
 
 func (s *service) ServerHandler(nMsg *nats.Msg) {
-	defer func() {
-		if rMsg := recover(); rMsg != nil {
-			recpro.Recover(s.Options().Transport.Options().Subject, "ServerHandler", rMsg, nMsg)
-		}
-	}()
+	defer recpro.Recover(s.config[constant.SLACKCHANNELADDR], s.Options().Transport.Options().Subject, "ServerHandler", nMsg)
+
 	if nMsg == nil {
 		panic("Nats body empty")
 	}
@@ -36,11 +33,7 @@ func (s *service) ServerHandler(nMsg *nats.Msg) {
 }
 
 func (s *service) ApiHandler(nMsg *nats.Msg) {
-	defer func() {
-		if rMsg := recover(); rMsg != nil {
-			recpro.Recover(s.Options().Transport.Options().Subject, "ApiHandler", rMsg, nMsg)
-		}
-	}()
+	defer recpro.Recover(s.config[constant.SLACKCHANNELADDR], s.Options().Transport.Options().Subject, "ApiHandler", nMsg)
 
 	if nMsg == nil {
 		panic("Nats body empty")
@@ -61,11 +54,7 @@ func (s *service) ApiHandler(nMsg *nats.Msg) {
 
 func (s *service) healthCheckHandler(message *codec.Message, Reply string) {
 	go func() {
-		defer func() {
-			if rMsg := recover(); rMsg != nil {
-				recpro.Recover(s.Options().Transport.Options().Subject, "Micro->HealthCheckHandler", rMsg, message)
-			}
-		}()
+		defer recpro.Recover(s.config[constant.SLACKCHANNELADDR], s.Options().Transport.Options().Subject, "Micro->HealthCheckHandler", message)
 		checkStatus, feedback := healthCheck(s.config)
 		msg := codec.NewJsonResponse("", checkStatus, feedback)
 		replyBody, _ := codec.Marshal(msg)
@@ -77,11 +66,7 @@ func (s *service) healthCheckHandler(message *codec.Message, Reply string) {
 }
 
 func (s *service) apiHandlerResponse(message *codec.Message) {
-	defer func() {
-		if rMsg := recover(); rMsg != nil {
-			recpro.Recover(s.Options().Transport.Options().Subject, "Micro->apiHandlerResponse", rMsg, message)
-		}
-	}()
+	defer recpro.Recover(s.config[constant.SLACKCHANNELADDR], s.Options().Transport.Options().Subject, "Micro->apiHandlerResponse", message)
 	ctx := s.opts.Context
 	conversation := ctx.Get(message.ContextID)
 	if conversation == nil {
@@ -99,11 +84,7 @@ func (s *service) apiHandlerResponse(message *codec.Message) {
 }
 
 func (s *service) serverHandlerRequest(message *codec.Message, Reply string) {
-	defer func() {
-		if rMsg := recover(); rMsg != nil {
-			recpro.Recover(s.Options().Transport.Options().Subject, "Micro->ServerHandlerRequest", rMsg, message)
-		}
-	}()
+	defer recpro.Recover(s.config[constant.SLACKCHANNELADDR], s.Options().Transport.Options().Subject, "Micro->ServerHandlerRequest", message)
 	// check the message type: Request or Publish.
 	// If it is a Request, the reply subject should be extracted from nats.Msg struct.
 	sub := s.opts.Transport.Options().Subject
@@ -130,7 +111,7 @@ func (s *service) serverHandlerRequest(message *codec.Message, Reply string) {
 	go func() {
 		defer func() {
 			if rMsg := recover(); rMsg != nil {
-				recpro.Recover(s.Options().Transport.Options().Subject, "Micro->RoutesHandler", rMsg, message)
+				recpro.PostProc(s.config[constant.SLACKCHANNELADDR], s.Options().Transport.Options().Subject, "Micro->RoutesHandler", rMsg, message)
 				s.Respond(
 					codec.NewJsonResponse(
 						message.ContextID,
@@ -145,6 +126,7 @@ func (s *service) serverHandlerRequest(message *codec.Message, Reply string) {
 		for i := len(s.opts.HdlrWrappers); i > 0; i-- {
 			handler = s.opts.HdlrWrappers[i-1](handler)
 		}
+
 		err := handler(message, reply)
 		if err != nil {
 			body := map[string]string{"message": err.Message}
@@ -164,11 +146,7 @@ func (s *service) serverHandlerRequest(message *codec.Message, Reply string) {
 }
 
 func (s *service) serverHandlerResponse(message *codec.Message, data []byte) {
-	defer func() {
-		if rMsg := recover(); rMsg != nil {
-			recpro.Recover(s.Options().Transport.Options().Subject, "Micro->ServerHandlerResponse", rMsg, message)
-		}
-	}()
+	defer recpro.Recover(s.config[constant.SLACKCHANNELADDR], s.Options().Transport.Options().Subject, "Micro->ServerHandlerResponse", message)
 	conversation := s.opts.Context.Get(message.ContextID)
 	if conversation == nil {
 		panic("ServerHandler respond error: conversation lost")
