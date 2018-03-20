@@ -23,7 +23,7 @@ type db struct {
 var (
 	DefaultDialect         = "mysql"
 	DefaultProtocol        = "tcp"
-	DefaultAddress         = "workbench.cugybz6qn13l.ap-southeast-2.rds.amazonaws.com"
+	DefaultAddress         = "localhost"
 	DefaultCharset         = "utf8"
 	DefaultParseTime       = true
 	DefaultLoc             = "Local"

@@ -41,8 +41,6 @@ func HTTPReqToIntrlSReq(req *http.Request, rplSub, ctxid string) (*codec.Message
 		}
 		body, _ := codec.Marshal(postData)
 		bodyBytes = body
-	} else {
-		return nil, constant.ErrHttpEmptyRequest
 	}
 
 	//TODO May need extract more data from http request
