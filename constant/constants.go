@@ -26,7 +26,7 @@ const (
 	CONFIG_FILE_NAME = ".config.json"
 
 	ORGANIZATION     = "gogo"
-	SLACKCHANNELADDR = "https://hooks.slack.com/services/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"
+	SLACKCHANNELADDR = "slack_webhook_url"
 
 	// max file chunck size 2mb
 	MAX_FILE_CHUNK_SIZE      = 2 * 1024 * 1024
