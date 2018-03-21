@@ -1,6 +1,7 @@
 package db
 
 import (
+	"crypto/tls"
 	"time"
 )
 
@@ -17,9 +18,19 @@ type Options struct {
 	MaxIdleConns    int
 	MaxOpenConns    int
 	MaxConnLifetime time.Duration
+
+	sslMgo bool
+
+	TLS *tls.Config
 }
 
 type Option func(*Options)
+
+func SSLMgo(ssl bool) Option {
+	return func(o *Options) {
+		o.sslMgo = ssl
+	}
+}
 
 func Dialects(dialects string) Option {
 	return func(o *Options) {
