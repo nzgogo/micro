@@ -18,6 +18,7 @@ type Error struct {
 
 type Router interface {
 	Init(opts ...Option) error
+	Routes() []*Node
 	Add(*Node)
 	Dispatch(*codec.Message) (Handler, error)
 	HttpMatch(*codec.Message) error
@@ -49,6 +50,10 @@ func (r *router) Init(opts ...Option) error {
 		}
 	}
 	return nil
+}
+
+func (r *router) Routes() []*Node {
+	return r.routes
 }
 
 // Pack supported service into a node struct and add to routes
