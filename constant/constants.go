@@ -77,6 +77,7 @@ const (
 // message type
 const (
 	REQUEST     = "request"
+	PUBLISH     = "publish"
 	RESPONSE    = "response"
 	HEALTHCHECK = "healthCheck"
 )
