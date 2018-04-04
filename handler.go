@@ -29,7 +29,10 @@ func (s *service) ServerHandler(nMsg *nats.Msg) {
 		s.healthCheckHandler(message, nMsg.Reply)
 	} else if message.Type == constant.RESPONSE {
 		s.serverHandlerResponse(message, nMsg.Data)
+	}else if message.Type == constant.PUBLISH {
+		s.serverHandlerPublish(message, nMsg.Reply)
 	}
+
 }
 
 func (s *service) ApiHandler(nMsg *nats.Msg) {
@@ -85,8 +88,8 @@ func (s *service) apiHandlerResponse(message *codec.Message) {
 
 func (s *service) serverHandlerRequest(message *codec.Message, Reply string) {
 	defer recpro.Recover(s.config[constant.SLACKCHANNELADDR], s.Options().Transport.Options().Subject, "Micro->ServerHandlerRequest", message)
-	// check the message type: Request or Publish.
-	// If it is a Request, the reply subject should be extracted from nats.Msg struct.
+	// check the nats message type: Request or Publish.
+	// If it is a nats Request, the reply subject should be extracted from nats.Msg struct.
 	sub := s.opts.Transport.Options().Subject
 	if Reply != "" {
 		message.ReplyTo = Reply
@@ -141,6 +144,37 @@ func (s *service) serverHandlerRequest(message *codec.Message, Reply string) {
 			if err1 != nil {
 				panic("ServerHandler respond error: " + err1.Error())
 			}
+		}
+	}()
+}
+
+func (s *service) serverHandlerPublish(message *codec.Message, Reply string) {
+	defer recpro.Recover(s.config[constant.SLACKCHANNELADDR], s.Options().Transport.Options().Subject, "Micro->ServerHandlerPublish", message)
+	sub := s.opts.Transport.Options().Subject
+	if Reply != "" {
+		message.ReplyTo = Reply
+	}
+
+	handler, routerErr := s.opts.Router.Dispatch(message)
+	if routerErr != nil {
+		errResp := codec.NewResponse(message.ContextID, 404, nil, message.Header)
+		err := s.Respond(errResp, message.ReplyTo)
+		if err != nil {
+			panic("ServerHandler respond error: " + err.Error())
+		}
+	}
+	message.ReplyTo = sub
+
+	go func() {
+		defer recpro.Recover(s.config[constant.SLACKCHANNELADDR], s.Options().Transport.Options().Subject, "Micro->RoutesHandler", message)
+
+		for i := len(s.opts.HdlrWrappers); i > 0; i-- {
+			handler = s.opts.HdlrWrappers[i-1](handler)
+		}
+
+		err := handler(message, "")
+		if err != nil {
+			panic("ServerHandler error: " + err.Message)
 		}
 	}()
 }

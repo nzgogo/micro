@@ -116,16 +116,26 @@ func (s *service) Respond(message *codec.Message, subject string) error {
 	return s.opts.Transport.Publish(subject, resp)
 }
 
-func (s *service) Pub(srv string, version string, msg []byte) error {
+func (s *service) Pub(srv string, version string, message *codec.Message) error {
 	sub, err := s.Options().Selector.Select(srv, version)
+	if err != nil {
+		return err
+	}
+	message.Type = constant.PUBLISH
+	msg, err := codec.Marshal(message)
 	if err != nil {
 		return err
 	}
 	return s.Options().Transport.Publish(sub, msg)
 }
 
-func (s *service) Req(srv string, version string, msg []byte, handler transport.ResponseHandler) error {
+func (s *service) Req(srv string, version string, message *codec.Message, handler transport.ResponseHandler) error {
 	sub, err := s.Options().Selector.Select(srv, version)
+	if err != nil {
+		return err
+	}
+	message.Type = constant.REQUEST
+	msg, err := codec.Marshal(message)
 	if err != nil {
 		return err
 	}
