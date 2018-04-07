@@ -1,12 +1,12 @@
 package router
 
 import (
-	"log"
 	"strings"
 
 	"github.com/hashicorp/consul/api"
 	"github.com/nzgogo/micro/codec"
 	"github.com/nzgogo/micro/constant"
+	"github.com/thedevsaddam/govalidator"
 )
 
 type Handler func(*codec.Message, string) *Error
@@ -32,10 +32,12 @@ type router struct {
 }
 
 type Node struct {
-	Method  string  `json:"Method,omitempty"`
-	Path    string  `json:"Path,omitempty"`
-	ID      string  `json:"ID"`
-	Handler Handler `json:"-"`
+	Method            string              `json:"Method,omitempty"`
+	Path              string              `json:"Path,omitempty"`
+	ID                string              `json:"ID"`
+	Handler           Handler             `json:"-"`
+	ValidationRules   govalidator.MapData `json:"ValidationRules,omitempty"`
+	ValidationMessage govalidator.MapData `json:"ValidationMessage,omitempty"`
 }
 
 func (r *router) Init(opts ...Option) error {
@@ -74,7 +76,6 @@ func (r *router) Register() error {
 	}
 
 	if r.opts.Client == nil {
-		log.Println("this is router client failure")
 		return nil
 	}
 
