@@ -29,8 +29,8 @@ type Service interface {
 	Run() error
 	Stop() error
 	Respond(*codec.Message, string) error
-	Pub(string, string, []byte) error
-	Req(string, string, []byte, transport.ResponseHandler) error
+	Pub(string, string, *codec.Message) error
+	Req(string, string, *codec.Message, transport.ResponseHandler) error
 }
 
 type service struct {
