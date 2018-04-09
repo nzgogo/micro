@@ -32,12 +32,12 @@ type router struct {
 }
 
 type Node struct {
-	Method            string              `json:"Method,omitempty"`
-	Path              string              `json:"Path,omitempty"`
-	ID                string              `json:"ID"`
-	Handler           Handler             `json:"-"`
-	ValidationRules   govalidator.MapData `json:"ValidationRules,omitempty"`
-	ValidationMessage govalidator.MapData `json:"ValidationMessage,omitempty"`
+	Method             string              `json:"Method,omitempty"`
+	Path               string              `json:"Path,omitempty"`
+	ID                 string              `json:"ID"`
+	Handler            Handler             `json:"-"`
+	ValidationRules    govalidator.MapData `json:"ValidationRules,omitempty"`
+	ValidationMessages govalidator.MapData `json:"ValidationMessages,omitempty"`
 }
 
 func (r *router) Init(opts ...Option) error {
