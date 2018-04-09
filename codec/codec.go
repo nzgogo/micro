@@ -74,7 +74,7 @@ func Unmarshal(d []byte, v interface{}) error {
 // }
 
 //NewResponse creates Response Message object.
-func NewResponse(contextID string, statusCode int, body []byte, header http.Header) *Message {
+func NewResponse(contextID string, statusCode int, body map[string]interface{}, header http.Header) *Message {
 	return &Message{
 		Type:       constant.RESPONSE,
 		StatusCode: statusCode,
@@ -84,18 +84,7 @@ func NewResponse(contextID string, statusCode int, body []byte, header http.Head
 	}
 }
 
-func NewJsonResponse(contextID string, statusCode int, body interface{}) *Message {
-	var b []byte
-	if v, ok := body.([]byte); ok {
-		b = v
-	} else {
-		if v, err := Marshal(body); err != nil {
-			b = nil
-		} else {
-			b = v
-		}
-	}
-
+func NewJsonResponse(contextID string, statusCode int, body map[string]interface{}) *Message {
 	h := http.Header{}
 	h.Add("Content-Type", "application/json")
 
@@ -104,6 +93,6 @@ func NewJsonResponse(contextID string, statusCode int, body interface{}) *Messag
 		StatusCode: statusCode,
 		Header:     h,
 		ContextID:  contextID,
-		Body:       b,
+		Body:       body,
 	}
 }
