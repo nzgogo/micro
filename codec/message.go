@@ -31,6 +31,12 @@ type Message struct {
 	Body   map[string]interface{} `json:"body,omitempty"`
 }
 
+func NewMessage(t string) *Message {
+	return &Message{
+		Type: t,
+	}
+}
+
 func (msg *Message) Set(key string, value interface{}) {
 	msg.Body[key] = value
 }
