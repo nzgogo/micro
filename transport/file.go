@@ -33,22 +33,13 @@ func (n *transport) SendFile(msg *codec.Message, sub string, file string) (err e
 		}
 		fileReader.Read(chunk)
 
-		msgBody := make(map[string]interface{})
-		msgBody["size"] = total
-		msgBody["index"] = counter
-		msgBody["fileChunk"] = chunk
+		msgChunk := codec.NewMessage(constant.REQUEST)
+		msgChunk.ContextID = msg.ContextID
+		msgChunk.Node = constant.FILE_SERVICE_UPLOAD_NODE
 
-		msgBodyBytes, err := codec.Marshal(msgBody)
-		if err != nil {
-			return err
-		}
-
-		msgChunk := &codec.Message{
-			ContextID: msg.ContextID,
-			Type:      constant.REQUEST,
-			Node:      constant.FILE_SERVICE_UPLOAD_NODE,
-			Body:      msgBodyBytes,
-		}
+		msgChunk.Set("size", total)
+		msgChunk.Set("index", counter)
+		msgChunk.Set("fileChunk", chunk)
 
 		msgBytes, err := codec.Marshal(msgChunk)
 		if err != nil {
