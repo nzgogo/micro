@@ -26,9 +26,10 @@ type Message struct {
 	StatusCode int `json:"statusCode,omitempty"`
 
 	//Common fields
-	Type   string                 `json:"type,omitempty"`
-	Header http.Header            `json:"header,omitempty"`
-	Body   map[string]interface{} `json:"body,omitempty"`
+	Type    string                 `json:"type,omitempty"`
+	Header  http.Header            `json:"header,omitempty"`
+	RawBody []byte                 `json:"rawBody,omitempty"`
+	Body    map[string]interface{} `json:"body,omitempty"`
 }
 
 func NewMessage(t string) *Message {
@@ -127,8 +128,9 @@ func (msg *Message) ParseHTTPRequest(r *http.Request, replyTo string, contextID 
 		if err != nil {
 			return nil, err
 		}
+		msg.RawBody = b
 		var j map[string]interface{}
-		err = Unmarshal(b, &j)
+		Unmarshal(b, &j)
 		for k, v := range j {
 			msg.Body[k] = v
 		}
