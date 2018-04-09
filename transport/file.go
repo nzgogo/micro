@@ -3,7 +3,6 @@ package transport
 import (
 	"bytes"
 	"encoding/base64"
-	"log"
 
 	"github.com/nzgogo/micro/codec"
 	"github.com/nzgogo/micro/constant"
@@ -33,7 +32,6 @@ func (n *transport) SendFile(msg *codec.Message, sub string, file string) (err e
 			chunk = make([]byte, fileReader.Size())
 		}
 		fileReader.Read(chunk)
-		log.Printf("Chunk %d size: %d\n", counter, len(chunk))
 
 		msgBody := make(map[string]interface{})
 		msgBody["size"] = total
@@ -56,8 +54,6 @@ func (n *transport) SendFile(msg *codec.Message, sub string, file string) (err e
 		if err != nil {
 			return err
 		}
-
-		log.Printf("Message %d size: %d\n", counter, len(msgBytes))
 
 		err = n.Publish(sub, msgBytes)
 		if err != nil {
