@@ -2,7 +2,6 @@ package gogo
 
 import (
 	"github.com/nats-io/go-nats"
-	"github.com/nzgogo/micro/api"
 	"github.com/nzgogo/micro/codec"
 	"github.com/nzgogo/micro/constant"
 	"github.com/nzgogo/micro/context"
@@ -77,11 +76,11 @@ func (s *service) apiHandlerResponse(message *codec.Message) {
 	}
 	r := conversation.Response
 
-	fn := gogoapi.WriteResponse
+	fn := message.WriteHTTPResponse
 	for i := len(s.opts.HttpRespWrappers); i > 0; i-- {
 		fn = s.opts.HttpRespWrappers[i-1](fn)
 	}
-	fn(r, message)
+	fn(r)
 	ctx.Done(message.ContextID)
 	ctx.Delete(message.ContextID)
 }
@@ -132,7 +131,7 @@ func (s *service) serverHandlerRequest(message *codec.Message, Reply string) {
 
 		err := handler(message, reply)
 		if err != nil {
-			body := map[string]string{"message": err.Message}
+			body := map[string]interface{}{"message": err.Message}
 			err1 := s.Respond(
 				codec.NewJsonResponse(
 					message.ContextID,
