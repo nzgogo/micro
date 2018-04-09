@@ -2,9 +2,10 @@ package db
 
 import (
 	"crypto/tls"
-	"github.com/globalsign/mgo"
 	"net"
 	"strings"
+
+	"github.com/globalsign/mgo"
 )
 
 type MgoDB interface {

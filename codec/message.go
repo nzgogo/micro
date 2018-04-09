@@ -1,9 +1,13 @@
 package codec
 
 import (
+	"bytes"
+	"io/ioutil"
 	"net/http"
+	"strings"
 
 	validator "github.com/asaskevich/govalidator"
+	"github.com/nzgogo/micro/constant"
 )
 
 type Message struct {
@@ -23,8 +27,8 @@ type Message struct {
 
 	//Common fields
 	Type   string                 `json:"type,omitempty"`
-	Header http.Header            `json:header,omitempty`
-	Body   map[string]interface{} `json:body,omitempty`
+	Header http.Header            `json:"header,omitempty"`
+	Body   map[string]interface{} `json:"body,omitempty"`
 }
 
 func (msg *Message) Set(key string, value interface{}) {
@@ -99,8 +103,64 @@ func (msg *Message) GetBool(key string) (value bool, ok bool) {
 	return
 }
 
-func (msg *Message) ParseHTTPRequest(r *http.Request) *Message {
-	return msg
+func (msg *Message) ParseHTTPRequest(r *http.Request, replyTo string, contextID string) (*Message, error) {
+	msg.Body = make(map[string]interface{})
+
+	r.ParseForm()
+	for k, v := range r.Form {
+		if len(v) == 1 {
+			msg.Body[k] = v[0]
+			continue
+		}
+		msg.Body[k] = v
+	}
+
+	if strings.Contains(r.Header.Get("Content-Type"), "application/json") {
+		b, err := ioutil.ReadAll(r.Body)
+		defer r.Body.Close()
+		if err != nil {
+			return nil, err
+		}
+		var j map[string]interface{}
+		err = Unmarshal(b, &j)
+		for k, v := range j {
+			msg.Body[k] = v
+		}
+	} else if strings.Contains(r.Header.Get("Content-Type"), "multipart/form-data") {
+		r.ParseMultipartForm(0)
+		for k, v := range r.MultipartForm.Value {
+			if len(v) == 1 {
+				msg.Body[k] = v[0]
+				continue
+			}
+			msg.Body[k] = v
+		}
+		file, fileHeader, err := r.FormFile("file")
+		if err == nil {
+			fileRaw := make([]byte, fileHeader.Size)
+			file.Read(fileRaw)
+			msg.Body["file"] = fileRaw
+		}
+	}
+
+	msg.Type = constant.REQUEST
+	msg.ContextID = contextID
+	msg.ReplyTo = replyTo
+	msg.Method = r.Method
+	msg.Host = r.Host
+	msg.Path = r.URL.Path
+	msg.Header = r.Header
+	return msg, nil
 }
 
-func (msg *Message) WriteHTTPResponse(rw http.ResponseWriter) {}
+func (msg *Message) WriteHTTPResponse(rw http.ResponseWriter) {
+	for k, values := range msg.Header {
+		for _, v := range values {
+			rw.Header().Add(k, v)
+		}
+	}
+	rw.WriteHeader(msg.StatusCode)
+	if b, err := Marshal(msg.Body); err == nil {
+		bytes.NewBuffer(b).WriteTo(rw)
+	}
+}
