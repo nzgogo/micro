@@ -35,6 +35,7 @@ type Message struct {
 func NewMessage(t string) *Message {
 	return &Message{
 		Type: t,
+		Body: make(map[string]interface{}),
 	}
 }
 
