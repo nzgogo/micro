@@ -10,7 +10,8 @@ import (
 type MgoDB interface {
 	Connect() error
 	Close()
-	DB() *mgo.Session
+	Session() *mgo.Session
+	DB()
 }
 
 type mgodb struct {
@@ -66,4 +67,22 @@ func NewMongoDB(url string, opts ...Option) *mgodb {
 		opts:     options,
 		dialInfo: dialOp,
 	}
+}
+
+// Collection method override. Soft delete
+type MgoCURD interface {
+
+}
+
+type MgoCollect struct {
+	mgo.Collection
+}
+
+//func (m *MgoCollect) FindId(){
+//}
+
+func (m *MgoCollect) Find(query interface{}) {
+
+	m.Collection.Find(query)
+
 }
