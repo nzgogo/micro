@@ -162,7 +162,7 @@ func (msg *Message) ParseHTTPRequest(r *http.Request, replyTo string, contextID 
 	return msg, nil
 }
 
-func (msg *Message) WriteHTTPResponse(rw http.ResponseWriter) {
+func (msg *Message) WriteHTTPResponse(rw http.ResponseWriter, response *Message) {
 	for k, values := range msg.Header {
 		for _, v := range values {
 			rw.Header().Add(k, v)
