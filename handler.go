@@ -80,7 +80,7 @@ func (s *service) apiHandlerResponse(message *codec.Message) {
 	for i := len(s.opts.HttpRespWrappers); i > 0; i-- {
 		fn = s.opts.HttpRespWrappers[i-1](fn)
 	}
-	fn(r)
+	fn(r, message)
 	ctx.Done(message.ContextID)
 	ctx.Delete(message.ContextID)
 }
