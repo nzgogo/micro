@@ -52,6 +52,16 @@ func (msg *Message) Get(key string) (value interface{}, ok bool) {
 	return
 }
 
+func (msg *Message) GetBytes(key string) (value []byte, ok bool) {
+	v, o := msg.Body[key]
+	if !o {
+		return
+	}
+	value, ok = v.([]byte)
+
+	return
+}
+
 func (msg *Message) GetString(key string) (value string, ok bool) {
 	v, ok := msg.Body[key]
 	if !ok {
