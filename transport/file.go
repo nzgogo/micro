@@ -2,7 +2,6 @@ package transport
 
 import (
 	"bytes"
-	"encoding/base64"
 
 	"github.com/nzgogo/micro/codec"
 	"github.com/nzgogo/micro/constant"
@@ -15,14 +14,10 @@ func chunkCount(a int, b int) int {
 	return int(a / b)
 }
 
-func (n *transport) SendFile(msg *codec.Message, sub string, file string) (err error) {
-	b, err := base64.StdEncoding.DecodeString(file)
-	if err != nil {
-		return err
-	}
-	fileSize := len(b)
+func (n *transport) SendFile(msg *codec.Message, sub string, file []byte) (err error) {
+	fileSize := len(file)
 	total := chunkCount(fileSize, constant.MAX_FILE_CHUNK_SIZE)
-	fileReader := bytes.NewReader(b)
+	fileReader := bytes.NewReader(file)
 
 	for counter := 0; counter < total; counter++ {
 		var chunk []byte

@@ -41,8 +41,9 @@ type File struct {
 
 func NewMessage(t string) *Message {
 	return &Message{
-		Type: t,
-		Body: make(map[string]interface{}),
+		Type:   t,
+		Header: make(map[string][]string),
+		Body:   make(map[string]interface{}),
 	}
 }
 
