@@ -32,6 +32,13 @@ type Message struct {
 	Body    map[string]interface{} `json:"body,omitempty"`
 }
 
+type File struct {
+	Name     string `json:"name,omitempty"`
+	MimeType string `json:"mimeType,omitempty"`
+	Size     int64  `json:"size,omitempty"`
+	Data     []byte `json:"data,omitempty"`
+}
+
 func NewMessage(t string) *Message {
 	return &Message{
 		Type: t,
@@ -158,7 +165,13 @@ func (msg *Message) ParseHTTPRequest(r *http.Request, replyTo string, contextID 
 		if err == nil {
 			fileRaw := make([]byte, fileHeader.Size)
 			file.Read(fileRaw)
-			msg.Body["file"] = fileRaw
+			messageFile := &File{
+				Name:     fileHeader.Filename,
+				MimeType: fileHeader.Header.Get("Content-Type"),
+				Size:     fileHeader.Size,
+				Data:     fileRaw,
+			}
+			msg.Body["file"] = messageFile
 		}
 	}
 
