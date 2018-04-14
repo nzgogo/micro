@@ -21,7 +21,7 @@ type Router interface {
 	Routes() []*Node
 	Add(*Node)
 	Dispatch(*codec.Message) (Handler, error)
-	HttpMatch(*codec.Message) error
+	HttpMatch(*codec.Message) (*Node, error)
 	Register() error
 	Deregister() error
 }
@@ -122,34 +122,34 @@ func (r *router) Deregister() error {
 // Based on reqeust.path and method (e.g GET /gogox/v1/greeter/hello),
 // this method will download all relavent nodes from consul KV store
 // according to parsed key (/gogox/v1/greeter) and find matching service (/hello)
-func (r *router) HttpMatch(req *codec.Message) error {
+func (r *router) HttpMatch(req *codec.Message) (*Node, error) {
 	if req == nil {
-		return constant.ErrEmptyMsg
+		return nil, constant.ErrEmptyMsg
 	}
 	srvPath, subPath, err := r.splitPath(req.Path)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	routes, err := r.loadRemoteRoutes(srvPath)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if len(routes) == 0 || routes == nil {
-		return constant.ErrResourceNotFound
+		return nil, constant.ErrResourceNotFound
 	}
 
 	if paths := r.pathMatch(routes, subPath); len(paths) > 0 {
 		if node := r.methodMatch(paths, req.Method); node != nil {
 			req.Node = node.ID
-			return nil
+			return node, nil
 		} else {
-			return constant.ErrMethodNotAllowed
+			return nil, constant.ErrMethodNotAllowed
 		}
 	}
 
-	return constant.ErrResourceNotFound
+	return nil, constant.ErrResourceNotFound
 }
 
 // dispatch to route handler
