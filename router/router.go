@@ -21,7 +21,7 @@ type Router interface {
 	Routes() []*Node
 	Add(*Node)
 	Dispatch(*codec.Message) (Handler, error)
-	HttpMatch(*codec.Message) (*Node, error)
+	HttpMatch(string, string) (*Node, error)
 	Register() error
 	Deregister() error
 }
@@ -122,11 +122,8 @@ func (r *router) Deregister() error {
 // Based on reqeust.path and method (e.g GET /gogox/v1/greeter/hello),
 // this method will download all relavent nodes from consul KV store
 // according to parsed key (/gogox/v1/greeter) and find matching service (/hello)
-func (r *router) HttpMatch(req *codec.Message) (*Node, error) {
-	if req == nil {
-		return nil, constant.ErrEmptyMsg
-	}
-	srvPath, subPath, err := r.splitPath(req.Path)
+func (r *router) HttpMatch(path, method string) (*Node, error) {
+	srvPath, subPath, err := r.splitPath(path)
 	if err != nil {
 		return nil, err
 	}
@@ -141,8 +138,7 @@ func (r *router) HttpMatch(req *codec.Message) (*Node, error) {
 	}
 
 	if paths := r.pathMatch(routes, subPath); len(paths) > 0 {
-		if node := r.methodMatch(paths, req.Method); node != nil {
-			req.Node = node.ID
+		if node := r.methodMatch(paths, method); node != nil {
 			return node, nil
 		} else {
 			return nil, constant.ErrMethodNotAllowed
