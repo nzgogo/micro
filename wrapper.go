@@ -1,9 +1,9 @@
 package gogo
 
 import (
-	"micro/codec"
 	"net/http"
 
+	"github.com/nzgogo/micro/codec"
 	"github.com/nzgogo/micro/router"
 )
 
