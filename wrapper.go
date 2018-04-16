@@ -1,7 +1,6 @@
 package gogo
 
 import (
-	"micro/codec"
 	"net/http"
 
 	"github.com/nzgogo/micro/codec"
