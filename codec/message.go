@@ -2,7 +2,6 @@ package codec
 
 import (
 	"bytes"
-	"io/ioutil"
 	"net/http"
 	"strings"
 
@@ -129,7 +128,7 @@ func (msg *Message) GetBool(key string) (value bool, ok bool) {
 	return
 }
 
-func (msg *Message) ParseHTTPRequest(r *http.Request, replyTo string, contextID string) (*Message, error) {
+func (msg *Message) ParseHTTPRequest(r *http.Request, replyTo string, contextID string, jsonBody map[string]interface{}) (*Message, error) {
 	msg.Body = make(map[string]interface{})
 
 	r.ParseForm()
@@ -142,15 +141,12 @@ func (msg *Message) ParseHTTPRequest(r *http.Request, replyTo string, contextID 
 	}
 
 	if strings.Contains(r.Header.Get("Content-Type"), "application/json") {
-		b, err := ioutil.ReadAll(r.Body)
-		defer r.Body.Close()
+		b, err := Marshal(jsonBody)
 		if err != nil {
 			return nil, err
 		}
 		msg.RawBody = b
-		var j map[string]interface{}
-		Unmarshal(b, &j)
-		for k, v := range j {
+		for k, v := range jsonBody {
 			msg.Body[k] = v
 		}
 	} else if strings.Contains(r.Header.Get("Content-Type"), "multipart/form-data") {
