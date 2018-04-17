@@ -124,13 +124,13 @@ func packHealthCheck(config map[string]string, srvSubject string) *consul.AgentS
 	}
 }
 
-func healthCheck(configs map[string]string) (int, map[string]string) {
+func healthCheck(configs map[string]string) (int, map[string]interface{}) {
 	if configs == nil {
 		log.Println("Missing service configurations")
 		return constant.Warning, nil
 	}
 	var status = constant.OK
-	feedback := make(map[string]string)
+	feedback := make(map[string]interface{})
 	//check cpu
 	//cpuCriticalThreshold, err1 := strconv.ParseFloat(configs[CONFIG_HC_CPU_CRITICAL_THRESHOLD], 64)
 	//cpuWarningThreshold, err2 := strconv.ParseFloat(configs[CONFIG_HC_CPU_WARNING_THRESHOLD], 64)

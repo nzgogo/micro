@@ -1,12 +1,12 @@
 package router
 
 import (
-	"log"
 	"strings"
 
 	"github.com/hashicorp/consul/api"
 	"github.com/nzgogo/micro/codec"
 	"github.com/nzgogo/micro/constant"
+	"github.com/thedevsaddam/govalidator"
 )
 
 type Handler func(*codec.Message, string) *Error
@@ -21,7 +21,7 @@ type Router interface {
 	Routes() []*Node
 	Add(*Node)
 	Dispatch(*codec.Message) (Handler, error)
-	HttpMatch(*codec.Message) error
+	HttpMatch(string, string) (*Node, error)
 	Register() error
 	Deregister() error
 }
@@ -32,10 +32,12 @@ type router struct {
 }
 
 type Node struct {
-	Method  string  `json:"Method,omitempty"`
-	Path    string  `json:"Path,omitempty"`
-	ID      string  `json:"ID"`
-	Handler Handler `json:"-"`
+	Method             string              `json:"Method,omitempty"`
+	Path               string              `json:"Path,omitempty"`
+	ID                 string              `json:"ID"`
+	Handler            Handler             `json:"-"`
+	ValidationRules    govalidator.MapData `json:"ValidationRules,omitempty"`
+	ValidationMessages govalidator.MapData `json:"ValidationMessages,omitempty"`
 }
 
 func (r *router) Init(opts ...Option) error {
@@ -74,7 +76,6 @@ func (r *router) Register() error {
 	}
 
 	if r.opts.Client == nil {
-		log.Println("this is router client failure")
 		return nil
 	}
 
@@ -121,34 +122,30 @@ func (r *router) Deregister() error {
 // Based on reqeust.path and method (e.g GET /gogox/v1/greeter/hello),
 // this method will download all relavent nodes from consul KV store
 // according to parsed key (/gogox/v1/greeter) and find matching service (/hello)
-func (r *router) HttpMatch(req *codec.Message) error {
-	if req == nil {
-		return constant.ErrEmptyMsg
-	}
-	srvPath, subPath, err := r.splitPath(req.Path)
+func (r *router) HttpMatch(path, method string) (*Node, error) {
+	srvPath, subPath, err := r.splitPath(path)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	routes, err := r.loadRemoteRoutes(srvPath)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if len(routes) == 0 || routes == nil {
-		return constant.ErrResourceNotFound
+		return nil, constant.ErrResourceNotFound
 	}
 
 	if paths := r.pathMatch(routes, subPath); len(paths) > 0 {
-		if node := r.methodMatch(paths, req.Method); node != nil {
-			req.Node = node.ID
-			return nil
+		if node := r.methodMatch(paths, method); node != nil {
+			return node, nil
 		} else {
-			return constant.ErrMethodNotAllowed
+			return nil, constant.ErrMethodNotAllowed
 		}
 	}
 
-	return constant.ErrResourceNotFound
+	return nil, constant.ErrResourceNotFound
 }
 
 // dispatch to route handler
