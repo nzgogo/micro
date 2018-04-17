@@ -29,7 +29,7 @@ func (s *service) ServerHandler(nMsg *nats.Msg) {
 		s.healthCheckHandler(message, nMsg.Reply)
 	} else if message.Type == constant.RESPONSE {
 		s.serverHandlerResponse(message, nMsg.Data)
-	}else if message.Type == constant.PUBLISH {
+	} else if message.Type == constant.PUBLISH {
 		s.serverHandlerPublish(message, nMsg.Reply)
 	}
 
