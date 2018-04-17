@@ -17,7 +17,7 @@ type HttpHandlerWrapper func(HttpHandlerFunc) HttpHandlerFunc
 // HandlerWrapper wraps the HandlerFunc and returns the equivalent
 type HandlerWrapper func(router.Handler) router.Handler
 
-type HttpResponseWriter func(rw http.ResponseWriter, response *codec.Message)
+type HttpResponseWriter func(http.ResponseWriter, *codec.Message)
 
 type HttpResponseWrapper func(HttpResponseWriter) HttpResponseWriter
 
