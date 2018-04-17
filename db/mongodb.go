@@ -121,7 +121,7 @@ func (m *MicroCollect) Find(query interface{}) *mgo.Query {
 	if s, ok := query.(bson.M); ok {
 		return m.Collection.Find(bson.M{"$and": []bson.M{
 			s,
-			{"delete_at": bson.M{"$exists": false}, "replaced_at": bson.M{"$exists": false}},
+			{"delete_at": bson.M{"$exists": false}},
 		}})
 	} else {
 		bytes, _ := bson.Marshal(query)
@@ -129,7 +129,7 @@ func (m *MicroCollect) Find(query interface{}) *mgo.Query {
 		bson.Unmarshal(bytes, origin)
 		return m.Collection.Find(bson.M{"$and": []bson.M{
 			origin,
-			{"delete_at": bson.M{"$exists": false}, "replaced_at": bson.M{"$exists": false}},
+			{"delete_at": bson.M{"$exists": false}},
 		}})
 	}
 	return nil
@@ -144,7 +144,7 @@ func (m *MicroCollect) FindId(id interface{}) *mgo.Query {
 	//return  m.Collection.Find(bson.D{{Name: "_id", Value: id}})
 	return m.Collection.Find(bson.M{"$and": []bson.M{
 		{"_id": id},
-		{"delete_at": bson.M{"$exists": false}, "replaced_at": bson.M{"$exists": false}},
+		{"delete_at": bson.M{"$exists": false}},
 	}})
 }
 
@@ -305,7 +305,7 @@ func (m *MicroCollect) IncrementUpdate(selector interface{}, update interface{})
 //
 // See the Update method for more details.
 func (m *MicroCollect) IncrementUpdateId(id interface{}, update interface{}) error {
-	return m.Update(bson.D{{Name: "_id", Value: id}}, update)
+	return m.IncrementUpdate(bson.D{{Name: "_id", Value: id}}, update)
 }
 
 // UpdateAll finds all documents matching the provided selector document
@@ -334,19 +334,20 @@ func (m *MicroCollect) IncrementUpdateAll(selector interface{}, update interface
 
 	var newDoc interface{}
 	if s, ok := update.(bson.M); ok {
-		s["_id"] = bson.NewObjectId()
 		newDoc = s
 	} else {
 		bytes, _ := bson.Marshal(update)
 		origin := bson.M{}
 		bson.Unmarshal(bytes, origin)
-		origin["_id"] = bson.NewObjectId()
 		newDoc = origin
 	}
 
-	if err := m.Insert(newDoc); err != nil {
-		return nil, err
+	for i := 0; i < info.Updated; i++ {
+		if err = m.Insert(newDoc); err != nil {
+			return
+		}
 	}
+
 	return
 }
 
@@ -370,7 +371,7 @@ func (m *MicroCollect) IncreUpsert(selector interface{}, update interface{}) (er
 	}
 
 	err = m.Remove(newSelector)
-	if err != nil || err != mgo.ErrNotFound {
+	if err != nil && err != mgo.ErrNotFound {
 		return
 	}
 	err = m.Insert(update)
@@ -382,6 +383,6 @@ func (m *MicroCollect) IncreUpsert(selector interface{}, update interface{}) (er
 //     info, err := MicroCollect.Upsert(bson.M{"_id": id}, update)
 //
 // See the Upsert method for more details.
-func (c *MicroCollect) IncreUpsertId(id interface{}, update interface{}) (err error) {
-	return c.IncreUpsert(bson.D{{Name: "_id", Value: id}}, update)
+func (m *MicroCollect) IncreUpsertId(id interface{}, update interface{}) (err error) {
+	return m.IncreUpsert(bson.M{"_id": id}, update)
 }
