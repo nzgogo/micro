@@ -141,7 +141,6 @@ func (m *MicroCollect) Find(query interface{}) *mgo.Query {
 //
 // See the Find method for more details.
 func (m *MicroCollect) FindId(id interface{}) *mgo.Query {
-	//return  m.Collection.Find(bson.D{{Name: "_id", Value: id}})
 	return m.Collection.Find(bson.M{"$and": []bson.M{
 		{"_id": id},
 		{"delete_at": bson.M{"$exists": false}},
@@ -167,7 +166,16 @@ func (m *MicroCollect) FindIdWithTrash(id interface{}) *mgo.Query {
 // when some other error is detected.
 func (m *MicroCollect) Remove(selector interface{}) error {
 	update := bson.M{"$set": bson.M{"delete_at": time.Now()}}
-	return m.Collection.Update(selector, update)
+	var newSelector interface{}
+	if s, ok := selector.(bson.M); ok {
+		newSelector = bson.M{"$and": []bson.M{s, {"delete_at": bson.M{"$exists": false}}}}
+	} else {
+		bytes, _ := bson.Marshal(selector)
+		origin := bson.M{}
+		bson.Unmarshal(bytes, origin)
+		newSelector = bson.M{"$and": []bson.M{origin, {"delete_at": bson.M{"$exists": false}}}}
+	}
+	return m.Collection.Update(newSelector, update)
 }
 
 // RemoveId is a convenience helper equivalent to:
@@ -176,8 +184,7 @@ func (m *MicroCollect) Remove(selector interface{}) error {
 //
 // See the Remove method for more details.
 func (m *MicroCollect) RemoveId(id interface{}) error {
-	update := bson.M{"$set": bson.M{"delete_at": time.Now()}}
-	return m.Collection.UpdateId(bson.D{{Name: "_id", Value: id}}, update)
+	return m.Remove(bson.D{{Name: "_id", Value: id}})
 }
 
 // RemoveAll finds all documents matching the provided selector document
@@ -188,7 +195,7 @@ func (m *MicroCollect) RemoveId(id interface{}) error {
 // of type *LastError.
 func (m *MicroCollect) RemoveAll(selector interface{}) (info *mgo.ChangeInfo, err error) {
 	update := bson.M{"$set": bson.M{"delete_at": time.Now()}}
-	return m.Collection.UpdateAll(selector, update)
+	return m.UpdateAll(selector, update)
 }
 
 // See details in m.Collection.Remove()
@@ -218,12 +225,41 @@ func (m *MicroCollect) Update(selector interface{}, update interface{}) error {
 	if s, ok := selector.(bson.M); ok {
 		newSelector = bson.M{"$and": []bson.M{s, {"delete_at": bson.M{"$exists": false}}}}
 	} else {
-		bytes, _ := bson.Marshal(update)
+		bytes, _ := bson.Marshal(selector)
 		origin := bson.M{}
 		bson.Unmarshal(bytes, origin)
 		newSelector = bson.M{"$and": []bson.M{origin, {"delete_at": bson.M{"$exists": false}}}}
 	}
 	return m.Collection.Update(newSelector, update)
+}
+
+// UpdateId is a convenience helper equivalent to:
+//
+//     err := MicroCollect.Update(bson.M{"_id": id}, update)
+//
+// See the Update method for more details.
+func (m *MicroCollect) UpdateId(id interface{}, update interface{}) error {
+	return m.Update(bson.M{"_id": id}, update)
+}
+
+// UpdateAll finds all documents matching the provided selector document
+// that is not marked as deleted (without field deleted_at) and modifies
+// them according to the update document.
+// If the session is in safe mode (see SetSafe) details of the executed
+// operation are returned in info or an error of type *LastError when
+// some problem is detected. It is not an error for the update to not be
+// applied on any documents because the selector doesn't match.
+func (m *MicroCollect) UpdateAll(selector interface{}, update interface{}) (info *mgo.ChangeInfo, err error) {
+	var newSelector interface{}
+	if s, ok := selector.(bson.M); ok {
+		newSelector = bson.M{"$and": []bson.M{s, {"delete_at": bson.M{"$exists": false}}}}
+	} else {
+		bytes, _ := bson.Marshal(selector)
+		origin := bson.M{}
+		bson.Unmarshal(bytes, origin)
+		newSelector = bson.M{"$and": []bson.M{origin, {"delete_at": bson.M{"$exists": false}}}}
+	}
+	return m.Collection.UpdateAll(newSelector, update)
 }
 
 // Update finds a single document matching the provided selector document
@@ -238,7 +274,7 @@ func (m *MicroCollect) UpdateParts(selector interface{}, update interface{}) err
 	if s, ok := selector.(bson.M); ok {
 		newSelector = bson.M{"$and": []bson.M{s, {"delete_at": bson.M{"$exists": false}}}}
 	} else {
-		bytes, _ := bson.Marshal(update)
+		bytes, _ := bson.Marshal(selector)
 		origin := bson.M{}
 		bson.Unmarshal(bytes, origin)
 		newSelector = bson.M{"$and": []bson.M{origin, {"delete_at": bson.M{"$exists": false}}}}
@@ -272,7 +308,7 @@ func (m *MicroCollect) IncrementUpdate(selector interface{}, update interface{})
 	if s, ok := selector.(bson.M); ok {
 		newSelector = bson.M{"$and": []bson.M{s, {"delete_at": bson.M{"$exists": false}}}}
 	} else {
-		bytes, _ := bson.Marshal(update)
+		bytes, _ := bson.Marshal(selector)
 		origin := bson.M{}
 		bson.Unmarshal(bytes, origin)
 		newSelector = bson.M{"$and": []bson.M{origin, {"delete_at": bson.M{"$exists": false}}}}
@@ -321,7 +357,7 @@ func (m *MicroCollect) IncrementUpdateAll(selector interface{}, update interface
 	if s, ok := selector.(bson.M); ok {
 		newSelector = bson.M{"$and": []bson.M{s, {"delete_at": bson.M{"$exists": false}}}}
 	} else {
-		bytes, _ := bson.Marshal(update)
+		bytes, _ := bson.Marshal(selector)
 		origin := bson.M{}
 		bson.Unmarshal(bytes, origin)
 		newSelector = bson.M{"$and": []bson.M{origin, {"delete_at": bson.M{"$exists": false}}}}
@@ -364,7 +400,7 @@ func (m *MicroCollect) IncreUpsert(selector interface{}, update interface{}) (er
 	if s, ok := selector.(bson.M); ok {
 		newSelector = bson.M{"$and": []bson.M{s, {"delete_at": bson.M{"$exists": false}}}}
 	} else {
-		bytes, _ := bson.Marshal(update)
+		bytes, _ := bson.Marshal(selector)
 		origin := bson.M{}
 		bson.Unmarshal(bytes, origin)
 		newSelector = bson.M{"$and": []bson.M{origin, {"delete_at": bson.M{"$exists": false}}}}
