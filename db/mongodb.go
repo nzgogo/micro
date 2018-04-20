@@ -281,12 +281,12 @@ func (m *MicroCollect) UpdateParts(selector interface{}, update interface{}) err
 	}
 	var newUpdate interface{}
 	if s, ok := selector.(bson.M); ok {
-		newUpdate = bson.M{"set": s}
+		newUpdate = bson.M{"$set": s}
 	} else {
 		bytes, _ := bson.Marshal(update)
 		origin := bson.M{}
 		bson.Unmarshal(bytes, origin)
-		newUpdate = bson.M{"set": origin}
+		newUpdate = bson.M{"$set": origin}
 	}
 	return m.Collection.Update(newSelector, newUpdate)
 }
