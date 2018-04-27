@@ -4,9 +4,9 @@ import (
 	"strings"
 
 	"github.com/hashicorp/consul/api"
+	"github.com/nzgogo/govalidator"
 	"github.com/nzgogo/micro/codec"
 	"github.com/nzgogo/micro/constant"
-	"github.com/thedevsaddam/govalidator"
 )
 
 type Handler func(*codec.Message, string) *Error
