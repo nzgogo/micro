@@ -6,6 +6,7 @@ import (
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
+	"log"
 )
 
 type DB interface {
@@ -20,7 +21,7 @@ type db struct {
 	opts Options
 }
 
-var (
+const (
 	DefaultDialect         = "mysql"
 	DefaultProtocol        = "tcp"
 	DefaultAddress         = "localhost"
@@ -33,6 +34,7 @@ var (
 )
 
 func (d *db) Connect() error {
+	log.Println("Connnecting to RDB...")
 	// The Data Source Name has a common format, like e.g. PEAR DB uses it, but without type-prefix (optional parts marked by squared brackets):
 	// [username[:password]@][protocol[(address)]]/dbname[?param1=value1&...&paramN=valueN]
 	dsn := d.opts.Username
