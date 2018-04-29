@@ -38,14 +38,6 @@ type File struct {
 	Data     []byte `json:"data,omitempty"`
 }
 
-func NewMessage(t string) *Message {
-	return &Message{
-		Type:   t,
-		Header: make(map[string][]string),
-		Body:   make(map[string]interface{}),
-	}
-}
-
 func (msg *Message) Set(key string, value interface{}) {
 	msg.Body[key] = value
 }
