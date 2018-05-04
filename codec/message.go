@@ -5,11 +5,11 @@ import (
 	"net/http"
 	"net/textproto"
 	"strings"
-	"utils"
 
 	validator "github.com/asaskevich/govalidator"
 	"github.com/nzgogo/mgo/bson"
 	"github.com/nzgogo/micro/constant"
+	"github.com/nzgogo/utils"
 )
 
 type Message struct {
@@ -69,6 +69,16 @@ func (msg *Message) GetBytes(key string) (value []byte, ok bool) {
 		return
 	}
 	value, ok = v.([]byte)
+	if ok {
+		return
+	}
+
+	if bytes, err := Marshal(v); err != nil {
+		return
+	} else {
+		value = bytes
+		ok = true
+	}
 
 	return
 }
