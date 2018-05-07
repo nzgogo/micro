@@ -154,6 +154,15 @@ func (msg *Message) GetRoles() []string {
 	return msg.Header[textproto.CanonicalMIMEHeaderKey("X-GOGO-ROLES")]
 }
 
+func (msg *Message) HasOrigin() bool {
+	origin := msg.Header.Get("X-GOGO-ORIGIN")
+	return origin != ""
+}
+
+func (msg *Message) GetOrigin() string {
+	return msg.Header.Get("X-GOGO-ORIGIN")
+}
+
 func (msg *Message) HasUser() bool {
 	user := msg.Header.Get("X-GOGO-USER")
 	return bson.IsObjectIdHex(user)
