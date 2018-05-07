@@ -163,6 +163,10 @@ func (msg *Message) GetOrigin() string {
 	return msg.Header.Get("X-GOGO-ORIGIN")
 }
 
+func (msg *Message) OriginContains(s string) bool {
+	return strings.Contains(msg.Header.Get("X-GOGO-ORIGIN"), s)
+}
+
 func (msg *Message) HasUser() bool {
 	user := msg.Header.Get("X-GOGO-USER")
 	return bson.IsObjectIdHex(user)
