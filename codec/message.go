@@ -55,7 +55,7 @@ func (msg *Message) Get(key string) (value interface{}, ok bool) {
 }
 
 func (msg *Message) GetBodyBytes() (value []byte) {
-	if msg.RawBody != nil {
+	if msg.RawBody == nil {
 		value, _ = Marshal(msg.Body)
 	} else {
 		value = msg.RawBody
