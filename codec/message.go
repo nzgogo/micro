@@ -230,6 +230,7 @@ func (msg *Message) ParseHTTPRequest(r *http.Request, replyTo string, contextID 
 	msg.Method = r.Method
 	msg.Host = r.Host
 	msg.Path = r.URL.Path
+	msg.Scheme = r.URL.Scheme
 	msg.Header = r.Header
 	return msg, nil
 }
