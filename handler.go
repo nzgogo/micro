@@ -169,7 +169,15 @@ func (s *service) serverHandlerPublish(message *codec.Message, Reply string) {
 
 		err := handler(message, "")
 		if err != nil {
-			panic("ServerHandler error: " + err.Message)
+			errResp := codec.NewJsonResponse(message.ContextID, err.StatusCode)
+			errResp.Set("error", err.Message)
+			err1 := s.Respond(
+				errResp,
+				message.ReplyTo,
+			)
+			if err1 != nil {
+				panic("ServerHandlerPublish respond error: " + err1.Error())
+			}
 		}
 	}()
 }
