@@ -29,7 +29,7 @@ func (s *service) ServerHandler(nMsg *nats.Msg) {
 	} else if message.Type == constant.RESPONSE {
 		s.serverHandlerResponse(message, nMsg.Data)
 	} else if message.Type == constant.PUBLISH {
-		s.serverHandlerPublish(message, nMsg.Reply)
+		s.serverHandlerPublish(message)
 	}
 
 }
@@ -142,12 +142,9 @@ func (s *service) serverHandlerRequest(message *codec.Message, Reply string) {
 	}()
 }
 
-func (s *service) serverHandlerPublish(message *codec.Message, Reply string) {
+func (s *service) serverHandlerPublish(message *codec.Message) {
 	defer recpro.Recover(s.config[constant.SLACKCHANNELADDR], s.Options().Transport.Options().Subject, "Micro->ServerHandlerPublish", message)
 	sub := s.opts.Transport.Options().Subject
-	if Reply != "" {
-		message.ReplyTo = Reply
-	}
 
 	handler, routerErr := s.opts.Router.Dispatch(message)
 	if routerErr != nil {
@@ -167,18 +164,7 @@ func (s *service) serverHandlerPublish(message *codec.Message, Reply string) {
 			handler = s.opts.HdlrWrappers[i-1](handler)
 		}
 
-		err := handler(message, "")
-		if err != nil {
-			errResp := codec.NewJsonResponse(message.ContextID, err.StatusCode)
-			errResp.Set("error", err.Message)
-			err1 := s.Respond(
-				errResp,
-				message.ReplyTo,
-			)
-			if err1 != nil {
-				panic("ServerHandlerPublish respond error: " + err1.Error())
-			}
-		}
+		handler(message, "")
 	}()
 }
 
