@@ -91,6 +91,17 @@ func (s *service) Run() error {
 		return err
 	}
 
+	if s.Options().Router != nil {
+		go func() {
+			msg := codec.NewMessage(constant.PUBLISH)
+			msg.Node = "compare_to_add_routes"
+			msg.Set("srvName", s.Name())
+			msg.Set("srvVersion", s.Version())
+			msg.Set("routes", s.Options().Router.Routes())
+			s.Pub("gogo-core-auth", "v1", msg)
+		}()
+	}
+
 	shutdownChannel := make(chan os.Signal, 1)
 
 	signal.Notify(shutdownChannel, syscall.SIGTERM, syscall.SIGINT, syscall.SIGKILL)
