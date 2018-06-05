@@ -3,13 +3,11 @@ package codec
 import (
 	"bytes"
 	"net/http"
-	"net/textproto"
 	"strings"
 
 	validator "github.com/asaskevich/govalidator"
 	"github.com/nzgogo/mgo/bson"
 	"github.com/nzgogo/micro/constant"
-	"github.com/nzgogo/utils"
 )
 
 type Message struct {
@@ -140,18 +138,6 @@ func (msg *Message) GetBool(key string) (value bool, ok bool) {
 	}
 
 	return
-}
-
-func (msg *Message) HasRole(r string) bool {
-	roles := msg.Header[textproto.CanonicalMIMEHeaderKey("X-GOGO-ROLES")]
-	if len(roles) == 0 {
-		return false
-	}
-	return utils.ContainsString(roles, r)
-}
-
-func (msg *Message) GetRoles() []string {
-	return msg.Header[textproto.CanonicalMIMEHeaderKey("X-GOGO-ROLES")]
 }
 
 func (msg *Message) HasOrigin() bool {
