@@ -93,11 +93,19 @@ func (s *service) Run() error {
 
 	if s.Options().Router != nil {
 		go func() {
+			publicRoutes := make([]*router.Node, 0)
+
+			for _, v := range s.Options().Router.Routes() {
+				if v.Method != "" {
+					publicRoutes = append(publicRoutes, v)
+				}
+			}
+
 			msg := codec.NewMessage(constant.PUBLISH)
 			msg.Node = "compare_to_add_routes"
 			msg.Set("srvName", s.Name())
 			msg.Set("srvVersion", s.Version())
-			msg.Set("routes", s.Options().Router.Routes())
+			msg.Set("routes", publicRoutes)
 			s.Pub("gogo-core-auth", "v1", msg)
 		}()
 	}
