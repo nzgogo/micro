@@ -25,6 +25,33 @@ func NewMessage(t string) *Message {
 	}
 }
 
+func NewFileMessage(contextID string) *Message {
+	return &Message{
+		Type:      constant.REQUEST,
+		ContextID: contextID,
+		Header:    http.Header{},
+		Body:      make(map[string]interface{}),
+	}
+}
+
+func NewOrderStatusMessage(origin, user string) *Message {
+	msg := &Message{
+		Type:   constant.REQUEST,
+		Header: http.Header{},
+		Body:   make(map[string]interface{}),
+	}
+
+	if origin != "" {
+		msg.Header.Add("X-GOGO-ORIGIN", origin)
+	}
+
+	if user != "" {
+		msg.Header.Add("X-GOGO-USER", user)
+	}
+
+	return msg
+}
+
 //NewResponse creates Response Message object.
 func NewResponse(contextID string, statusCode int) *Message {
 	return &Message{
