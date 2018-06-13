@@ -12,11 +12,10 @@ import (
 
 type Message struct {
 	//HTTP request mandatory fields
-	Method     string `json:"method,omitempty"`
-	Path       string `json:"path,omitempty"`
-	Host       string `json:"host,omitempty"`
-	RemoteAddr string `json:"remoteAddr,omitempty"`
-	Scheme     string `json:"scheme,omitempty"`
+	Method string `json:"method,omitempty"`
+	Path   string `json:"path,omitempty"`
+	Host   string `json:"host,omitempty"`
+	Scheme string `json:"scheme,omitempty"`
 
 	//Internal request fields
 	ReplyTo   string `json:"replyTo,omitempty"`
@@ -232,7 +231,6 @@ func (msg *Message) ParseHTTPRequest(r *http.Request, replyTo string, contextID 
 	msg.Method = r.Method
 	msg.Host = r.Host
 	msg.Path = r.URL.Path
-	msg.RemoteAddr = r.RemoteAddr
 	msg.Scheme = r.URL.Scheme
 	msg.Header = r.Header
 	return msg, nil
