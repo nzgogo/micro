@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	validator "github.com/asaskevich/govalidator"
+	"github.com/nzgogo/mgo/bson"
 	"github.com/nzgogo/micro/constant"
 )
 
@@ -38,14 +39,6 @@ type File struct {
 	Data     []byte `json:"data,omitempty"`
 }
 
-func NewMessage(t string) *Message {
-	return &Message{
-		Type:   t,
-		Header: make(map[string][]string),
-		Body:   make(map[string]interface{}),
-	}
-}
-
 func (msg *Message) Set(key string, value interface{}) {
 	msg.Body[key] = value
 }
@@ -59,12 +52,31 @@ func (msg *Message) Get(key string) (value interface{}, ok bool) {
 	return
 }
 
+func (msg *Message) GetBodyBytes() (value []byte) {
+	if msg.RawBody == nil {
+		value, _ = Marshal(msg.Body)
+	} else {
+		value = msg.RawBody
+	}
+	return
+}
+
 func (msg *Message) GetBytes(key string) (value []byte, ok bool) {
 	v, o := msg.Body[key]
 	if !o {
 		return
 	}
 	value, ok = v.([]byte)
+	if ok {
+		return
+	}
+
+	if bytes, err := Marshal(v); err != nil {
+		return
+	} else {
+		value = bytes
+		ok = true
+	}
 
 	return
 }
@@ -128,6 +140,47 @@ func (msg *Message) GetBool(key string) (value bool, ok bool) {
 	return
 }
 
+func (msg *Message) GetObjectID(key string) (value bson.ObjectId, ok bool) {
+	v, ok := msg.Body[key]
+	if !ok {
+		return
+	}
+
+	value = bson.ObjectIdHex(validator.ToString(v))
+	if !value.Valid() {
+		ok = false
+		return
+	}
+
+	return
+}
+
+func (msg *Message) HasOrigin() bool {
+	origin := msg.Header.Get("X-GOGO-ORIGIN")
+	return origin != ""
+}
+
+func (msg *Message) GetOrigin() string {
+	return msg.Header.Get("X-GOGO-ORIGIN")
+}
+
+func (msg *Message) OriginContains(s string) bool {
+	return strings.Contains(msg.Header.Get("X-GOGO-ORIGIN"), s)
+}
+
+func (msg *Message) HasUser() bool {
+	user := msg.Header.Get("X-GOGO-USER")
+	return bson.IsObjectIdHex(user)
+}
+
+func (msg *Message) GetUser() bson.ObjectId {
+	user := msg.Header.Get("X-GOGO-USER")
+	if bson.IsObjectIdHex(user) {
+		return bson.ObjectIdHex(user)
+	}
+	return ""
+}
+
 func (msg *Message) ParseHTTPRequest(r *http.Request, replyTo string, contextID string, jsonBody map[string]interface{}) (*Message, error) {
 	msg.Body = make(map[string]interface{})
 
@@ -178,6 +231,7 @@ func (msg *Message) ParseHTTPRequest(r *http.Request, replyTo string, contextID 
 	msg.Method = r.Method
 	msg.Host = r.Host
 	msg.Path = r.URL.Path
+	msg.Scheme = r.URL.Scheme
 	msg.Header = r.Header
 	return msg, nil
 }

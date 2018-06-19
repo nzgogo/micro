@@ -29,7 +29,7 @@ func (s *service) ServerHandler(nMsg *nats.Msg) {
 	} else if message.Type == constant.RESPONSE {
 		s.serverHandlerResponse(message, nMsg.Data)
 	} else if message.Type == constant.PUBLISH {
-		s.serverHandlerPublish(message, nMsg.Reply)
+		s.serverHandlerPublish(message)
 	}
 
 }
@@ -58,7 +58,8 @@ func (s *service) healthCheckHandler(message *codec.Message, Reply string) {
 	go func() {
 		defer recpro.Recover(s.config[constant.SLACKCHANNELADDR], s.Options().Transport.Options().Subject, "Micro->HealthCheckHandler", message)
 		checkStatus, feedback := healthCheck(s.config)
-		msg := codec.NewJsonResponse("", checkStatus, feedback)
+		msg := codec.NewJsonResponse("", checkStatus)
+		msg.Body = feedback
 		replyBody, _ := codec.Marshal(msg)
 		err := s.opts.Transport.Publish(Reply, replyBody)
 		if err != nil {
@@ -101,7 +102,8 @@ func (s *service) serverHandlerRequest(message *codec.Message, Reply string) {
 
 	handler, routerErr := s.opts.Router.Dispatch(message)
 	if routerErr != nil {
-		errResp := codec.NewResponse(message.ContextID, 404, nil, message.Header)
+		errResp := codec.NewResponse(message.ContextID, 404)
+		errResp.Header = message.Header
 		err := s.Respond(errResp, message.ReplyTo)
 		if err != nil {
 			panic("ServerHandler respond error: " + err.Error())
@@ -115,11 +117,7 @@ func (s *service) serverHandlerRequest(message *codec.Message, Reply string) {
 			if rMsg := recover(); rMsg != nil {
 				recpro.PostProc(s.config[constant.SLACKCHANNELADDR], s.Options().Transport.Options().Subject, "Micro->RoutesHandler", rMsg, message)
 				s.Respond(
-					codec.NewJsonResponse(
-						message.ContextID,
-						500,
-						nil,
-					),
+					codec.NewJsonResponse(message.ContextID, 500),
 					reply,
 				)
 			}
@@ -131,13 +129,10 @@ func (s *service) serverHandlerRequest(message *codec.Message, Reply string) {
 
 		err := handler(message, reply)
 		if err != nil {
-			body := map[string]interface{}{"message": err.Message}
+			errResp := codec.NewJsonResponse(message.ContextID, err.StatusCode)
+			errResp.Set("error", err.Message)
 			err1 := s.Respond(
-				codec.NewJsonResponse(
-					message.ContextID,
-					err.StatusCode,
-					body,
-				),
+				errResp,
 				reply,
 			)
 			if err1 != nil {
@@ -147,16 +142,14 @@ func (s *service) serverHandlerRequest(message *codec.Message, Reply string) {
 	}()
 }
 
-func (s *service) serverHandlerPublish(message *codec.Message, Reply string) {
+func (s *service) serverHandlerPublish(message *codec.Message) {
 	defer recpro.Recover(s.config[constant.SLACKCHANNELADDR], s.Options().Transport.Options().Subject, "Micro->ServerHandlerPublish", message)
 	sub := s.opts.Transport.Options().Subject
-	if Reply != "" {
-		message.ReplyTo = Reply
-	}
 
 	handler, routerErr := s.opts.Router.Dispatch(message)
 	if routerErr != nil {
-		errResp := codec.NewResponse(message.ContextID, 404, nil, message.Header)
+		errResp := codec.NewResponse(message.ContextID, 404)
+		errResp.Header = message.Header
 		err := s.Respond(errResp, message.ReplyTo)
 		if err != nil {
 			panic("ServerHandler respond error: " + err.Error())
@@ -171,10 +164,7 @@ func (s *service) serverHandlerPublish(message *codec.Message, Reply string) {
 			handler = s.opts.HdlrWrappers[i-1](handler)
 		}
 
-		err := handler(message, "")
-		if err != nil {
-			panic("ServerHandler error: " + err.Message)
-		}
+		handler(message, "")
 	}()
 }
 
