@@ -15,6 +15,7 @@ type Context interface {
 	Delete(id string)
 	Wait(string)
 	Done(string)
+	Count() int
 }
 
 type context struct {
@@ -76,6 +77,15 @@ func (ctx *context) Done(id string) {
 		return
 	}
 	conv.(*Conversation).done <- 1
+}
+
+func (ctx *context) Count() int {
+	length := 0
+	ctx.pool.Range(func(k, v interface{}) bool {
+		length++
+		return true
+	})
+	return length
 }
 
 func NewContext() Context {
