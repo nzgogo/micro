@@ -2,6 +2,8 @@
 GoGo microservice library.
 
 [![License Apache 2](https://img.shields.io/badge/License-Apache2-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0)
+[![Go Report Card](https://goreportcard.com/badge/github.com/nzgogo/micro)](https://goreportcard.com/report/github.com/nzgogo/micro)
+
 ## Getting started
 - Service Discovery
 - NATS
