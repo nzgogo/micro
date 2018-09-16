@@ -95,7 +95,7 @@ func (s *service) serverHandlerRequest(message *codec.Message, Reply string) {
 		message.ReplyTo = Reply
 	}
 	contxt := s.Options().Context
-	contxt.Add(&context.Conversation{
+	message.ContextID = contxt.Add(&context.Conversation{
 		ID:      message.ContextID,
 		Request: message.ReplyTo,
 	})
