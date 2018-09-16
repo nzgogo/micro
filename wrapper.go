@@ -1,10 +1,9 @@
 package gogo
 
 import (
-	"net/http"
-
 	"github.com/nzgogo/micro/codec"
 	"github.com/nzgogo/micro/router"
+	"net/http"
 )
 
 // HttpHandlerFunc represents a single method of a http handler. It's used primarily
