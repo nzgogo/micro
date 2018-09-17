@@ -30,4 +30,4 @@ One of the primary roles of the Consul agent is management of system-level and a
 The checks used in micro is **Script + Interval**. 
 
 ## Examples
-Refer to nzgogo/examples directory for more details, which contains examples such as how to write a service using micro.
+Refer to nzgogo/examples directory for more details. The repo contains examples such as [greeter](https://github.com/nzgogo/examples/tree/master/greeter) that teach you how to write a service using micro.
