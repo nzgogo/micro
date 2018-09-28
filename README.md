@@ -1,6 +1,6 @@
 # micro [![License Apache 2](https://img.shields.io/badge/License-Apache2-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0) [![Go Report Card](https://goreportcard.com/badge/github.com/nzgogo/micro)](https://goreportcard.com/report/github.com/nzgogo/micro) [![GoDoc](https://godoc.org/github.com/nzgogo/micro?status.svg)](http://godoc.org/github.com/nzgogo/micro)
 
-GOGO micro is a set of utilities and libraries that makes it easier to write and manage microservices.
+[GoGo micro](https://medium.com/@kailiu_36596/gogo-micro-26f0637d1b78) is a set of utilities and libraries that makes it easier to write and manage microservices.
 
 ## Getting started
 - Service Discovery
