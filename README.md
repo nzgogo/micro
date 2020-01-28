@@ -15,11 +15,11 @@ Service discovery is used to resolve service names to NATS addresses (subject). 
 ## NATS
 [NATS](https://nats.io) is a messaging system used as internal communication of our distributed services.
 
-### [Installation](https://github.com/nats-io/go-nats)
+### [Installation](https://github.com/nzgogo/go-nats)
 
 ```bash
 # Go client
-go get github.com/nats-io/go-nats
+go get github.com/nzgogo/go-nats
 
 # Server
 go get github.com/nats-io/gnatsd

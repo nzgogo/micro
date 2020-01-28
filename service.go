@@ -7,7 +7,7 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/nats-io/go-nats"
+	"github.com/nzgogo/go-nats"
 	"github.com/nzgogo/micro/codec"
 	"github.com/nzgogo/micro/constant"
 	"github.com/nzgogo/micro/registry"
