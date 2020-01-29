@@ -15,7 +15,7 @@ require (
 	github.com/nats-io/nats.go v1.9.1
 	github.com/nzgogo/govalidator v0.0.0-20180427051727-1fe99a8587f9
 	github.com/nzgogo/mgo v0.0.0-20181002223507-7fcfc26c1b02
-	github.com/satori/go.uuid v1.2.0
+	github.com/satori/go.uuid v1.1.0
 	github.com/shirou/gopsutil v2.19.12+incompatible
 	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
 )
