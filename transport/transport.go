@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/nzgogo/go-nats"
+	"github.com/nats-io/nats.go"
 	"github.com/nzgogo/micro/codec"
 )
 

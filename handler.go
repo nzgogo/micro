@@ -1,7 +1,7 @@
 package gogo
 
 import (
-	"github.com/nzgogo/go-nats"
+	"github.com/nats-io/nats.go"
 	"github.com/nzgogo/micro/codec"
 	"github.com/nzgogo/micro/constant"
 	"github.com/nzgogo/micro/context"
